@@ -1,0 +1,56 @@
+@import 'tailwindcss';
+@import '@biaenergy/ui/styles.css';
+
+/* Permite que Tailwind v4 escanee las clases usadas por @biaenergy/ui */
+@source '../../node_modules/@biaenergy/ui/dist';
+
+/* Activa la variante dark basada en clase (lo controla next-themes) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Tailwind v4 incluye un default `:root { --font-sans: ui-sans-serif, ... }`
+   en su preflight que se carga DESPUÉS del rule de next/font (`.inter-variable
+   { --font-sans: "Inter", "Inter Fallback" }`) — misma especificidad, así que
+   Tailwind gana por orden de cascada. Re-aplicamos Inter al final del bundle
+   para que el body del DS (`font-family: var(--font-sans, Inter, ...)`) y la
+   utility `font-sans` resuelvan a Inter. */
+@theme {
+  --font-sans:
+    'Inter', 'Inter Fallback', Arial, Helvetica, sans-serif;
+
+  /* Shake horizontal — feedback de "no podés hacer eso" en cards/buttons.
+     Curva clásica de Chris Coyier; 400ms se siente firme sin marear. */
+  --animate-shake: shake 400ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+
+  @keyframes shake {
+    10%,
+    90% {
+      transform: translate3d(-1px, 0, 0);
+    }
+    20%,
+    80% {
+      transform: translate3d(2px, 0, 0);
+    }
+    30%,
+    50%,
+    70% {
+      transform: translate3d(-3px, 0, 0);
+    }
+    40%,
+    60% {
+      transform: translate3d(3px, 0, 0);
+    }
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Override de Olibia sobre @biaenergy/ui: headers de tabla más sutiles
+   (12px + color soft) hasta que el cambio aterrice en el DS. */
+thead th {
+  font-size: var(--text-label-xs) !important;
+  line-height: var(--text-label-xs--line-height);
+  letter-spacing: var(--text-label-xs--letter-spacing);
+  color: var(--color-text-soft-400);
+}
