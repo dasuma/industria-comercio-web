@@ -1,0 +1,20 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "goHome": "Go to home"
+  },
+  "home": {
+    "title": "Welcome to BIA",
+    "subtitle": "Your energy management platform"
+  },
+  "errors": {
+    "title": "An error occurred",
+    "description": "We couldn't complete the operation. Try again or go back home."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for doesn't exist or was moved."
+  }
+}
