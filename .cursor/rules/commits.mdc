@@ -1,0 +1,58 @@
+---
+description: Conventional commit format enforced by commitlint
+alwaysApply: true
+---
+
+# Commit messages — Conventional Commits
+
+Este repo enforced commitlint. Los commits **deben** empezar con un type del set: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
+
+## Formato
+
+```
+<type>(<scope opcional>): <descripción>
+
+<body opcional con detalles>
+```
+
+## Reglas
+
+- **El type es obligatorio** y debe ir en minúscula. Sin él, commitlint rompe el commit.
+- **Scope** es opcional, en kebab-case y consistente (`auth`, `example`, `i18n`, `data`, etc.).
+- **Descripción**: en imperativo, foco en el _why_ no en el _what_ (el diff dice qué cambió).
+- **Body**: libre. Largo OK, formatting libre — las reglas cosméticas están desactivadas.
+
+## Cómo elegir el type
+
+| Type       | Cuándo                                                           |
+| ---------- | ---------------------------------------------------------------- |
+| `feat`     | Nueva funcionalidad visible para el usuario                      |
+| `fix`      | Corrección de un bug                                             |
+| `refactor` | Cambio de código sin cambiar comportamiento                      |
+| `perf`     | Mejora de performance                                            |
+| `docs`     | Solo cambios en documentación (README, docs/, comentarios)       |
+| `style`    | Formato/whitespace, sin cambios de lógica                        |
+| `test`     | Agregar o corregir tests                                         |
+| `build`    | Cambios en build system, deps, package.json                      |
+| `ci`       | Cambios en CI (.github/workflows, husky)                         |
+| `chore`    | Tareas de mantenimiento que no encajan en otro type              |
+| `revert`   | Revertir un commit anterior                                      |
+
+## Ejemplos buenos
+
+```
+feat(example): add module with data layer + form + UI states
+fix(auth): redirect to / after logout when session is stale
+refactor(modules): rename diccionarios to dictionaries
+docs: clarify boundaries section in CONVENTIONS
+chore(deps): bump @biaenergy/ui to 0.0.0-pr-19-...
+ci: add type-check job to GitHub Actions
+```
+
+## Ejemplos que rompen el commit
+
+```
+Refactor localization structure  ❌ (no type)
+Update files                     ❌ (no type, vago)
+FEAT: new module                  ❌ (type en mayúscula)
+```
