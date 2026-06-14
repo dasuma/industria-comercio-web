@@ -16,9 +16,9 @@ Si el usuario no incluyó argumentos completos, pregunta vía `AskUserQuestion`:
 
 ## Paso 2 — Verificaciones previas
 
-1. Leé `src/modules/shell/models/nav.types.ts`. Si la `WorkspaceKey` ya existe, abortá y avisá.
-2. Leé `src/modules/shell/models/workspaces.config.ts` para ver el shape actual y dónde agregar.
-3. Leé `src/modules/shell/dictionaries/es.ts` para ver el shape actual del bloque `workspaces`.
+1. Leé `src/modules/_global/shell/models/nav.types.ts`. Si la `WorkspaceKey` ya existe, abortá y avisá.
+2. Leé `src/modules/_global/shell/models/workspaces.config.ts` para ver el shape actual y dónde agregar.
+3. Leé `src/modules/_global/shell/dictionaries/es.ts` para ver el shape actual del bloque `workspaces`.
 
 ## Paso 3 — Sugerir íconos (Fill + Line)
 
@@ -42,13 +42,13 @@ Procedimiento:
 
 Hay 3 archivos a tocar:
 
-**1. `src/modules/shell/models/nav.types.ts`** — extender la unión `WorkspaceKey`:
+**1. `src/modules/_global/shell/models/nav.types.ts`** — extender la unión `WorkspaceKey`:
 
 ```ts
 export type WorkspaceKey = 'operaciones' | 'growth' | '{newKey}';
 ```
 
-**2. `src/modules/shell/dictionaries/es.ts` y `en.ts`** — agregar el label al objeto `workspaces`:
+**2. `src/modules/_global/shell/dictionaries/es.ts` y `en.ts`** — agregar el label al objeto `workspaces`:
 
 ```ts
 workspaces: {
@@ -58,7 +58,7 @@ workspaces: {
 } satisfies Record<WorkspaceKey, string>,
 ```
 
-**3. `src/modules/shell/models/workspaces.config.ts`** — agregar el workspace al array:
+**3. `src/modules/_global/shell/models/workspaces.config.ts`** — agregar el workspace al array:
 
 ```ts
 import {

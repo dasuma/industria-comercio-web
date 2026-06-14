@@ -19,12 +19,12 @@ If the user passed arguments in `$ARGUMENTS`, use them as module + component nam
 
 ## Step 2 — Pre-checks
 
-1. Verify the module exists at `src/modules/{module}/`.
-2. Verify no component with that name exists at `src/modules/{module}/components/{ComponentName}/`.
+1. Verify the module exists at `{ruta-del-modulo}/`.
+2. Verify no component with that name exists at `{ruta-del-modulo}/components/{ComponentName}/`.
 
 ## Step 3 — Generate files
 
-### `src/modules/{module}/components/{ComponentName}/index.tsx`
+### `{ruta-del-modulo}/components/{ComponentName}/index.tsx`
 
 #### Server Component (default)
 
@@ -62,7 +62,7 @@ export const {ComponentName} = ({}: {ComponentName}Props) => {
 };
 ```
 
-### `src/modules/{module}/components/{ComponentName}/{ComponentName}.test.tsx` (if test requested)
+### `{ruta-del-modulo}/components/{ComponentName}/{ComponentName}.test.tsx` (if test requested)
 
 ```tsx
 import { render, screen } from '@testing-library/react';
@@ -82,7 +82,7 @@ describe('{ComponentName}', () => {
 
 ## Step 4 — Update barrel
 
-Add the export to `src/modules/{module}/index.ts`:
+Add the export to `{ruta-del-modulo}/index.ts`:
 
 ```ts
 export { {ComponentName} } from './components/{ComponentName}';

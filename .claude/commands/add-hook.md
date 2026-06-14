@@ -18,13 +18,13 @@ If the user passed arguments in `$ARGUMENTS`, parse module + hook name from them
 
 ## Step 2 — Pre-checks
 
-1. Verify the module exists at `src/modules/{module}/`.
-2. Check `src/modules/{module}/hooks/` exists — create it if not.
+1. Verify the module exists at `{ruta-del-modulo}/`.
+2. Check `{ruta-del-modulo}/hooks/` exists — create it if not.
 3. Verify no hook with that name already exists.
 
 ## Step 3 — Generate the hook file
 
-### `src/modules/{module}/hooks/{hookName}.ts`
+### `{ruta-del-modulo}/hooks/{hookName}.ts`
 
 #### URL search params hook (common pattern)
 
@@ -89,19 +89,74 @@ export const {
 };
 ```
 
-## Step 4 — Update barrel
+## Step 4 — Generate the co-located test (if the hook has logic)
 
-Add to `src/modules/{module}/index.ts`:
+If the hook contains logic worth testing (derived state, conditional branches, side effects), create `{ruta-del-modulo}/hooks/{hookName}.test.tsx`.
+
+**Skip the test only if** the hook is a trivial pass-through (e.g. just a `useQuery({ queryFn })` with no logic) — in that case the underlying data layer test already covers it.
+
+**Template** (hook with React Query):
+
+```tsx
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { ReactNode } from 'react';
+import { {hookName} } from './{hookName}';
+
+// Mock external dependencies (data, store, navigation) — never the hook itself.
+jest.mock('../data', () => ({
+  useGet{Resource}: jest.fn()
+}));
+
+const createWrapper = () => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const Wrapper = ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={client}>{children}</QueryClientProvider>
+  );
+  Wrapper.displayName = 'TestQueryClientWrapper';
+  return Wrapper;
+};
+
+describe('{hookName}', () => {
+  it('returns expected values when {condition}', async () => {
+    // TODO: setup mocks, call hook, assert returned shape
+    const { result } = renderHook(() => {hookName}(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current).toBeDefined());
+    // expect(result.current.selected).toBe(...);
+  });
+
+  // TODO: one test per logical branch
+});
+```
+
+**Template** (pure hook, no React Query): omit the `QueryClientProvider` wrapper.
+
+If it's the **first hook with tests** in the modules tree, add the threshold entry to [jest.config.js](../../jest.config.js):
+
+```js
+'./{ruta-del-modulo}/hooks/': {
+  statements: 70,
+  branches: 60,
+  functions: 70,
+  lines: 70
+}
+```
+
+## Step 5 — Update barrel
+
+Add to `{ruta-del-modulo}/index.ts`:
 
 ```ts
 export { {hookName} } from './hooks/{hookName}';
 ```
 
-## Step 5 — Validate and report
+## Step 6 — Validate and report
 
 1. Run `npm run type-check`.
-2. Report:
+2. If you generated a test, run `npm run test:ci` to confirm it passes and coverage threshold is met.
+3. Report:
    - Hook file created.
+   - Test file created (or skipped — explain why).
    - Barrel updated.
    - Remind the user: hooks that use `useSearchParams` must be inside a Client Component (wrap the consumer with `'use client'`, not the hook itself).
 

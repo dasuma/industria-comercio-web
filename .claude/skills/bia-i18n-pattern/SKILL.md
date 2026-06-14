@@ -34,7 +34,7 @@ export const defaultLocale = 'es';
 
 ## Dictionaries por módulo
 
-Cada módulo trae su propio diccionario en `src/modules/{name}/dictionaries/`:
+Cada módulo trae su propio diccionario en `{ruta-del-modulo}/dictionaries/`:
 
 ```ts
 // es.ts
@@ -113,7 +113,7 @@ const ClientPart = ({ locale }: { locale: Locale }) => {
    export const locales = ['es', 'en', 'pt'] as const;
    ```
 2. Crear `src/i18n/dictionaries/pt.json` con la misma forma que `es.json`.
-3. Crear `src/modules/{name}/dictionaries/pt.ts` para cada módulo:
+3. Crear `{ruta-del-modulo}/dictionaries/pt.ts` para cada módulo:
    ```ts
    import type { SitesDictionary } from './es';
    export const sitesDictPt: SitesDictionary = {

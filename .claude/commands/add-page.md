@@ -15,7 +15,7 @@ Si el usuario no incluyó argumentos completos, pregunta vía `AskUserQuestion`:
    - **Protegida**: va en `src/app/(app)/{ruta}/page.tsx`. Pasa por el guard del proxy.
 2. **(solo si protegida) ¿Aparece en el sidebar?** Sí / No.
 3. **(solo si NO aparece en sidebar, o es pública) Ruta** (sin barra inicial, ej. `sites`, `sites/[id]`, `dashboard/reports`).
-4. **(solo si aparece en sidebar) Workspace destino**: leé `src/modules/shell/models/workspaces.config.ts` para listar los workspaces disponibles. Mostralos como opciones; agrega una opción extra "Crear nuevo workspace" que termina la conversación con la sugerencia de correr `/add-workspace` primero.
+4. **(solo si aparece en sidebar) Workspace destino**: leé `src/modules/_global/shell/models/workspaces.config.ts` para listar los workspaces disponibles. Mostralos como opciones; agrega una opción extra "Crear nuevo workspace" que termina la conversación con la sugerencia de correr `/add-workspace` primero.
 5. **(solo si aparece en sidebar) Item key** (camelCase corto, ej. `cgm`, `bianetwork`, `dashboard`). Va a ser literal en `NavItemKey`.
 6. **(solo si aparece en sidebar) Labels** ES / EN para el sidebar.
 7. **(solo si aparece en sidebar) Icon** del item: pregunta sobre qué trata la sección y grepeá íconos relevantes de `@biaenergy/ui/icons` (ver paso 3 para el procedimiento). Sugerí 3-5 opciones Line.
@@ -27,7 +27,7 @@ Si el usuario no incluyó argumentos completos, pregunta vía `AskUserQuestion`:
 
 1. Verificar que la ruta no existe (`ls src/app/(public)/{ruta}` o `ls src/app/(app)/{ruta}`).
 2. Si tiene parámetros dinámicos (`[id]`), avisar que `params` es `Promise<{...}>` en Next 16. Las pages dinámicas NO se pueden registrar en el sidebar (porque el item necesita un href estático).
-3. (Si registrás en nav) Verificar que el `NavItemKey` propuesto no exista en `src/modules/shell/models/nav.types.ts`. Si existe, abortá y avisá que ya hay un item con esa key.
+3. (Si registrás en nav) Verificar que el `NavItemKey` propuesto no exista en `src/modules/_global/shell/models/nav.types.ts`. Si existe, abortá y avisá que ya hay un item con esa key.
 
 ## Paso 3 — Sugerir íconos (solo si registrás en nav)
 
@@ -49,7 +49,7 @@ Procedimiento:
 
 ```tsx
 import { getActiveLocale } from '@/i18n/getDictionary';
-import { getShellDict } from '@modules/shell';
+import { getShellDict } from '@modules/_global/shell';
 
 const {Nombre}Page = async () => {
   const locale = await getActiveLocale();
@@ -128,13 +128,13 @@ export const APP_ROUTES = {
 } as const;
 ```
 
-**2. `src/modules/shell/models/nav.types.ts`** — extender la unión `NavItemKey`:
+**2. `src/modules/_global/shell/models/nav.types.ts`** — extender la unión `NavItemKey`:
 
 ```ts
 export type NavItemKey = 'cgm' | 'bianetwork' | '{itemKey}';
 ```
 
-**3. `src/modules/shell/dictionaries/es.ts` y `en.ts`** — agregar el label al objeto `items`:
+**3. `src/modules/_global/shell/dictionaries/es.ts` y `en.ts`** — agregar el label al objeto `items`:
 
 ```ts
 items: {
@@ -144,7 +144,7 @@ items: {
 } satisfies Record<NavItemKey, string>,
 ```
 
-**4. `src/modules/shell/models/workspaces.config.ts`** — agregar el item al workspace correspondiente:
+**4. `src/modules/_global/shell/models/workspaces.config.ts`** — agregar el item al workspace correspondiente:
 
 ```ts
 import {

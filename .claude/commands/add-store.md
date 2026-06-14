@@ -18,13 +18,13 @@ If the user passed arguments in `$ARGUMENTS`, parse module name from them and as
 
 ## Step 2 — Pre-checks
 
-1. Verify the module exists at `src/modules/{module}/`.
-2. Verify no store already exists at `src/modules/{module}/store/`. If it does, ask if the user wants to extend it instead.
+1. Verify the module exists at `{ruta-del-modulo}/`.
+2. Verify no store already exists at `{ruta-del-modulo}/store/`. If it does, ask if the user wants to extend it instead.
 3. Confirm `store/` is not already in the module barrel — if it is, remind the user to add selectors there.
 
 ## Step 3 — Generate the store file
 
-### `src/modules/{module}/store/{module}.store.ts`
+### `{ruta-del-modulo}/store/{module}.store.ts`
 
 #### Without persistence (default)
 
@@ -86,25 +86,70 @@ export const use{Module}Store = create<{Module}State>()(
 );
 ```
 
-## Step 4 — Update barrel
+## Step 4 — Generate the co-located test
 
-Add to `src/modules/{module}/index.ts`:
+**Always** create `{ruta-del-modulo}/store/{module}.store.test.ts`. The `store/` folder is enforced by coverage threshold in [jest.config.js](../../jest.config.js).
+
+```ts
+import { use{Module}Store } from './{module}.store';
+
+describe('use{Module}Store', () => {
+  beforeEach(() => {
+    use{Module}Store.getState().reset();
+  });
+
+  it('returns the initial state', () => {
+    const state = use{Module}Store.getState();
+    // TODO: assert initial values per field
+    expect(state).toEqual(expect.objectContaining({ /* ... */ }));
+  });
+
+  it('resets the state', () => {
+    // TODO: mutate state via an action, then call reset() and verify it returns to initial
+    use{Module}Store.getState().reset();
+    const state = use{Module}Store.getState();
+    expect(state).toEqual(expect.objectContaining({ /* initial values */ }));
+  });
+
+  // TODO: one test per action / selector with logic
+});
+```
+
+If the store has actions with logic (toggles, filters, transformations), add one `it()` per action verifying both the input/output and any side effects.
+
+If it's the **first store with tests** in the modules tree (check `find src/modules/*/store -name "*.test.*"`), add the threshold entry to [jest.config.js](../../jest.config.js):
+
+```js
+'./{ruta-del-modulo}/store/': {
+  statements: 70,
+  branches: 60,
+  functions: 70,
+  lines: 70
+}
+```
+
+## Step 5 — Update barrel
+
+Add to `{ruta-del-modulo}/index.ts`:
 
 ```ts
 export { use{Module}Store } from './store/{module}.store';
 // export { select{Field} } from './store/{module}.store';
 ```
 
-## Step 5 — Validate and report
+## Step 6 — Validate and report
 
 1. Run `npm run type-check`.
-2. Report:
+2. Run `npm run test:ci` — confirm the new test passes and coverage threshold is met.
+3. Report:
    - Store file created.
+   - Test file created.
    - Barrel updated.
    - Remind the user to:
      - Call `use{Module}Store.persist.rehydrate()` on mount (if persisted).
      - Use individual selectors to avoid unnecessary re-renders.
      - Never put server state (API data) in the store — use React Query for that.
+     - Complete the test TODOs (one `it()` per action/selector with logic).
 
 ## Anti-patterns to avoid
 

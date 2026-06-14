@@ -41,21 +41,33 @@ Filtra a `*.ts` y `*.tsx` dentro de `src/`.
 12. **Cascadas async** — múltiples `await` consecutivos en server components que no son dependientes. Usar `Promise.all`.
 13. **Selector Zustand sin función** — `useStore(state => state.user)` ✅, `const { user } = useStore()` ❌ (re-render por cualquier cambio).
 14. **Imports no usados** o **variables no usadas** sin prefijo `_`.
+15. **Variante Tailwind viewport-pura en contenido** — `sm:`/`md:`/`lg:`/`xl:`/`2xl:` en archivos fuera de `src/modules/_global/shell/`. Usar las variantes content-aware `psm:`/`pmd:`/`plg:`/`pxl:`/`p2xl:` (basadas en container queries sobre el `<main>` del AppShell), así el snap responde al ancho real del contenido y respeta el estado colapsado/expandido del sidebar. Cita [R14 / AP13](../../docs/DESIGN.md). Comando:
+    ```bash
+    grep -rE "\b(sm|md|lg|xl|2xl):[a-zA-Z!\[@_-]" src/ | grep -vE "src/modules/_global/shell/|src/core/ui/Drawer/"
+    ```
+16. **Datos informativos sin copy-on-hover** — Field/Row de info-cards con valores string e identificadores (IDs, NIT, emails, códigos), y celdas de `<DataTable>` que muestren datos consultables, deben ofrecer copy-to-clipboard via `<Copyable>` o `copyableCells`. Cita [R15 / AP14](../../docs/DESIGN.md). Comando (tablas que no opt-in todavía):
+    ```bash
+    grep -rln "<DataTable" src/modules/ | xargs grep -L "copyableCells"
+    ```
 
 ### SUGERENCIAS (mejoras)
 
-15. **Funciones inline en render** que dependen del componente — considerar `useCallback` si se pasa a hijos memoizados.
-16. **`useState(valor)` con valor costoso** — usar `useState(() => valor)` para lazy init.
-17. **Componentes pesados sin `dynamic`** — chart libs, editores, modales pesados — considerar `next/dynamic`.
+16. **Funciones inline en render** que dependen del componente — considerar `useCallback` si se pasa a hijos memoizados.
+17. **`useState(valor)` con valor costoso** — usar `useState(() => valor)` para lazy init.
+18. **Componentes pesados sin `dynamic`** — chart libs, editores, modales pesados — considerar `next/dynamic`.
 
 ## Paso 3 — Revisar estructura de módulos modificados
 
-Para cada módulo en `src/modules/{nombre}/`:
+Para cada módulo modificado (`src/modules/{workspace}/{modulo}/` flat o `src/modules/{workspace}/{dominio}/{submodulo}/` anidado):
 
+- ¿Vive bajo un workspace? Todo módulo debe estar dentro de una carpeta de workspace (`_global/`, `operations/`, `growth/`, etc.). Si está suelto en `src/modules/{nombre}/`, flagéalo.
+- Si está anidado bajo un dominio (`{workspace}/{dominio}/{submodulo}/`): ¿hay 2+ submódulos? Si solo hay uno, debería ser plano (`{workspace}/{modulo}/`) — flagéalo.
+- ¿La carpeta del workspace y del dominio NO tienen `index.ts` ni código? Si tienen, son módulos disfrazados — flagéalo.
 - ¿Tiene `index.ts` exportando lo público?
 - ¿Los `data/{action}.ts` exportan tanto la función plana como el hook `use{Action}`?
 - ¿Los strings de UI vienen del diccionario del módulo (`dictionaries/`)?
 - ¿Las interfaces de dominio están en `models/`, los DTOs request/response en `types/`?
+- ¿Los imports cross-module van al barrel (`@modules/{ws}/{mod}` o `@modules/{ws}/{dom}/{sub}`) y no a un path interno?
 
 ## Paso 4 — Reportar
 

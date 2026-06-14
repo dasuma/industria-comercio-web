@@ -20,6 +20,7 @@ El template tiene **una sola forma** de hacer fetch: `doFetch<TBody, TResponse>`
 - **Timeout**: 60s con `AbortController`.
 
 Firma:
+
 ```ts
 doFetch<TBody, TResponse>(args: {
   endpoint: IHttpClient;
@@ -50,7 +51,7 @@ export const endpointsSites: Record<string, IHttpClient> = {
     urlMock: 'http://localhost:3001/sites'
   },
   detail: {
-    url: '/ems-api/sites/',  // path param se concatena vía `value`
+    url: '/ems-api/sites/', // path param se concatena vía `value`
     method: 'GET',
     requiresAuthorization: true,
     isMocked,
@@ -60,6 +61,7 @@ export const endpointsSites: Record<string, IHttpClient> = {
 ```
 
 **Reglas:**
+
 - El **path** va en `url`. **Nunca** hardcodees el host completo.
 - `requiresAuthorization: true` para endpoints autenticados.
 - `isMocked` y `urlMock` permiten apuntar a un mock server local sin cambiar código.
@@ -76,8 +78,7 @@ import QueryKeys from '@data/core/QueryKeys';
 import { endpointsSites } from '../endpoints';
 import type { Site } from '../../models/site.interface';
 
-const getSites = () =>
-  doFetch<void, Site[]>({ endpoint: endpointsSites.list });
+const getSites = () => doFetch<void, Site[]>({ endpoint: endpointsSites.list });
 
 export const useGetSites = () =>
   useQuery({
@@ -141,18 +142,87 @@ enum QueryKeys {
 
 **Cualquier `useQuery` debe registrar su key aquí.** Esto permite invalidar consistentemente y evita strings mágicos.
 
+## Pieza 7 — Tests del data layer
+
+**Cada archivo de endpoint debe tener su test co-localizado** (`{action}.test.tsx`). El patrón: mockear `doFetch` y verificar que el hook lo llama con el endpoint y los params correctos. El coverage threshold de `data/` lo enforcea (ver [jest.config.js](../../../jest.config.js)).
+
+**Template para Query** (`data/{feature}/{action}.test.tsx`):
+
+```tsx
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { ReactNode } from 'react';
+import { use{Action} } from './{action}';
+
+jest.mock('@/http_client', () => ({
+  doFetch: jest.fn()
+}));
+
+const { doFetch } = jest.requireMock('@/http_client') as { doFetch: jest.Mock };
+
+const createWrapper = () => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const Wrapper = ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={client}>{children}</QueryClientProvider>
+  );
+  Wrapper.displayName = 'TestQueryClientWrapper';
+  return Wrapper;
+};
+
+describe('use{Action}', () => {
+  beforeEach(() => doFetch.mockReset());
+
+  it('calls doFetch with the configured endpoint and params', async () => {
+    doFetch.mockResolvedValueOnce([{ id: 1 }]);
+
+    const { result } = renderHook(() => use{Action}({ /* params */ }), {
+      wrapper: createWrapper()
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(doFetch).toHaveBeenCalledWith({
+      endpoint: expect.objectContaining({
+        url: '{expected-url}',
+        method: '{METHOD}'
+      }),
+      params: { /* expected params */ }
+    });
+    expect(result.current.data).toEqual([{ id: 1 }]);
+  });
+
+  // Si el hook tiene `enabled` condicional, agregar test que verifique
+  // que doFetch NO se llama cuando la condición es falsa:
+  it('does not fire the query when {condition}', () => {
+    renderHook(() => use{Action}({ /* invalid params */ }), { wrapper: createWrapper() });
+    expect(doFetch).not.toHaveBeenCalled();
+  });
+});
+```
+
+**Template para Mutation**: igual pero usando `result.current.mutate({...})` y `await waitFor(() => expect(result.current.isSuccess).toBe(true))`.
+
+**Referencia funcionando**: [src/modules/retention/contracts/data/findContractsByIds/findContractsByIds.test.tsx](../../../src/modules/retention/contracts/data/findContractsByIds/findContractsByIds.test.tsx).
+
+Cuando agregues el primer test al `data/` de un módulo nuevo, agregá la entrada al `coverageThreshold` en [jest.config.js](../../../jest.config.js):
+
+```js
+'./{ruta-del-modulo}/data/': { statements: 70, branches: 60, functions: 70, lines: 70 }
+```
+
 ## Anti-patterns
 
-| ❌ | ✅ |
-|---|---|
-| `axios` | `doFetch` |
-| `fetch` directo en componente | `doFetch` con hook React Query |
-| `await response.json()` después de doFetch | Usa el generic `doFetch<T,R>` |
-| `useEffect(() => fetch(...).then(setData))` | `useQuery` |
-| Strings de queryKey inline | `QueryKeys` enum |
+| ❌                                                  | ✅                                                           |
+| --------------------------------------------------- | ------------------------------------------------------------ |
+| `axios`                                             | `doFetch`                                                    |
+| `fetch` directo en componente                       | `doFetch` con hook React Query                               |
+| `await response.json()` después de doFetch          | Usa el generic `doFetch<T,R>`                                |
+| `useEffect(() => fetch(...).then(setData))`         | `useQuery`                                                   |
+| Strings de queryKey inline                          | `QueryKeys` enum                                             |
 | `useQuery({ queryKey: ['sites'], queryFn })` ad-hoc | Hook `useGetSites()` reutilizable en `data/list/getSites.ts` |
-| URL completa en componente | URL en `endpoints.ts` |
+| URL completa en componente                          | URL en `endpoints.ts`                                        |
+| Endpoint sin test                                   | Test co-localizado mockeando `doFetch` (template arriba)     |
 
 ## Comando relacionado
 
-Para agregar un endpoint nuevo: `/add-endpoint`. Pregunta módulo, acción, método, tipo (query/mutation).
+Para agregar un endpoint nuevo: `/add-endpoint`. Pregunta módulo, acción, método, tipo (query/mutation) y **genera el test automáticamente** con el template de arriba.

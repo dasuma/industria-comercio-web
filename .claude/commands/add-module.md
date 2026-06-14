@@ -4,25 +4,46 @@ description: Crea un módulo nuevo con la arquitectura BIA (components, data, ho
 
 # /add-module
 
-Vas a crear un módulo nuevo en `src/modules/{nombre}/` siguiendo la arquitectura del template.
+Vas a crear un módulo nuevo en `src/modules/{workspace}/{nombre}/` siguiendo la arquitectura del template. Todo módulo vive bajo un workspace; módulos sin workspace específico van en `_global/`.
 
 ## Paso 1 — Recolectar requisitos
 
-Si el usuario no incluyó argumentos, pregunta vía `AskUserQuestion`:
+Antes de preguntar, corré `ls src/modules/` para ver los workspaces existentes (carpetas como `_global/`, `operations/`, `growth/`, `retention/`, etc.).
+
+Pregunta vía `AskUserQuestion`:
 
 1. **Nombre del módulo** (kebab-case, ej. `sites`, `invoices`, `energy-solutions`).
-2. **¿Necesita capa de datos?** (`data/` con endpoints + React Query). Casi siempre sí.
-3. **¿Necesita Zustand store?** (estado de UI persistente o cross-component). Solo si lo justifica — no por defecto.
-4. **¿Necesita layouts propios?** (rutas con shell distinto). Solo si tiene varias páginas hermanas.
+2. **¿A qué workspace pertenece?** Ofrecé los workspaces que ya existen como carpetas en `src/modules/`. Opciones:
+   - Cada workspace existente (`_global`, `operations`, `growth`, ...).
+   - "Workspace nuevo" → pedir nombre. Antes de aceptar, decile al usuario que también necesita correr `/add-workspace` para registrarlo en la nav config.
+   - "Sin workspace (global)" → va a `_global/`. Solo justificado para piezas pre-auth (auth) o cross-workspace (shell, layouts compartidos).
+3. **¿Es submódulo de un dominio existente dentro del workspace?** Mostrá los subdirectorios del workspace elegido. Opciones:
+   - "No, es plano" (default) → ruta `src/modules/{workspace}/{nombre}/`.
+   - Si hay una carpeta de dominio candidata (existe como dominio y tiene 0-1 submódulos), ofrecer "Sí, bajo `{dominio}/`" → ruta `src/modules/{workspace}/{dominio}/{nombre}/`.
+   - "Sí, crear dominio nuevo" → pedir el nombre del dominio (kebab-case). Solo aceptar si el usuario va a crear de inmediato un segundo submódulo hermano. Un dominio **solo se justifica con 2+ submódulos**.
+4. **¿Necesita capa de datos?** (`data/` con endpoints + React Query). Casi siempre sí.
+5. **¿Necesita Zustand store?** (estado de UI persistente o cross-component). Solo si lo justifica — no por defecto.
+6. **¿Necesita layouts propios?** (rutas con shell distinto). Solo si tiene varias páginas hermanas.
 
 Si el usuario pasó argumentos en `$ARGUMENTS`, úsalos como nombre y pregunta solo lo que falte.
 
+**Reglas de agrupación**:
+
+- La carpeta del **workspace** (`{workspace}/`) NO es un módulo — no tiene `index.ts`, ni `components/`. Solo agrupa.
+- La carpeta del **dominio** (`{dominio}/`) tampoco — mismas reglas.
+- Para código compartido entre hermanos del mismo dominio, módulo plano hermano (`{workspace}/{dominio}-shared/`).
+
 ## Paso 2 — Generar la estructura
 
-Crea esta estructura (siempre):
+La ruta base es:
+
+- Módulo plano en workspace: `src/modules/{workspace}/{nombre}/`
+- Submódulo anidado: `src/modules/{workspace}/{dominio}/{nombre}/` (si el dominio no existe, créalo como carpeta vacía — sin `index.ts`).
+
+A partir de la ruta base, crea siempre esta estructura:
 
 ```
-src/modules/{nombre}/
+{ruta-base}/
 ├── components/        # Componentes del módulo
 ├── dictionaries/
 │   ├── es.ts          # diccionario base, exporta el tipo
@@ -141,10 +162,12 @@ export const use{Nombre}Store = create<{Nombre}State>()(
 
 ## Paso 4 — Validar y reportar
 
-1. Corre `npm run type-check` para validar que el módulo compila.
+1. Corre `npm run type-check` y `npm run lint` para validar que el módulo compila y respeta boundaries (los globs `src/modules/*/*/{layer}/**` y `src/modules/*/*/*/{layer}/**` cubren ambos formatos).
 2. Reporta al usuario:
-   - Carpetas creadas
-   - Archivos generados
+   - Ruta donde se creó el módulo (workspace plano o anidado bajo dominio).
+   - Carpetas creadas.
+   - Archivos generados.
+   - Path del import público (`@modules/{workspace}/{nombre}` para flat, `@modules/{workspace}/{dominio}/{nombre}` para anidado).
    - Próximos pasos sugeridos:
      - `/add-endpoint {modulo} {accion}` para conectar con el backend.
      - `/add-page` si el módulo va a tener una página propia. Si querés que aparezca en el sidebar, durante `/add-page` decí que sí cuando pregunte; si todavía no hay un workspace donde encaje, corré `/add-workspace` primero.
