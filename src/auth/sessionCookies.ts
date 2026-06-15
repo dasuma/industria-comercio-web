@@ -1,6 +1,6 @@
-export const SESSION_TOKEN_COOKIE = 'olibia_session';
-export const SESSION_USER_ID_COOKIE = 'olibia_session_userId';
-export const SESSION_EMAIL_COOKIE = 'olibia_session_email';
+export const SESSION_TOKEN_COOKIE = 'pradma_session';
+export const SESSION_USER_ID_COOKIE = 'pradma_session_userId';
+export const SESSION_EMAIL_COOKIE = 'pradma_session_email';
 
 export const SESSION_ENDPOINT = '/api/auth/session';
 

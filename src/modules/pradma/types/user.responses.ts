@@ -1,6 +1,5 @@
 export interface PradmaUserResponse {
-  id: number;
-  name: string;
+  id: string;
   email: string;
   role: string;
   created_at: string;

@@ -1,8 +1,7 @@
 import type { UserRole } from './shared';
 
 export interface PradmaUser {
-  id: number;
-  name: string;
+  id: string;
   email: string;
   role: UserRole;
   createdAt: string;

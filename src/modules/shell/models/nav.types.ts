@@ -1,15 +1,10 @@
-export type WorkspaceKey = 'operations' | 'growth' | 'energy' | 'finance' | 'retention';
+export type WorkspaceKey = 'pradma';
 export type NavItemKey =
-  | 'cgm'
-  | 'cgmReport'
-  | 'cgmAnalysis'
-  | 'supply'
-  | 'bianetwork'
-  | 'energy'
-  | 'finance'
-  | 'retention';
-// Sub-tabs anidados dentro de un item del sidebar (ej. los tabs internos de
-// BiaNetwork: Usuarios, Usuarios Pro, etc.). Tienen su propio namespace de
-// claves para que el TabsStrip pueda mostrar el último nivel jerárquico
-// (item > subTab) en el label.
-export type NavSubTabKey = 'users' | 'usersPro' | 'accounts' | 'transactions' | 'invoices';
+  | 'clients'
+  | 'establishments'
+  | 'establishmentActivities'
+  | 'activityTypes'
+  | 'activityCategories'
+  | 'users'
+  | 'migrations';
+export type NavSubTabKey = never;

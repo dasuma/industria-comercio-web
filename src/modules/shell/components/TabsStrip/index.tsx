@@ -36,12 +36,6 @@ interface TabsStripProps {
 //   - Item suelto → "Growth > BiaNetwork" (workspace > item)
 const buildTabLabels = (tab: Tab, dict: ShellDictionary): { section: string; item: string } => {
   const match = findNavMatch(tab.href);
-  if (match?.subTabKey) {
-    return {
-      section: dict.items[match.itemKey],
-      item: dict.subTabs[match.subTabKey]
-    };
-  }
   if (match?.groupKey) {
     return {
       section: dict.items[match.groupKey],

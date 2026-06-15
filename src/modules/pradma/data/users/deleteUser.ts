@@ -3,7 +3,7 @@ import { doFetch } from '@/http_client';
 import QueryKeys from '@data/core/QueryKeys';
 import { endpointsPradma } from '../endpoints';
 
-const deleteUser = (id: number) =>
+const deleteUser = (id: string) =>
   doFetch<void, void>({
     endpoint: endpointsPradma.deleteUser,
     value: `/${id}`

@@ -2,64 +2,35 @@ import type { ShellDictionary } from './es';
 
 export const shellDictEn: ShellDictionary = {
   workspaces: {
-    operations: 'Operations',
-    growth: 'Acquisition',
-    energy: 'Energy',
-    finance: 'Finance',
-    retention: 'Retention'
+    pradma: 'Industry & Commerce'
   },
   descriptions: {
-    operations: 'Daily system operation: monitoring, control and management.',
-    growth: 'Gestión de Bia Networkers',
-    energy: 'Section under construction — coming soon.',
-    finance: 'Section under construction — coming soon.',
-    retention: 'Section under construction — coming soon.'
+    pradma: 'Industry and Commerce tax management.'
   },
   items: {
-    cgm: 'CGM',
-    cgmReport: 'CGM Report',
-    cgmAnalysis: 'Analysis',
-    supply: 'Supply',
-    bianetwork: 'Bia Network',
-    energy: 'Energy',
-    finance: 'Finance',
-    retention: 'Retention'
-  },
-  itemDescriptions: {
-    cgmAnalysis: 'Analysis, insights and consumption reports for our customers.'
-  },
-  subTabs: {
+    clients: 'Taxpayers',
+    establishments: 'Establishments',
+    establishmentActivities: 'Activities',
+    activityTypes: 'Activity types',
+    activityCategories: 'Categories',
     users: 'Users',
-    usersPro: 'Pro users',
-    accounts: 'Accounts',
-    transactions: 'Transactions',
-    invoices: 'Invoices'
+    migrations: 'Migrations'
   },
+  itemDescriptions: {},
+  subTabs: {},
   switchSection: 'Change section',
   picker: {
-    title: 'Where shall\nwe work today?',
+    title: 'Industry & Commerce',
     comingSoon: 'Coming soon',
     inspirations: [
-      'let’s make today count',
+      "let's make today count",
       'great work starts here',
-      'today is yours',
       'one step closer to the goal',
-      'your focus moves the needle',
-      'let the ideas flow',
       'the moment is now',
-      'small steps, big results',
-      'today belongs to the bold',
-      'let’s ship it',
-      'the team is counting on you',
-      'the best is yet to come',
-      'let’s build something great',
-      'your energy sets the tone',
-      'every choice matters',
-      'make the day matter',
-      'stay sharp, stay kind',
+      "let's ship it",
+      "let's build something great",
       'progress starts with a click',
-      'today is a good day to lead',
-      'let’s keep moving'
+      "let's keep moving"
     ]
   },
   search: {

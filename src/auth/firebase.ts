@@ -34,7 +34,7 @@ export const getFirebaseAuth = (): Auth => {
   }
   // Session persistence vive solo en memoria del tab — al cerrar el tab el
   // user de Firebase se va, y la persistencia del lado de la app queda a
-  // cargo de las cookies (olibia_session*). Persistence solo aplica en
+  // cargo de las cookies (pradma_session*). Persistence solo aplica en
   // browser; en SSR Firebase falla si lo intentamos.
   if (!persistenceConfigured && typeof window !== 'undefined') {
     persistenceConfigured = true;

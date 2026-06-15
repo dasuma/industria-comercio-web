@@ -6,7 +6,7 @@ import type { UpdatePradmaUserRequest } from '../../types/user.requests';
 import type { PradmaUserResponse } from '../../types/user.responses';
 
 interface UpdateUserVars {
-  id: number;
+  id: string;
   request: UpdatePradmaUserRequest;
 }
 

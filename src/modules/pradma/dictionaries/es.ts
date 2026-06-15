@@ -103,7 +103,44 @@ export const pradmaDictEs = {
     interestRates: 'Migrar tasas de interés',
     yearConfigs: 'Migrar configuraciones anuales',
     discounts: 'Migrar descuentos',
-    establishmentTariffs: 'Migrar tarifas de establecimientos'
+    establishmentTariffs: 'Migrar tarifas de establecimientos',
+    wizard: {
+      stepOf: 'Paso {current} de {total}',
+      back: 'Atrás',
+      next: 'Siguiente',
+      restart: 'Iniciar de nuevo',
+      steps: {
+        clients: 'Contribuyentes',
+        activityCategories: 'Categorías',
+        tariffs: 'Tarifas',
+        interestRates: 'Intereses',
+        yearConfigs: 'Años',
+        discounts: 'Descuentos',
+        establishmentTariffs: 'Establ.',
+        summary: 'Resumen'
+      },
+      descriptions: {
+        clients: 'Terceros.DBF → clients',
+        activityCategories: 'DSTIYC.DBF → activity_categories',
+        tariffs: 'FCTIYC.DBF → tariffs',
+        interestRates: 'intpreacd.DBF → interest_rates',
+        yearConfigs: 'años.DBF → year_configs',
+        discounts: 'dsciyc.DBF → discounts',
+        establishmentTariffs: 'ESTIYC.DBF → establishment_tariffs'
+      },
+      summary: {
+        title: 'Resumen de migración',
+        step: 'Paso',
+        file: 'DBF → Tabla',
+        success: 'Exitosos',
+        failed: 'Fallidos',
+        total: 'Total',
+        totals: 'Totales',
+        allSuccess: 'Todas las migraciones completadas sin errores.',
+        hasErrors: 'Algunas migraciones tuvieron errores.',
+        notRun: 'No ejecutado'
+      }
+    }
   },
   common: {
     search: 'Buscar...',

@@ -5,7 +5,6 @@ import type { SearchResponse } from '../../types/search.types';
 
 export const adaptUser = (raw: PradmaUserResponse): PradmaUser => ({
   id: raw.id,
-  name: raw.name,
   email: raw.email,
   role: raw.role as UserRole,
   createdAt: raw.created_at,

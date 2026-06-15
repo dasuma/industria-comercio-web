@@ -105,7 +105,44 @@ export const pradmaDictEn: PradmaDictionary = {
     interestRates: 'Migrate interest rates',
     yearConfigs: 'Migrate year configurations',
     discounts: 'Migrate discounts',
-    establishmentTariffs: 'Migrate establishment tariffs'
+    establishmentTariffs: 'Migrate establishment tariffs',
+    wizard: {
+      stepOf: 'Step {current} of {total}',
+      back: 'Back',
+      next: 'Next',
+      restart: 'Start over',
+      steps: {
+        clients: 'Taxpayers',
+        activityCategories: 'Categories',
+        tariffs: 'Tariffs',
+        interestRates: 'Rates',
+        yearConfigs: 'Years',
+        discounts: 'Discounts',
+        establishmentTariffs: 'Establ.',
+        summary: 'Summary'
+      },
+      descriptions: {
+        clients: 'Terceros.DBF → clients',
+        activityCategories: 'DSTIYC.DBF → activity_categories',
+        tariffs: 'FCTIYC.DBF → tariffs',
+        interestRates: 'intpreacd.DBF → interest_rates',
+        yearConfigs: 'años.DBF → year_configs',
+        discounts: 'dsciyc.DBF → discounts',
+        establishmentTariffs: 'ESTIYC.DBF → establishment_tariffs'
+      },
+      summary: {
+        title: 'Migration summary',
+        step: 'Step',
+        file: 'DBF → Table',
+        success: 'Successful',
+        failed: 'Failed',
+        total: 'Total',
+        totals: 'Totals',
+        allSuccess: 'All migrations completed without errors.',
+        hasErrors: 'Some migrations had errors.',
+        notRun: 'Not run'
+      }
+    }
   },
   common: {
     search: 'Search...',

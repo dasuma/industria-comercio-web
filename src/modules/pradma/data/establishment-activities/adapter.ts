@@ -2,10 +2,13 @@ import type { EstablishmentActivity } from '../../models/establishment-activity.
 import type { EstablishmentActivityResponse } from '../../types/establishment-activity.responses';
 import type { SearchResponse } from '../../types/search.types';
 
-export const adaptEstablishmentActivity = (raw: EstablishmentActivityResponse): EstablishmentActivity => ({
+export const adaptEstablishmentActivity = (
+  raw: EstablishmentActivityResponse
+): EstablishmentActivity => ({
   id: raw.id,
   establishmentId: raw.establishment_id,
-  activityTypeId: raw.activity_type_id,
+  activityCode: raw.activity_code,
+  valor: raw.valor,
   startDate: raw.start_date,
   endDate: raw.end_date,
   createdAt: raw.created_at,

@@ -46,6 +46,11 @@ export {
   useMigrateEstablishmentTariffs
 } from './data';
 
+// Components
+export { MigrationCard } from './components/MigrationCard';
+export { MigrationsWizard } from './components/MigrationsWizard';
+export { MigrationSummary } from './components/MigrationSummary';
+
 // Dictionaries
 export { getPradmaDict } from './dictionaries';
 export type { PradmaDictionary } from './dictionaries';

@@ -4,8 +4,10 @@ import type { SearchResponse } from '../../types/search.types';
 
 export const adaptActivityCategory = (raw: ActivityCategoryResponse): ActivityCategory => ({
   id: raw.id,
-  name: raw.name,
-  code: raw.code,
+  activityTypeCode: raw.activity_type_code,
+  activityTypeName: raw.activity_type_name,
+  yearInitial: raw.year_initial,
+  yearEnd: raw.year_end,
   createdAt: raw.created_at,
   updatedAt: raw.updated_at,
   deletedAt: raw.deleted_at

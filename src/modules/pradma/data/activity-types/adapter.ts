@@ -4,10 +4,8 @@ import type { SearchResponse } from '../../types/search.types';
 
 export const adaptActivityType = (raw: ActivityTypeResponse): ActivityType => ({
   id: raw.id,
-  name: raw.name,
-  code: raw.code,
-  rate: raw.rate,
-  activityCategoryId: raw.activity_category_id,
+  activityCode: raw.activity_code,
+  activityName: raw.activity_name,
   createdAt: raw.created_at,
   updatedAt: raw.updated_at,
   deletedAt: raw.deleted_at

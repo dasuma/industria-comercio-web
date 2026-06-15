@@ -15,12 +15,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Olibia',
-  description: 'El sistema operativo de Bia',
+  title: 'Pradma — Industria y Comercio',
+  description: 'Sistema de gestión de Industria y Comercio',
   icons: {
-    icon: '/olibia-logo.png',
-    shortcut: '/olibia-logo.png',
-    apple: '/olibia-logo.png'
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/pradma-logo.png'
   }
 };
 
