@@ -1,7 +1,7 @@
 import type { UserRole } from '../../models/shared';
 import type { PradmaUser } from '../../models/user.interface';
 import type { PradmaUserResponse } from '../../types/user.responses';
-import type { SearchResponse } from '../../types/search.types';
+import type { SearchResponse, ApiSearchResponse } from '../../types/search.types';
 
 export const adaptUser = (raw: PradmaUserResponse): PradmaUser => ({
   id: raw.id,
@@ -13,10 +13,10 @@ export const adaptUser = (raw: PradmaUserResponse): PradmaUser => ({
 });
 
 export const adaptUsersResponse = (
-  raw: SearchResponse<PradmaUserResponse>
+  raw: ApiSearchResponse<PradmaUserResponse>
 ): SearchResponse<PradmaUser> => ({
   data: raw.data.map(adaptUser),
-  total_rows: raw.total_rows,
-  offset: raw.offset,
-  limit: raw.limit
+  total: raw.pagination.total,
+  offset: raw.pagination.current_offset,
+  limit: raw.pagination.current_limit
 });

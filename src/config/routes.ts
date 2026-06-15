@@ -5,8 +5,6 @@ export const PUBLIC_ROUTES = {
 export const APP_ROUTES = {
   clients: '/pradma/clients',
   establishments: '/pradma/establishments',
-  establishmentActivities: '/pradma/establishment-activities',
-  activityTypes: '/pradma/activity-types',
   activityCategories: '/pradma/activity-categories',
   users: '/pradma/users',
   migrations: '/pradma/migrations'

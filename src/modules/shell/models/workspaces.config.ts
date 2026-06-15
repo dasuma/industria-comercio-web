@@ -2,9 +2,7 @@ import {
   RiBuildingLine,
   RiBuilding4Line,
   RiBuilding4Fill,
-  RiFileListLine,
   RiGroupLine,
-  RiPriceTag3Line,
   RiStackLine,
   RiUploadCloud2Line,
   RiUserLine
@@ -25,18 +23,6 @@ export const workspaces: Workspace[] = [
         key: 'establishments',
         href: APP_ROUTES.establishments,
         icon: RiBuildingLine
-      },
-      {
-        kind: 'item',
-        key: 'establishmentActivities',
-        href: APP_ROUTES.establishmentActivities,
-        icon: RiFileListLine
-      },
-      {
-        kind: 'item',
-        key: 'activityTypes',
-        href: APP_ROUTES.activityTypes,
-        icon: RiPriceTag3Line
       },
       {
         kind: 'item',

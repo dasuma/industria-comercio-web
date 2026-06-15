@@ -16,6 +16,14 @@ export const pradmaDictEn: PradmaDictionary = {
       created: 'Taxpayer created successfully.',
       updated: 'Taxpayer updated successfully.',
       deleted: 'Taxpayer deleted successfully.'
+    },
+    columns: {
+      id: 'ID',
+      name: 'Name',
+      documentType: 'Doc. type',
+      email: 'Email',
+      phone: 'Phone',
+      isCompany: 'Company'
     }
   },
   establishments: {
@@ -31,51 +39,37 @@ export const pradmaDictEn: PradmaDictionary = {
       created: 'Establishment created successfully.',
       updated: 'Establishment updated successfully.',
       deleted: 'Establishment deleted successfully.'
-    }
-  },
-  establishmentActivities: {
-    title: 'Establishment activities',
-    loading: 'Loading activities...',
-    empty: 'No activities to show.',
-    errorLoading: 'Could not load activities.',
-    create: 'Create activity',
-    edit: 'Edit activity',
-    delete: 'Delete activity',
-    deleteConfirm: 'Are you sure you want to delete this activity?',
-    success: {
-      created: 'Activity created successfully.',
-      updated: 'Activity updated successfully.',
-      deleted: 'Activity deleted successfully.'
-    }
-  },
-  activityTypes: {
-    title: 'Activity types',
-    loading: 'Loading activity types...',
-    empty: 'No activity types to show.',
-    errorLoading: 'Could not load activity types.',
-    create: 'Create activity type',
-    edit: 'Edit activity type',
-    delete: 'Delete activity type',
-    deleteConfirm: 'Are you sure you want to delete this activity type?',
-    success: {
-      created: 'Activity type created successfully.',
-      updated: 'Activity type updated successfully.',
-      deleted: 'Activity type deleted successfully.'
+    },
+    columns: {
+      id: 'ID',
+      registrationNumber: 'Reg. number',
+      name: 'Name',
+      clientId: 'Taxpayer',
+      address: 'Address',
+      phone: 'Phone',
+      startDate: 'Start date'
     }
   },
   activityCategories: {
-    title: 'Activity categories',
-    loading: 'Loading categories...',
-    empty: 'No categories to show.',
-    errorLoading: 'Could not load categories.',
-    create: 'Create category',
-    edit: 'Edit category',
-    delete: 'Delete category',
-    deleteConfirm: 'Are you sure you want to delete this category?',
+    title: 'Economic activities',
+    loading: 'Loading economic activities...',
+    empty: 'No economic activities to show.',
+    errorLoading: 'Could not load economic activities.',
+    create: 'Create economic activity',
+    edit: 'Edit economic activity',
+    delete: 'Delete economic activity',
+    deleteConfirm: 'Are you sure you want to delete this economic activity?',
     success: {
-      created: 'Category created successfully.',
-      updated: 'Category updated successfully.',
-      deleted: 'Category deleted successfully.'
+      created: 'Economic activity created successfully.',
+      updated: 'Economic activity updated successfully.',
+      deleted: 'Economic activity deleted successfully.'
+    },
+    columns: {
+      id: 'ID',
+      activityTypeCode: 'Type code',
+      activityTypeName: 'Type name',
+      yearInitial: 'Start year',
+      yearEnd: 'End year'
     }
   },
   users: {
@@ -91,6 +85,11 @@ export const pradmaDictEn: PradmaDictionary = {
       created: 'User created successfully.',
       updated: 'User updated successfully.',
       deleted: 'User deleted successfully.'
+    },
+    columns: {
+      id: 'ID',
+      email: 'Email',
+      role: 'Role'
     }
   },
   migrations: {
@@ -150,6 +149,10 @@ export const pradmaDictEn: PradmaDictionary = {
     save: 'Save',
     cancel: 'Cancel',
     saving: 'Saving...',
-    serverError: 'An error occurred. Try again.'
+    serverError: 'An error occurred. Try again.',
+    yes: 'Yes',
+    no: 'No',
+    page: 'Page',
+    of: 'of'
   }
 };

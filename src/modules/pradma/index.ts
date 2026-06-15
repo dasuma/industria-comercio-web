@@ -50,6 +50,10 @@ export {
 export { MigrationCard } from './components/MigrationCard';
 export { MigrationsWizard } from './components/MigrationsWizard';
 export { MigrationSummary } from './components/MigrationSummary';
+export { ClientList } from './components/ClientList';
+export { EstablishmentList } from './components/EstablishmentList';
+export { ActivityCategoryList } from './components/ActivityCategoryList';
+export { UserList } from './components/UserList';
 
 // Dictionaries
 export { getPradmaDict } from './dictionaries';
@@ -67,7 +71,7 @@ export type { PradmaUser } from './models/user.interface';
 export type { MigrationResult } from './models/migration.interface';
 
 // Types
-export type { SearchRequest, SearchResponse } from './types/search.types';
+export type { SearchRequest, SearchResponse, ApiSearchResponse } from './types/search.types';
 export type { CreateClientRequest, UpdateClientRequest } from './types/client.requests';
 export type {
   CreateEstablishmentRequest,

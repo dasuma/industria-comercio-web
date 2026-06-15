@@ -12,9 +12,7 @@ export const shellDictEs = {
   items: {
     clients: 'Contribuyentes',
     establishments: 'Establecimientos',
-    establishmentActivities: 'Actividades',
-    activityTypes: 'Tipos de actividad',
-    activityCategories: 'Categorías',
+    activityCategories: 'Actividades económicas',
     users: 'Usuarios',
     migrations: 'Migraciones'
   } satisfies Record<NavItemKey, string>,

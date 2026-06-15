@@ -5,8 +5,8 @@ const base = '/ms-pradma';
 export const endpointsPradma: Record<string, IHttpClient> = {
   // Clients
   searchClients: {
-    url: `${base}/clients`,
-    method: 'GET',
+    url: `${base}/clients/search`,
+    method: 'POST',
     requiresAuthorization: true,
     isMocked: false,
     urlMock: ''
@@ -41,8 +41,8 @@ export const endpointsPradma: Record<string, IHttpClient> = {
   },
   // Establishments
   searchEstablishments: {
-    url: `${base}/establishments`,
-    method: 'GET',
+    url: `${base}/establishments/search`,
+    method: 'POST',
     requiresAuthorization: true,
     isMocked: false,
     urlMock: ''
@@ -77,8 +77,8 @@ export const endpointsPradma: Record<string, IHttpClient> = {
   },
   // Establishment Activities
   searchEstablishmentActivities: {
-    url: `${base}/establishment-activities`,
-    method: 'GET',
+    url: `${base}/establishment-activities/search`,
+    method: 'POST',
     requiresAuthorization: true,
     isMocked: false,
     urlMock: ''
@@ -113,8 +113,8 @@ export const endpointsPradma: Record<string, IHttpClient> = {
   },
   // Activity Types
   searchActivityTypes: {
-    url: `${base}/activity-types`,
-    method: 'GET',
+    url: `${base}/activity-types/search`,
+    method: 'POST',
     requiresAuthorization: true,
     isMocked: false,
     urlMock: ''
@@ -149,8 +149,8 @@ export const endpointsPradma: Record<string, IHttpClient> = {
   },
   // Activity Categories
   searchActivityCategories: {
-    url: `${base}/activity-categories`,
-    method: 'GET',
+    url: `${base}/activity-categories/search`,
+    method: 'POST',
     requiresAuthorization: true,
     isMocked: false,
     urlMock: ''
@@ -185,8 +185,8 @@ export const endpointsPradma: Record<string, IHttpClient> = {
   },
   // Users
   searchUsers: {
-    url: `${base}/users`,
-    method: 'GET',
+    url: `${base}/users/search`,
+    method: 'POST',
     requiresAuthorization: true,
     isMocked: false,
     urlMock: ''

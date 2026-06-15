@@ -20,7 +20,7 @@ export const adaptEstablishmentActivitiesResponse = (
   raw: SearchResponse<EstablishmentActivityResponse>
 ): SearchResponse<EstablishmentActivity> => ({
   data: raw.data.map(adaptEstablishmentActivity),
-  total_rows: raw.total_rows,
+  total: raw.total,
   offset: raw.offset,
   limit: raw.limit
 });

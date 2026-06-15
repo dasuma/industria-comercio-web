@@ -14,6 +14,14 @@ export const pradmaDictEs = {
       created: 'Contribuyente creado correctamente.',
       updated: 'Contribuyente actualizado correctamente.',
       deleted: 'Contribuyente eliminado correctamente.'
+    },
+    columns: {
+      id: 'ID',
+      name: 'Nombre',
+      documentType: 'Tipo doc.',
+      email: 'Correo',
+      phone: 'Teléfono',
+      isCompany: 'Empresa'
     }
   },
   establishments: {
@@ -29,51 +37,37 @@ export const pradmaDictEs = {
       created: 'Establecimiento creado correctamente.',
       updated: 'Establecimiento actualizado correctamente.',
       deleted: 'Establecimiento eliminado correctamente.'
-    }
-  },
-  establishmentActivities: {
-    title: 'Actividades de establecimiento',
-    loading: 'Cargando actividades...',
-    empty: 'No hay actividades para mostrar.',
-    errorLoading: 'No se pudieron cargar las actividades.',
-    create: 'Crear actividad',
-    edit: 'Editar actividad',
-    delete: 'Eliminar actividad',
-    deleteConfirm: '¿Está seguro de eliminar esta actividad?',
-    success: {
-      created: 'Actividad creada correctamente.',
-      updated: 'Actividad actualizada correctamente.',
-      deleted: 'Actividad eliminada correctamente.'
-    }
-  },
-  activityTypes: {
-    title: 'Tipos de actividad',
-    loading: 'Cargando tipos de actividad...',
-    empty: 'No hay tipos de actividad para mostrar.',
-    errorLoading: 'No se pudieron cargar los tipos de actividad.',
-    create: 'Crear tipo de actividad',
-    edit: 'Editar tipo de actividad',
-    delete: 'Eliminar tipo de actividad',
-    deleteConfirm: '¿Está seguro de eliminar este tipo de actividad?',
-    success: {
-      created: 'Tipo de actividad creado correctamente.',
-      updated: 'Tipo de actividad actualizado correctamente.',
-      deleted: 'Tipo de actividad eliminado correctamente.'
+    },
+    columns: {
+      id: 'ID',
+      registrationNumber: 'N.° registro',
+      name: 'Nombre',
+      clientId: 'Contribuyente',
+      address: 'Dirección',
+      phone: 'Teléfono',
+      startDate: 'Fecha inicio'
     }
   },
   activityCategories: {
-    title: 'Categorías de actividad',
-    loading: 'Cargando categorías...',
-    empty: 'No hay categorías para mostrar.',
-    errorLoading: 'No se pudieron cargar las categorías.',
-    create: 'Crear categoría',
-    edit: 'Editar categoría',
-    delete: 'Eliminar categoría',
-    deleteConfirm: '¿Está seguro de eliminar esta categoría?',
+    title: 'Actividades económicas',
+    loading: 'Cargando actividades económicas...',
+    empty: 'No hay actividades económicas para mostrar.',
+    errorLoading: 'No se pudieron cargar las actividades económicas.',
+    create: 'Crear actividad económica',
+    edit: 'Editar actividad económica',
+    delete: 'Eliminar actividad económica',
+    deleteConfirm: '¿Está seguro de eliminar esta actividad económica?',
     success: {
-      created: 'Categoría creada correctamente.',
-      updated: 'Categoría actualizada correctamente.',
-      deleted: 'Categoría eliminada correctamente.'
+      created: 'Actividad económica creada correctamente.',
+      updated: 'Actividad económica actualizada correctamente.',
+      deleted: 'Actividad económica eliminada correctamente.'
+    },
+    columns: {
+      id: 'ID',
+      activityTypeCode: 'Código tipo',
+      activityTypeName: 'Nombre tipo',
+      yearInitial: 'Año inicial',
+      yearEnd: 'Año final'
     }
   },
   users: {
@@ -89,6 +83,11 @@ export const pradmaDictEs = {
       created: 'Usuario creado correctamente.',
       updated: 'Usuario actualizado correctamente.',
       deleted: 'Usuario eliminado correctamente.'
+    },
+    columns: {
+      id: 'ID',
+      email: 'Correo',
+      role: 'Rol'
     }
   },
   migrations: {
@@ -148,7 +147,11 @@ export const pradmaDictEs = {
     save: 'Guardar',
     cancel: 'Cancelar',
     saving: 'Guardando...',
-    serverError: 'Ocurrió un error. Intentá de nuevo.'
+    serverError: 'Ocurrió un error. Intentá de nuevo.',
+    yes: 'Sí',
+    no: 'No',
+    page: 'Página',
+    of: 'de'
   }
 };
 

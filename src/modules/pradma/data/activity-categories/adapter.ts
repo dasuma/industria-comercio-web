@@ -1,6 +1,6 @@
 import type { ActivityCategory } from '../../models/activity-category.interface';
 import type { ActivityCategoryResponse } from '../../types/activity-category.responses';
-import type { SearchResponse } from '../../types/search.types';
+import type { SearchResponse, ApiSearchResponse } from '../../types/search.types';
 
 export const adaptActivityCategory = (raw: ActivityCategoryResponse): ActivityCategory => ({
   id: raw.id,
@@ -14,10 +14,10 @@ export const adaptActivityCategory = (raw: ActivityCategoryResponse): ActivityCa
 });
 
 export const adaptActivityCategoriesResponse = (
-  raw: SearchResponse<ActivityCategoryResponse>
+  raw: ApiSearchResponse<ActivityCategoryResponse>
 ): SearchResponse<ActivityCategory> => ({
   data: raw.data.map(adaptActivityCategory),
-  total_rows: raw.total_rows,
-  offset: raw.offset,
-  limit: raw.limit
+  total: raw.pagination.total,
+  offset: raw.pagination.current_offset,
+  limit: raw.pagination.current_limit
 });

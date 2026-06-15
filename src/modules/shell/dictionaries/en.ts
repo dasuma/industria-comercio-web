@@ -10,9 +10,7 @@ export const shellDictEn: ShellDictionary = {
   items: {
     clients: 'Taxpayers',
     establishments: 'Establishments',
-    establishmentActivities: 'Activities',
-    activityTypes: 'Activity types',
-    activityCategories: 'Categories',
+    activityCategories: 'Economic activities',
     users: 'Users',
     migrations: 'Migrations'
   },

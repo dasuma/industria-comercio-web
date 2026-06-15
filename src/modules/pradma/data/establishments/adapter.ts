@@ -1,6 +1,6 @@
 import type { Establishment } from '../../models/establishment.interface';
 import type { EstablishmentResponse } from '../../types/establishment.responses';
-import type { SearchResponse } from '../../types/search.types';
+import type { SearchResponse, ApiSearchResponse } from '../../types/search.types';
 
 export const adaptEstablishment = (raw: EstablishmentResponse): Establishment => ({
   id: raw.id,
@@ -20,10 +20,10 @@ export const adaptEstablishment = (raw: EstablishmentResponse): Establishment =>
 });
 
 export const adaptEstablishmentsResponse = (
-  raw: SearchResponse<EstablishmentResponse>
+  raw: ApiSearchResponse<EstablishmentResponse>
 ): SearchResponse<Establishment> => ({
   data: raw.data.map(adaptEstablishment),
-  total_rows: raw.total_rows,
-  offset: raw.offset,
-  limit: raw.limit
+  total: raw.pagination.total,
+  offset: raw.pagination.current_offset,
+  limit: raw.pagination.current_limit
 });

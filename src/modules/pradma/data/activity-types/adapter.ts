@@ -15,7 +15,7 @@ export const adaptActivityTypesResponse = (
   raw: SearchResponse<ActivityTypeResponse>
 ): SearchResponse<ActivityType> => ({
   data: raw.data.map(adaptActivityType),
-  total_rows: raw.total_rows,
+  total: raw.total,
   offset: raw.offset,
   limit: raw.limit
 });
