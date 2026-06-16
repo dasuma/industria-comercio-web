@@ -37,12 +37,16 @@ export const EstablishmentList = ({ locale }: EstablishmentListProps) => {
       if (value.trim()) {
         const f: SearchFilter[] = [
           { field: 'name', value: value.trim(), operation: 'ilike', option: 'OR' },
-          {
-            field: 'registration_number',
-            value: value.trim(),
-            operation: 'ilike',
-            option: 'OR'
-          }
+          ...(isNaN(Number(value.trim()))
+            ? []
+            : [
+                {
+                  field: 'id',
+                  value: Number(value.trim()),
+                  operation: 'eq' as const,
+                  option: 'OR' as const
+                }
+              ])
         ];
         setFilters(f);
       } else {
