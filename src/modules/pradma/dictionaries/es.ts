@@ -74,7 +74,38 @@ export const pradmaDictEs = {
       address: 'Dirección',
       phone: 'Teléfono',
       startDate: 'Fecha inicio'
-    }
+    },
+    fields: {
+      name: 'Nombre',
+      address: 'Dirección',
+      phone: 'Teléfono',
+      description: 'Descripción',
+      startDate: 'Fecha inicio',
+      endDate: 'Fecha fin',
+      clientId: 'Número de identificación'
+    },
+    tabs: {
+      data: 'Datos',
+      client: 'Cliente',
+      payments: 'Pagos',
+      settlements: 'Liquidaciones',
+      settle: 'Liquidar'
+    },
+    form: {
+      errors: {
+        nameRequired: 'El nombre es obligatorio',
+        addressRequired: 'La dirección es obligatoria',
+        startDateRequired: 'La fecha de inicio es obligatoria',
+        phoneOnlyNumbers: 'El teléfono solo debe contener números',
+        clientIdRequired: 'El contribuyente es obligatorio',
+        serverError: 'No se pudo guardar el establecimiento.'
+      },
+      success: {
+        created: 'Establecimiento creado correctamente.',
+        updated: 'Establecimiento actualizado correctamente.'
+      }
+    },
+    comingSoon: 'Próximamente'
   },
   activityCategories: {
     title: 'Actividades económicas',

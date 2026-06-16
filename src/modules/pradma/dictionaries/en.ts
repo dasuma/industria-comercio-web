@@ -76,7 +76,38 @@ export const pradmaDictEn: PradmaDictionary = {
       address: 'Address',
       phone: 'Phone',
       startDate: 'Start date'
-    }
+    },
+    fields: {
+      name: 'Name',
+      address: 'Address',
+      phone: 'Phone',
+      description: 'Description',
+      startDate: 'Start date',
+      endDate: 'End date',
+      clientId: 'Identification number'
+    },
+    tabs: {
+      data: 'Data',
+      client: 'Client',
+      payments: 'Payments',
+      settlements: 'Settlements',
+      settle: 'Settle'
+    },
+    form: {
+      errors: {
+        nameRequired: 'Name is required',
+        addressRequired: 'Address is required',
+        startDateRequired: 'Start date is required',
+        phoneOnlyNumbers: 'Phone must contain only numbers',
+        clientIdRequired: 'Taxpayer is required',
+        serverError: 'Could not save establishment.'
+      },
+      success: {
+        created: 'Establishment created successfully.',
+        updated: 'Establishment updated successfully.'
+      }
+    },
+    comingSoon: 'Coming soon'
   },
   activityCategories: {
     title: 'Economic activities',

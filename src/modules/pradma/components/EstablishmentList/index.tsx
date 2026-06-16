@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Table, Pagination, Button, Input } from '@biaenergy/ui';
-import { RiArrowLeftSLine, RiArrowRightSLine, RiSearchLine } from '@biaenergy/ui/icons';
+import { useRouter } from 'next/navigation';
+import { FancyButton, Table, Pagination, Button, Input } from '@biaenergy/ui';
+import { RiAddLine, RiArrowLeftSLine, RiArrowRightSLine, RiSearchLine } from '@biaenergy/ui/icons';
 import type { Locale } from '@/i18n/config';
+import { APP_ROUTES } from '@/config/routes';
 import { getPradmaDict } from '../../dictionaries';
 import { useSearchEstablishments } from '../../data';
 import { useSearchPagination } from '../../hooks/useSearchPagination';
@@ -16,7 +18,9 @@ interface EstablishmentListProps {
 export const EstablishmentList = ({ locale }: EstablishmentListProps) => {
   const dict = getPradmaDict(locale);
   const { columns } = dict.establishments;
+  const router = useRouter();
   const [search, setSearch] = useState('');
+
   const {
     searchParams,
     currentPage,
@@ -35,14 +39,15 @@ export const EstablishmentList = ({ locale }: EstablishmentListProps) => {
     (value: string) => {
       setSearch(value);
       if (value.trim()) {
+        const trimmed = value.trim();
         const f: SearchFilter[] = [
-          { field: 'name', value: value.trim(), operation: 'ilike', option: 'OR' },
-          ...(isNaN(Number(value.trim()))
+          { field: 'name', value: trimmed, operation: 'ilike', option: 'OR' },
+          ...(isNaN(Number(trimmed))
             ? []
             : [
                 {
                   field: 'id',
-                  value: Number(value.trim()),
+                  value: Number(trimmed),
                   operation: 'eq' as const,
                   option: 'OR' as const
                 }
@@ -64,17 +69,26 @@ export const EstablishmentList = ({ locale }: EstablishmentListProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="max-w-sm">
-        <Input.Root>
-          <Input.Wrapper>
-            <Input.Icon as={RiSearchLine} />
-            <Input.Input
-              placeholder={dict.common.search}
-              value={search}
-              onChange={e => handleSearch(e.target.value)}
-            />
-          </Input.Wrapper>
-        </Input.Root>
+      <div className="flex items-center justify-between">
+        <div className="max-w-sm flex-1">
+          <Input.Root>
+            <Input.Wrapper>
+              <Input.Icon as={RiSearchLine} />
+              <Input.Input
+                placeholder={dict.common.search}
+                value={search}
+                onChange={e => handleSearch(e.target.value)}
+              />
+            </Input.Wrapper>
+          </Input.Root>
+        </div>
+        <FancyButton.Root
+          variant="primary"
+          onClick={() => router.push(`${APP_ROUTES.establishments}/new`)}
+        >
+          <FancyButton.Icon as={RiAddLine} />
+          {dict.establishments.create}
+        </FancyButton.Root>
       </div>
 
       {isLoading && (
@@ -110,7 +124,11 @@ export const EstablishmentList = ({ locale }: EstablishmentListProps) => {
             </Table.Header>
             <Table.Body>
               {data.data.map(est => (
-                <Table.Row key={est.id}>
+                <Table.Row
+                  key={est.id}
+                  onClick={() => router.push(`${APP_ROUTES.establishments}/${est.id}`)}
+                  className="cursor-pointer"
+                >
                   <Table.Cell>{est.id}</Table.Cell>
                   <Table.Cell>{est.registrationNumber}</Table.Cell>
                   <Table.Cell>{est.name}</Table.Cell>
