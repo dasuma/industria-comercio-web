@@ -12,6 +12,7 @@ import {
   useMigrateInterestRates,
   useMigrateYearConfigs,
   useMigrateDiscounts,
+  useMigrateEstablishments,
   useMigrateEstablishmentTariffs
 } from '../../data';
 import { MigrationCard } from '../MigrationCard';
@@ -43,6 +44,12 @@ const STEPS = [
     labelKey: 'discounts',
     descriptionKey: 'discounts',
     hook: useMigrateDiscounts
+  },
+  {
+    key: 'establishments',
+    labelKey: 'establishments',
+    descriptionKey: 'establishments',
+    hook: useMigrateEstablishments
   },
   {
     key: 'establishmentTariffs',
@@ -97,6 +104,7 @@ export const MigrationsWizard = ({ dict }: MigrationsWizardProps) => {
             label={wizardDict.steps[step.labelKey as keyof typeof wizardDict.steps]}
             state={getStepState(i)}
             isLast={false}
+            onClick={() => setCurrentStep(i)}
           />
         ))}
         <StepperItem
@@ -104,6 +112,7 @@ export const MigrationsWizard = ({ dict }: MigrationsWizardProps) => {
           label={wizardDict.steps.summary}
           state={getStepState(STEPS.length)}
           isLast
+          onClick={() => setCurrentStep(STEPS.length)}
         />
       </HorizontalStepper.Root>
 
@@ -157,11 +166,7 @@ export const MigrationsWizard = ({ dict }: MigrationsWizardProps) => {
           </Button.Root>
         ) : (
           // [R7] FancyButton for primary "Next" action
-          <FancyButton.Root
-            onClick={() => setCurrentStep(s => s + 1)}
-            disabled={results[currentStep] === null}
-            size="medium"
-          >
+          <FancyButton.Root onClick={() => setCurrentStep(s => s + 1)} size="medium">
             {wizardDict.next}
             <FancyButton.Icon as={RiArrowRightSLine} />
           </FancyButton.Root>
@@ -178,14 +183,17 @@ interface StepperItemProps {
   label: string;
   state: 'completed' | 'active' | 'default';
   isLast: boolean;
+  onClick: () => void;
 }
 
-const StepperItem = ({ index, label, state, isLast }: StepperItemProps) => (
+const StepperItem = ({ index, label, state, isLast, onClick }: StepperItemProps) => (
   <>
-    <HorizontalStepper.Item state={state}>
-      <HorizontalStepper.ItemIndicator>{index + 1}</HorizontalStepper.ItemIndicator>
-      <span className="hidden sm:inline">{label}</span>
-    </HorizontalStepper.Item>
+    <button type="button" onClick={onClick} className="cursor-pointer">
+      <HorizontalStepper.Item state={state}>
+        <HorizontalStepper.ItemIndicator>{index + 1}</HorizontalStepper.ItemIndicator>
+        <span className="hidden sm:inline">{label}</span>
+      </HorizontalStepper.Item>
+    </button>
     {!isLast && <HorizontalStepper.SeparatorIcon />}
   </>
 );

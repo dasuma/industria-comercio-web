@@ -47,4 +47,5 @@ export { useMigrateTariffs } from './migrations/migrateTariffs';
 export { useMigrateInterestRates } from './migrations/migrateInterestRates';
 export { useMigrateYearConfigs } from './migrations/migrateYearConfigs';
 export { useMigrateDiscounts } from './migrations/migrateDiscounts';
+export { useMigrateEstablishments } from './migrations/migrateEstablishments';
 export { useMigrateEstablishmentTariffs } from './migrations/migrateEstablishmentTariffs';

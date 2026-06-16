@@ -268,6 +268,14 @@ export const endpointsPradma: Record<string, IHttpClient> = {
     isMocked: false,
     urlMock: ''
   },
+  migrateEstablishments: {
+    url: `${base}/migrations/establishments`,
+    method: 'POST',
+    requiresAuthorization: true,
+    headers: { 'Content-Type': 'multipart/form-data' },
+    isMocked: false,
+    urlMock: ''
+  },
   migrateEstablishmentTariffs: {
     url: `${base}/migrations/establishment-tariffs`,
     method: 'POST',

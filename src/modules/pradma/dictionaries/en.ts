@@ -132,6 +132,7 @@ export const pradmaDictEn: PradmaDictionary = {
     interestRates: 'Migrate interest rates',
     yearConfigs: 'Migrate year configurations',
     discounts: 'Migrate discounts',
+    establishments: 'Migrate establishments',
     establishmentTariffs: 'Migrate establishment tariffs',
     wizard: {
       stepOf: 'Step {current} of {total}',
@@ -145,7 +146,8 @@ export const pradmaDictEn: PradmaDictionary = {
         interestRates: 'Rates',
         yearConfigs: 'Years',
         discounts: 'Discounts',
-        establishmentTariffs: 'Establ.',
+        establishments: 'Establ.',
+        establishmentTariffs: 'Tariffs est.',
         summary: 'Summary'
       },
       descriptions: {
@@ -155,6 +157,7 @@ export const pradmaDictEn: PradmaDictionary = {
         interestRates: 'intpreacd.DBF → interest_rates',
         yearConfigs: 'años.DBF → year_configs',
         discounts: 'dsciyc.DBF → discounts',
+        establishments: 'ESTIYC.DBF → establishments',
         establishmentTariffs: 'ESTIYC.DBF → establishment_tariffs'
       },
       summary: {

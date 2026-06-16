@@ -33,12 +33,15 @@ interface MigrationCardProps {
   initialResult?: MigrationResult | null;
 }
 
-const adaptResult = (raw: MigrationResponse): MigrationResult => ({
-  totalRecords: raw.total_records,
-  successRecords: raw.inserted,
-  failedRecords: raw.skipped,
-  errors: raw.errors
-});
+const adaptResult = (raw: MigrationResponse | MigrationResponse[]): MigrationResult => {
+  const item = Array.isArray(raw) ? raw[0] : raw;
+  return {
+    totalRecords: item.total_records,
+    successRecords: item.inserted,
+    failedRecords: item.skipped,
+    errors: item.errors ?? []
+  };
+};
 
 export const MigrationCard = ({
   title,

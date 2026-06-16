@@ -130,6 +130,7 @@ export const pradmaDictEs = {
     interestRates: 'Migrar tasas de interés',
     yearConfigs: 'Migrar configuraciones anuales',
     discounts: 'Migrar descuentos',
+    establishments: 'Migrar establecimientos',
     establishmentTariffs: 'Migrar tarifas de establecimientos',
     wizard: {
       stepOf: 'Paso {current} de {total}',
@@ -143,7 +144,8 @@ export const pradmaDictEs = {
         interestRates: 'Intereses',
         yearConfigs: 'Años',
         discounts: 'Descuentos',
-        establishmentTariffs: 'Establ.',
+        establishments: 'Establ.',
+        establishmentTariffs: 'Tarifas est.',
         summary: 'Resumen'
       },
       descriptions: {
@@ -153,6 +155,7 @@ export const pradmaDictEs = {
         interestRates: 'intpreacd.DBF → interest_rates',
         yearConfigs: 'años.DBF → year_configs',
         discounts: 'dsciyc.DBF → discounts',
+        establishments: 'ESTIYC.DBF → establishments',
         establishmentTariffs: 'ESTIYC.DBF → establishment_tariffs'
       },
       summary: {
