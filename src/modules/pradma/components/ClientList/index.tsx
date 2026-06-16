@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Table, Pagination, Button, Input } from '@biaenergy/ui';
-import { RiArrowLeftSLine, RiArrowRightSLine, RiSearchLine } from '@biaenergy/ui/icons';
+import { FancyButton, Table, Pagination, Button, Input } from '@biaenergy/ui';
+import { RiAddLine, RiArrowLeftSLine, RiArrowRightSLine, RiSearchLine } from '@biaenergy/ui/icons';
 import type { Locale } from '@/i18n/config';
 import { getPradmaDict } from '../../dictionaries';
 import { useSearchClients } from '../../data';
 import { useSearchPagination } from '../../hooks/useSearchPagination';
+import { ClientPanel } from '../ClientPanel';
 import type { SearchFilter } from '../../types/search.types';
 
 interface ClientListProps {
@@ -17,6 +18,24 @@ export const ClientList = ({ locale }: ClientListProps) => {
   const dict = getPradmaDict(locale);
   const { columns } = dict.clients;
   const [search, setSearch] = useState('');
+  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
+  const [panelOpen, setPanelOpen] = useState(false);
+
+  const openCreate = () => {
+    setSelectedClientId(null);
+    setPanelOpen(true);
+  };
+
+  const openEdit = (id: number) => {
+    setSelectedClientId(id);
+    setPanelOpen(true);
+  };
+
+  const closePanel = () => {
+    setPanelOpen(false);
+    setSelectedClientId(null);
+  };
+
   const {
     searchParams,
     currentPage,
@@ -37,7 +56,7 @@ export const ClientList = ({ locale }: ClientListProps) => {
       if (value.trim()) {
         const trimmed = value.trim();
         const f: SearchFilter[] = [
-          { field: 'name', value: `%${trimmed}%`, operation: 'ilike', option: 'OR' },
+          { field: 'name', value: trimmed, operation: 'ilike', option: 'OR' },
           ...(isNaN(Number(trimmed))
             ? []
             : [
@@ -64,92 +83,108 @@ export const ClientList = ({ locale }: ClientListProps) => {
   }, [data, setTotal]);
 
   return (
-    <div className="space-y-4">
-      <div className="max-w-sm">
-        <Input.Root>
-          <Input.Wrapper>
-            <Input.Icon as={RiSearchLine} />
-            <Input.Input
-              placeholder={dict.common.search}
-              value={search}
-              onChange={e => handleSearch(e.target.value)}
-            />
-          </Input.Wrapper>
-        </Input.Root>
+    <>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="max-w-sm flex-1">
+            <Input.Root>
+              <Input.Wrapper>
+                <Input.Icon as={RiSearchLine} />
+                <Input.Input
+                  placeholder={dict.common.search}
+                  value={search}
+                  onChange={e => handleSearch(e.target.value)}
+                />
+              </Input.Wrapper>
+            </Input.Root>
+          </div>
+          <FancyButton.Root variant="primary" onClick={openCreate}>
+            <FancyButton.Icon as={RiAddLine} />
+            {dict.clients.create}
+          </FancyButton.Root>
+        </div>
+
+        {isLoading && <p className="text-text-sub-600 py-8 text-center">{dict.clients.loading}</p>}
+
+        {isError && (
+          <div className="flex flex-col items-center gap-3 py-8">
+            <p className="text-text-sub-600">{dict.clients.errorLoading}</p>
+            <Button.Root variant="neutral" onClick={() => refetch()}>
+              {dict.common.retry}
+            </Button.Root>
+          </div>
+        )}
+
+        {!isLoading && !isError && (!data || data.data.length === 0) && (
+          <p className="text-text-sub-600 py-8 text-center">{dict.clients.empty}</p>
+        )}
+
+        {!isLoading && !isError && data && data.data.length > 0 && (
+          <>
+            <Table.Root>
+              <Table.Header>
+                <Table.Row>
+                  <Table.Head>{columns.id}</Table.Head>
+                  <Table.Head>{columns.name}</Table.Head>
+                  <Table.Head>{columns.documentType}</Table.Head>
+                  <Table.Head>{columns.email}</Table.Head>
+                  <Table.Head>{columns.phone}</Table.Head>
+                  <Table.Head>{columns.isCompany}</Table.Head>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {data.data.map(client => (
+                  <Table.Row
+                    key={client.id}
+                    onClick={() => openEdit(client.id)}
+                    className="cursor-pointer"
+                  >
+                    <Table.Cell>{client.id}</Table.Cell>
+                    <Table.Cell>{client.name}</Table.Cell>
+                    <Table.Cell>{client.documentType}</Table.Cell>
+                    <Table.Cell>{client.email}</Table.Cell>
+                    <Table.Cell>{client.phone}</Table.Cell>
+                    <Table.Cell>{client.isCompany ? dict.common.yes : dict.common.no}</Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table.Root>
+
+            <div className="flex items-center justify-between">
+              <p className="text-text-sub-600 text-sm">
+                {dict.common.page} {currentPage} {dict.common.of} {totalPages}
+              </p>
+              <Pagination.Root>
+                <Pagination.NavButton disabled={!hasPrevPage} onClick={prevPage}>
+                  <Pagination.NavIcon as={RiArrowLeftSLine} />
+                </Pagination.NavButton>
+                {pageNumbers.map((page, i) =>
+                  page === -1 ? (
+                    <span key={`ellipsis-${i}`} className="text-text-sub-600 px-2">
+                      &hellip;
+                    </span>
+                  ) : (
+                    <Pagination.Item
+                      key={page}
+                      current={page === currentPage}
+                      onClick={() => goToPage(page)}
+                    >
+                      {page}
+                    </Pagination.Item>
+                  )
+                )}
+                <Pagination.NavButton disabled={!hasNextPage} onClick={nextPage}>
+                  <Pagination.NavIcon as={RiArrowRightSLine} />
+                </Pagination.NavButton>
+              </Pagination.Root>
+            </div>
+          </>
+        )}
       </div>
 
-      {isLoading && <p className="text-text-sub-600 py-8 text-center">{dict.clients.loading}</p>}
-
-      {isError && (
-        <div className="flex flex-col items-center gap-3 py-8">
-          <p className="text-text-sub-600">{dict.clients.errorLoading}</p>
-          <Button.Root variant="neutral" onClick={() => refetch()}>
-            {dict.common.retry}
-          </Button.Root>
-        </div>
+      {panelOpen && (
+        <ClientPanel locale={locale} clientId={selectedClientId} onClose={closePanel} />
       )}
-
-      {!isLoading && !isError && (!data || data.data.length === 0) && (
-        <p className="text-text-sub-600 py-8 text-center">{dict.clients.empty}</p>
-      )}
-
-      {!isLoading && !isError && data && data.data.length > 0 && (
-        <>
-          <Table.Root>
-            <Table.Header>
-              <Table.Row>
-                <Table.Head>{columns.id}</Table.Head>
-                <Table.Head>{columns.name}</Table.Head>
-                <Table.Head>{columns.documentType}</Table.Head>
-                <Table.Head>{columns.email}</Table.Head>
-                <Table.Head>{columns.phone}</Table.Head>
-                <Table.Head>{columns.isCompany}</Table.Head>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {data.data.map(client => (
-                <Table.Row key={client.id}>
-                  <Table.Cell>{client.id}</Table.Cell>
-                  <Table.Cell>{client.name}</Table.Cell>
-                  <Table.Cell>{client.documentType}</Table.Cell>
-                  <Table.Cell>{client.email}</Table.Cell>
-                  <Table.Cell>{client.phone}</Table.Cell>
-                  <Table.Cell>{client.isCompany ? dict.common.yes : dict.common.no}</Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table.Root>
-
-          <div className="flex items-center justify-between">
-            <p className="text-text-sub-600 text-sm">
-              {dict.common.page} {currentPage} {dict.common.of} {totalPages}
-            </p>
-            <Pagination.Root>
-              <Pagination.NavButton disabled={!hasPrevPage} onClick={prevPage}>
-                <Pagination.NavIcon as={RiArrowLeftSLine} />
-              </Pagination.NavButton>
-              {pageNumbers.map((page, i) =>
-                page === -1 ? (
-                  <span key={`ellipsis-${i}`} className="text-text-sub-600 px-2">
-                    &hellip;
-                  </span>
-                ) : (
-                  <Pagination.Item
-                    key={page}
-                    current={page === currentPage}
-                    onClick={() => goToPage(page)}
-                  >
-                    {page}
-                  </Pagination.Item>
-                )
-              )}
-              <Pagination.NavButton disabled={!hasNextPage} onClick={nextPage}>
-                <Pagination.NavIcon as={RiArrowRightSLine} />
-              </Pagination.NavButton>
-            </Pagination.Root>
-          </div>
-        </>
-      )}
-    </div>
+    </>
   );
 };

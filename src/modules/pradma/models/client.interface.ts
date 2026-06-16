@@ -10,4 +10,5 @@ export interface Client {
   isCompany: boolean;
   createdAt: string;
   updatedAt: string;
+  deletedAt: string | null;
 }

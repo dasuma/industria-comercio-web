@@ -12,7 +12,8 @@ export const adaptClient = (raw: ClientResponse): Client => ({
   email: raw.email,
   isCompany: raw.is_company,
   createdAt: raw.created_at,
-  updatedAt: raw.updated_at
+  updatedAt: raw.updated_at,
+  deletedAt: raw.deleted_at
 });
 
 export const adaptClientsResponse = (

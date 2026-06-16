@@ -38,13 +38,13 @@ export const ActivityCategoryList = ({ locale }: ActivityCategoryListProps) => {
         const f: SearchFilter[] = [
           {
             field: 'activity_type_name',
-            value: `%${value.trim()}%`,
+            value: value.trim(),
             operation: 'ilike',
             option: 'OR'
           },
           {
             field: 'activity_type_code',
-            value: `%${value.trim()}%`,
+            value: value.trim(),
             operation: 'ilike',
             option: 'OR'
           }

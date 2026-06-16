@@ -22,6 +22,34 @@ export const pradmaDictEs = {
       email: 'Correo',
       phone: 'Teléfono',
       isCompany: 'Empresa'
+    },
+    fields: {
+      id: 'Número de identificación',
+      name: 'Nombre',
+      documentType: 'Tipo de documento',
+      address: 'Dirección',
+      phone: 'Teléfono',
+      email: 'Correo electrónico',
+      isCompany: 'Es empresa'
+    },
+    form: {
+      title: 'Datos del contribuyente',
+      createTitle: 'Nuevo contribuyente',
+      errors: {
+        idRequired: 'El número de identificación es obligatorio',
+        idOnlyNumbers: 'Solo se permiten números',
+        nameRequired: 'El nombre es obligatorio',
+        documentTypeRequired: 'El tipo de documento es obligatorio',
+        addressRequired: 'La dirección es obligatoria',
+        phoneRequired: 'El teléfono es obligatorio',
+        phoneOnlyNumbers: 'El teléfono solo debe contener números',
+        emailInvalid: 'Correo electrónico inválido',
+        serverError: 'No se pudo guardar el contribuyente. Intentá de nuevo.'
+      },
+      success: {
+        created: 'Contribuyente creado correctamente.',
+        updated: 'Contribuyente actualizado correctamente.'
+      }
     }
   },
   establishments: {

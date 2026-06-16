@@ -36,10 +36,10 @@ export const EstablishmentList = ({ locale }: EstablishmentListProps) => {
       setSearch(value);
       if (value.trim()) {
         const f: SearchFilter[] = [
-          { field: 'name', value: `%${value.trim()}%`, operation: 'ilike', option: 'OR' },
+          { field: 'name', value: value.trim(), operation: 'ilike', option: 'OR' },
           {
             field: 'registration_number',
-            value: `%${value.trim()}%`,
+            value: value.trim(),
             operation: 'ilike',
             option: 'OR'
           }

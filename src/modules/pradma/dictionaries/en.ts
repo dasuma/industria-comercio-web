@@ -24,6 +24,34 @@ export const pradmaDictEn: PradmaDictionary = {
       email: 'Email',
       phone: 'Phone',
       isCompany: 'Company'
+    },
+    fields: {
+      id: 'Identification number',
+      name: 'Name',
+      documentType: 'Document type',
+      address: 'Address',
+      phone: 'Phone',
+      email: 'Email',
+      isCompany: 'Is company'
+    },
+    form: {
+      title: 'Taxpayer details',
+      createTitle: 'New taxpayer',
+      errors: {
+        idRequired: 'Identification number is required',
+        idOnlyNumbers: 'Only numbers are allowed',
+        nameRequired: 'Name is required',
+        documentTypeRequired: 'Document type is required',
+        addressRequired: 'Address is required',
+        phoneRequired: 'Phone is required',
+        phoneOnlyNumbers: 'Phone must contain only numbers',
+        emailInvalid: 'Invalid email',
+        serverError: 'Could not save taxpayer. Try again.'
+      },
+      success: {
+        created: 'Taxpayer created successfully.',
+        updated: 'Taxpayer updated successfully.'
+      }
     }
   },
   establishments: {

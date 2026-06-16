@@ -36,7 +36,7 @@ export const UserList = ({ locale }: UserListProps) => {
       setSearch(value);
       if (value.trim()) {
         const f: SearchFilter[] = [
-          { field: 'email', value: `%${value.trim()}%`, operation: 'ilike', option: 'AND' }
+          { field: 'email', value: value.trim(), operation: 'ilike', option: 'AND' }
         ];
         setFilters(f);
       } else {
