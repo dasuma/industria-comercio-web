@@ -8,6 +8,7 @@ export const adaptEstablishmentActivity = (
   id: raw.id,
   establishmentId: raw.establishment_id,
   activityCode: raw.activity_code,
+  activityName: raw.activity_name,
   valor: raw.valor,
   startDate: raw.start_date,
   endDate: raw.end_date,

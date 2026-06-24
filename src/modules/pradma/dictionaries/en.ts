@@ -151,6 +151,71 @@ export const pradmaDictEn: PradmaDictionary = {
       role: 'Role'
     }
   },
+  settle: {
+    months: 'Settlement months',
+    startDate: 'Start date',
+    endDate: 'End date',
+    presentationDate: 'Presentation date',
+    settlementDate: 'Settlement date',
+    calculate: 'Calculate',
+    steps: {
+      period: 'Period',
+      activities: 'Activities'
+    },
+    activities: {
+      add: 'Add activity',
+      defaultActivity: 'Main activity',
+      activity: 'Activity',
+      activityCode: 'Activity code',
+      activityName: 'Activity name',
+      selectActivity: 'Select activity...',
+      ventasAnuales: 'Annual sales',
+      impuestoJuegos: 'Permitted games and street vendor tax',
+      menosSaldo: 'Less credit balance from previous year',
+      menosAnticipo: 'Less advance from previous year',
+      menosRetenciones: 'Less withholdings applied',
+      optionalTaxes: {
+        title: 'Optional taxes',
+        avisosTableros: 'Signs and billboards tax',
+        sobretasaBomberil: 'Fire brigade surcharge',
+        estampillaCMGRD: 'CMGRD stamp',
+        valorNovedad: 'Novelty value'
+      }
+    },
+    baseGravable: {
+      title: 'Tax base',
+      row8: '8 - Total ordinary and extraordinary income for the period nationwide',
+      row9: '9 - Less income outside this municipality or district',
+      row10: '10 - Total income in this municipality (line 8 minus 9)',
+      row11: '11 - Less returns, rebates and discounts',
+      row12: '12 - Less income from exports',
+      row13: '13 - Less income from sale of fixed assets',
+      row14: '14 - Less excluded, non-taxable and other non-taxed income',
+      row15: '15 - Less other exempt activities in this municipality',
+      row16: '16 - Total taxable income (line 10 minus 11, 12, 13, 14 and 15)'
+    },
+    errors: {
+      startDateRequired: 'Start date is required',
+      endDateRequired: 'End date is required',
+      presentationDateRequired: 'Presentation date is required',
+      presentationDateFuture: 'Presentation date cannot be in the past',
+      settlementDateRequired: 'Settlement date is required',
+      settlementDateFuture: 'Settlement date cannot be in the past'
+    }
+  },
+  invoices: {
+    loading: 'Loading settlements...',
+    empty: 'No settlements found for this establishment.',
+    errorLoading: 'Could not load settlements.',
+    year: 'Year',
+    expirationDate: 'Due date',
+    kind: 'Concept',
+    amount: 'Amount',
+    statuses: {
+      paid: 'Paid',
+      created: 'Created'
+    }
+  },
   migrations: {
     title: 'Migrations',
     upload: 'Upload DBF file',
@@ -165,6 +230,7 @@ export const pradmaDictEn: PradmaDictionary = {
     discounts: 'Migrate discounts',
     establishments: 'Migrate establishments',
     establishmentTariffs: 'Migrate establishment tariffs',
+    invoices: 'Migrate invoices',
     wizard: {
       stepOf: 'Step {current} of {total}',
       back: 'Back',
@@ -179,6 +245,7 @@ export const pradmaDictEn: PradmaDictionary = {
         discounts: 'Discounts',
         establishments: 'Establ.',
         establishmentTariffs: 'Tariffs est.',
+        invoices: 'Invoices',
         summary: 'Summary'
       },
       descriptions: {
@@ -189,7 +256,8 @@ export const pradmaDictEn: PradmaDictionary = {
         yearConfigs: 'años.DBF → year_configs',
         discounts: 'dsciyc.DBF → discounts',
         establishments: 'ESTIYC.DBF → establishments',
-        establishmentTariffs: 'ESTIYC.DBF → establishment_tariffs'
+        establishmentTariffs: 'ESTIYC.DBF → establishment_tariffs',
+        invoices: 'ESTIYC.DBF → invoices'
       },
       summary: {
         title: 'Migration summary',
@@ -210,6 +278,7 @@ export const pradmaDictEn: PradmaDictionary = {
     retry: 'Retry',
     save: 'Save',
     cancel: 'Cancel',
+    back: 'Back',
     saving: 'Saving...',
     serverError: 'An error occurred. Try again.',
     yes: 'Yes',

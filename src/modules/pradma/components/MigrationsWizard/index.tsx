@@ -13,7 +13,8 @@ import {
   useMigrateYearConfigs,
   useMigrateDiscounts,
   useMigrateEstablishments,
-  useMigrateEstablishmentTariffs
+  useMigrateEstablishmentTariffs,
+  useMigrateInvoices
 } from '../../data';
 import { MigrationCard } from '../MigrationCard';
 import { MigrationSummary } from '../MigrationSummary';
@@ -56,6 +57,12 @@ const STEPS = [
     labelKey: 'establishmentTariffs',
     descriptionKey: 'establishmentTariffs',
     hook: useMigrateEstablishmentTariffs
+  },
+  {
+    key: 'invoices',
+    labelKey: 'invoices',
+    descriptionKey: 'invoices',
+    hook: useMigrateInvoices
   }
 ] as const;
 

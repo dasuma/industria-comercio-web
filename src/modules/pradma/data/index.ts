@@ -14,6 +14,8 @@ export { useDeleteEstablishment } from './establishments/deleteEstablishment';
 
 // Establishment Activities
 export { useSearchEstablishmentActivities } from './establishment-activities/searchEstablishmentActivities';
+export { useGetEstablishmentActivitiesByYear } from './establishment-activities/getEstablishmentActivitiesByYear';
+export { useGetActivitiesByYear } from './establishment-activities/getActivitiesByYear';
 export { useGetEstablishmentActivity } from './establishment-activities/getEstablishmentActivity';
 export { useCreateEstablishmentActivity } from './establishment-activities/createEstablishmentActivity';
 export { useUpdateEstablishmentActivity } from './establishment-activities/updateEstablishmentActivity';
@@ -40,6 +42,9 @@ export { useCreateUser } from './users/createUser';
 export { useUpdateUser } from './users/updateUser';
 export { useDeleteUser } from './users/deleteUser';
 
+// Invoices
+export { useGetInvoicesByEstablishment } from './invoices/getInvoicesByEstablishment';
+
 // Migrations
 export { useMigrateClients } from './migrations/migrateClients';
 export { useMigrateActivityCategories } from './migrations/migrateActivityCategories';
@@ -49,3 +54,4 @@ export { useMigrateYearConfigs } from './migrations/migrateYearConfigs';
 export { useMigrateDiscounts } from './migrations/migrateDiscounts';
 export { useMigrateEstablishments } from './migrations/migrateEstablishments';
 export { useMigrateEstablishmentTariffs } from './migrations/migrateEstablishmentTariffs';
+export { useMigrateInvoices } from './migrations/migrateInvoices';

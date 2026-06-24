@@ -12,7 +12,10 @@ enum QueryKeys {
   PRADMA_ACTIVITY_CATEGORIES_SEARCH = 'pradma.activityCategories.search',
   PRADMA_ACTIVITY_CATEGORY_DETAIL = 'pradma.activityCategories.detail',
   PRADMA_USERS_SEARCH = 'pradma.users.search',
-  PRADMA_USER_DETAIL = 'pradma.users.detail'
+  PRADMA_USER_DETAIL = 'pradma.users.detail',
+  PRADMA_ACTIVITIES_BY_YEAR = 'pradma.activities.byYear',
+  PRADMA_ESTABLISHMENT_ACTIVITIES_BY_YEAR = 'pradma.establishmentActivities.byYear',
+  PRADMA_INVOICES_BY_ESTABLISHMENT = 'pradma.invoices.byEstablishment'
 }
 
 export default QueryKeys;

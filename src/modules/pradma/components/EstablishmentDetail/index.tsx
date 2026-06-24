@@ -16,6 +16,8 @@ import {
   useGetClient
 } from '../../data';
 import { FormField } from '@/components/FormField';
+import { EstablishmentInvoices } from '../EstablishmentInvoices';
+import { EstablishmentSettle } from '../EstablishmentSettle';
 
 interface EstablishmentDetailProps {
   locale: Locale;
@@ -279,15 +281,23 @@ export const EstablishmentDetail = ({ locale, establishmentId }: EstablishmentDe
         </TabMenuHorizontal.Content>
 
         <TabMenuHorizontal.Content value="settlements" className="pt-3">
-          <p className="text-text-sub-600 py-4 text-center text-sm">
-            {dict.establishments.comingSoon}
-          </p>
+          {isEditing ? (
+            <EstablishmentInvoices establishmentId={establishmentId} dict={dict} />
+          ) : (
+            <p className="text-text-sub-600 py-4 text-center text-sm">
+              {dict.establishments.comingSoon}
+            </p>
+          )}
         </TabMenuHorizontal.Content>
 
         <TabMenuHorizontal.Content value="settle" className="pt-3">
-          <p className="text-text-sub-600 py-4 text-center text-sm">
-            {dict.establishments.comingSoon}
-          </p>
+          {isEditing && establishment ? (
+            <EstablishmentSettle establishment={establishment} dict={dict} />
+          ) : (
+            <p className="text-text-sub-600 py-4 text-center text-sm">
+              {dict.establishments.comingSoon}
+            </p>
+          )}
         </TabMenuHorizontal.Content>
       </TabMenuHorizontal.Root>
     </div>

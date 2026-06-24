@@ -2,6 +2,7 @@ export interface EstablishmentActivityResponse {
   id: number;
   establishment_id: number;
   activity_code: string;
+  activity_name: string;
   valor: number;
   start_date: string;
   end_date: string | null;

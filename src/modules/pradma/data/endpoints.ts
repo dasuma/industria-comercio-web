@@ -283,5 +283,35 @@ export const endpointsPradma: Record<string, IHttpClient> = {
     headers: { 'Content-Type': 'multipart/form-data' },
     isMocked: false,
     urlMock: ''
+  },
+  getActivitiesByYear: {
+    url: `${base}/establishment-activities/year`,
+    method: 'GET',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  getEstablishmentActivitiesByYear: {
+    url: `${base}/establishment-activities/establishment`,
+    method: 'GET',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  // Invoices
+  getInvoicesByEstablishment: {
+    url: `${base}/invoices/establishment`,
+    method: 'GET',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  migrateInvoices: {
+    url: `${base}/migrations/invoices`,
+    method: 'POST',
+    requiresAuthorization: true,
+    headers: { 'Content-Type': 'multipart/form-data' },
+    isMocked: false,
+    urlMock: ''
   }
 };
