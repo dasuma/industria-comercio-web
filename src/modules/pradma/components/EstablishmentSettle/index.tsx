@@ -1,7 +1,7 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
-import { useForm, useWatch, useFieldArray } from 'react-hook-form';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { useForm, useWatch, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@/utils/zodResolver';
 import { z } from 'zod';
 import { Button, CompactButton, FancyButton, Input, Label, Select, Switch } from '@biaenergy/ui';
@@ -9,13 +9,19 @@ import {
   RiAddLine,
   RiArrowLeftSLine,
   RiArrowRightSLine,
-  RiDeleteBinLine
+  RiDeleteBinLine,
+  RiRefreshLine
 } from '@biaenergy/ui/icons';
 import { cn } from '@/utils/cn';
 import { FormField } from '@/components/FormField';
-import { useGetEstablishmentActivitiesByYear, useGetActivitiesByYear } from '../../data';
+import {
+  useGetEstablishmentActivitiesByYear,
+  useGetActivitiesByYear,
+  useCreateSettlement
+} from '../../data';
 import type { Establishment } from '../../models/establishment.interface';
 import type { PradmaDictionary } from '../../dictionaries';
+import type { SettlementResponse } from '../../types/settlement.types';
 
 interface EstablishmentSettleProps {
   establishment: Establishment;
@@ -50,7 +56,11 @@ const diffMonths = (start: string, end: string): number => {
 };
 
 const formatCop = (value: number): string =>
-  new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 }).format(value);
+  new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    maximumFractionDigits: 0
+  }).format(value);
 
 const formatDate = (iso: string): string => {
   if (!iso) return '—';
@@ -69,25 +79,13 @@ const toInt = (v: string): number => {
 const truncate = (str: string, max = 32): string =>
   str.length > max ? `${str.slice(0, max)}…` : str;
 
-const stripRowNum = (s: string) => s.replace(/^\d+ - /, '');
-
 /* ─── Schema ─── */
 
-const rowSchema = z.string().regex(/^\d*$/).default('0');
-
 const activitySchema = z.object({
-  activityCode: z.string(),
+  activityCode: z.string().min(1),
   activityName: z.string(),
   isDefault: z.boolean(),
-  annualSales: rowSchema,
-  gamesTax: rowSchema,
-  lessCreditBalance: rowSchema,
-  lessAdvancePayment: rowSchema,
-  lessWithholdings: rowSchema,
-  signsBillboardsTax: z.boolean(),
-  fireBrigadeSurcharge: z.boolean(),
-  cmgrdStamp: z.boolean(),
-  noveltyValue: rowSchema
+  annualSales: z.string().regex(/^\d*$/).default('0')
 });
 
 const schema = z.object({
@@ -101,29 +99,13 @@ const schema = z.object({
     .string()
     .min(1)
     .refine(v => v >= TODAY),
-  totalNationwideIncome: rowSchema,
-  lessIncomeOutsideMunicipality: rowSchema,
-  lessReturnsRebatesDiscounts: rowSchema,
-  lessExportIncome: rowSchema,
-  lessFixedAssetsIncome: rowSchema,
-  lessExcludedNonTaxableIncome: rowSchema,
-  lessExemptActivities: rowSchema,
+  signsBillboardsTax: z.boolean(),
+  fireBrigadeSurcharge: z.boolean(),
   activities: z.array(activitySchema)
 });
 
 type FormValues = z.infer<typeof schema>;
 type SetValueFn = ReturnType<typeof useForm<FormValues>>['setValue'];
-
-interface GravableRowDef {
-  id: string;
-  num: number;
-  label: string;
-  value: string;
-  onChange?: React.ChangeEventHandler<HTMLInputElement>;
-  isCalc?: boolean;
-  isTotal?: boolean;
-  op: '+' | '−' | '=';
-}
 
 /* ─── EstablishmentSettle ─── */
 
@@ -135,9 +117,35 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
     establishment.id,
     CURRENT_YEAR
   );
-  const { data: allActivities = [] } = useGetActivitiesByYear(CURRENT_YEAR);
+  const { data: allActivitiesRaw = [] } = useGetActivitiesByYear(CURRENT_YEAR);
 
-  const { register, handleSubmit, control, setValue } = useForm<FormValues>({
+  // Deduplicate by activityCode — the endpoint can return the same code
+  // multiple times (one per tariff year). Keep the first occurrence.
+  const allActivities = useMemo(() => {
+    const seen = new Set<string>();
+    return allActivitiesRaw.filter(a => {
+      if (seen.has(a.activityCode)) return false;
+      seen.add(a.activityCode);
+      return true;
+    });
+  }, [allActivitiesRaw]);
+
+  const {
+    mutate: createSettlement,
+    isPending,
+    isError,
+    error,
+    data: result,
+    reset: resetMutation
+  } = useCreateSettlement();
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    reset: resetForm
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
     mode: 'onChange',
     defaultValues: {
@@ -145,13 +153,8 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
       endDate: resolveEndDate(establishment),
       presentationDate: TODAY,
       settlementDate: TODAY,
-      totalNationwideIncome: '0',
-      lessIncomeOutsideMunicipality: '0',
-      lessReturnsRebatesDiscounts: '0',
-      lessExportIncome: '0',
-      lessFixedAssetsIncome: '0',
-      lessExcludedNonTaxableIncome: '0',
-      lessExemptActivities: '0',
+      signsBillboardsTax: true,
+      fireBrigadeSurcharge: true,
       activities: []
     }
   });
@@ -165,145 +168,59 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
           activityCode: a.activityCode,
           activityName: a.activityName,
           isDefault: true,
-          annualSales: '0',
-          gamesTax: '0',
-          lessCreditBalance: '0',
-          lessAdvancePayment: '0',
-          lessWithholdings: '0',
-          signsBillboardsTax: true,
-          fireBrigadeSurcharge: true,
-          cmgrdStamp: false,
-          noveltyValue: '0'
+          annualSales: '0'
         }))
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activitiesData]);
 
-  /* Derived values (row numbers per official tax form) */
   const watchStart = useWatch({ control, name: 'startDate' });
   const watchEnd = useWatch({ control, name: 'endDate' });
   const months = diffMonths(watchStart, watchEnd);
 
-  const r8 = toInt(useWatch({ control, name: 'totalNationwideIncome' }));
-  const r9 = toInt(useWatch({ control, name: 'lessIncomeOutsideMunicipality' }));
-  const r11 = toInt(useWatch({ control, name: 'lessReturnsRebatesDiscounts' }));
-  const r12 = toInt(useWatch({ control, name: 'lessExportIncome' }));
-  const r13 = toInt(useWatch({ control, name: 'lessFixedAssetsIncome' }));
-  const r14 = toInt(useWatch({ control, name: 'lessExcludedNonTaxableIncome' }));
-  const r15 = toInt(useWatch({ control, name: 'lessExemptActivities' }));
-  const r10 = Math.max(0, r8 - r9);
-  const r16 = Math.max(0, r10 - r11 - r12 - r13 - r14 - r15);
-
-  const copChange =
-    (name: Parameters<typeof setValue>[0]) => (e: React.ChangeEvent<HTMLInputElement>) =>
-      setValue(name, e.target.value.replace(/\D/g, '') || '0', { shouldValidate: true });
-
-  const copChangeActivity =
-    (index: number, field: keyof FormValues['activities'][0]) =>
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      setValue(
-        `activities.${index}.${field}` as Parameters<typeof setValue>[0],
-        e.target.value.replace(/\D/g, '') || '0'
-      );
+  const copChangeActivity = useCallback(
+    (index: number) => (e: React.ChangeEvent<HTMLInputElement>) =>
+      setValue(`activities.${index}.annualSales`, e.target.value.replace(/\D/g, '') || '0'),
+    [setValue]
+  );
 
   const addActivity = () =>
     append({
       activityCode: '',
       activityName: '',
       isDefault: false,
-      annualSales: '0',
-      gamesTax: '0',
-      lessCreditBalance: '0',
-      lessAdvancePayment: '0',
-      lessWithholdings: '0',
-      signsBillboardsTax: true,
-      fireBrigadeSurcharge: true,
-      cmgrdStamp: false,
-      noveltyValue: '0'
+      annualSales: '0'
     });
 
-  const onSubmit = handleSubmit(_values => {
-    // TODO: llamar al endpoint de liquidación cuando esté disponible
-    // Payload shape (see buildPayload helper below for reference)
+  const handleNewSettlement = () => {
+    resetMutation();
+    setStep(0);
+    resetForm();
+  };
+
+  const onSubmit = handleSubmit(values => {
+    createSettlement({
+      establishment_id: establishment.id,
+      start_date: values.startDate,
+      end_date: values.endDate,
+      presentation_date: values.presentationDate,
+      settlement_date: values.settlementDate,
+      signs_billboards_tax: values.signsBillboardsTax,
+      fire_brigade_surcharge: values.fireBrigadeSurcharge,
+      activities: values.activities.map(a => ({
+        activity_code: a.activityCode,
+        annual_sales: toInt(a.annualSales)
+      }))
+    });
   });
 
-  const STEPS = [d.steps.period, d.baseGravable.title, d.steps.activities];
+  /* ── Result view ── */
+  if (result) {
+    return <SettlementResult data={result} dict={d} onNew={handleNewSettlement} />;
+  }
 
-  const gravableRows: GravableRowDef[] = [
-    {
-      id: 'row-8',
-      num: 8,
-      label: stripRowNum(d.baseGravable.row8),
-      value: formatCop(r8),
-      onChange: copChange('totalNationwideIncome'),
-      op: '+'
-    },
-    {
-      id: 'row-9',
-      num: 9,
-      label: stripRowNum(d.baseGravable.row9),
-      value: formatCop(r9),
-      onChange: copChange('lessIncomeOutsideMunicipality'),
-      op: '−'
-    },
-    {
-      id: 'row-10',
-      num: 10,
-      label: stripRowNum(d.baseGravable.row10),
-      value: formatCop(r10),
-      isCalc: true,
-      op: '='
-    },
-    {
-      id: 'row-11',
-      num: 11,
-      label: stripRowNum(d.baseGravable.row11),
-      value: formatCop(r11),
-      onChange: copChange('lessReturnsRebatesDiscounts'),
-      op: '−'
-    },
-    {
-      id: 'row-12',
-      num: 12,
-      label: stripRowNum(d.baseGravable.row12),
-      value: formatCop(r12),
-      onChange: copChange('lessExportIncome'),
-      op: '−'
-    },
-    {
-      id: 'row-13',
-      num: 13,
-      label: stripRowNum(d.baseGravable.row13),
-      value: formatCop(r13),
-      onChange: copChange('lessFixedAssetsIncome'),
-      op: '−'
-    },
-    {
-      id: 'row-14',
-      num: 14,
-      label: stripRowNum(d.baseGravable.row14),
-      value: formatCop(r14),
-      onChange: copChange('lessExcludedNonTaxableIncome'),
-      op: '−'
-    },
-    {
-      id: 'row-15',
-      num: 15,
-      label: stripRowNum(d.baseGravable.row15),
-      value: formatCop(r15),
-      onChange: copChange('lessExemptActivities'),
-      op: '−'
-    },
-    {
-      id: 'row-16',
-      num: 16,
-      label: stripRowNum(d.baseGravable.row16),
-      value: formatCop(r16),
-      isTotal: true,
-      op: '='
-    }
-  ];
+  const STEPS = [d.steps.period, d.steps.activities];
 
   return (
     <div className="flex flex-col gap-5">
@@ -318,7 +235,7 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
               <DateChip label={d.startDate} date={formatDate(watchStart)} />
               <div className="flex shrink-0 flex-col items-center gap-1.5">
                 <div className="bg-stroke-soft-200 h-px w-6" />
-                <span className="bg-information-lighter text-information-base rounded-full px-2.5 py-1 text-[11px] font-bold whitespace-nowrap">
+                <span className="bg-information-lighter text-information-dark rounded-full px-2.5 py-1 text-[11px] font-bold whitespace-nowrap">
                   {months}&nbsp;{months === 1 ? 'mes' : 'meses'}
                 </span>
                 <div className="bg-stroke-soft-200 h-px w-6" />
@@ -353,20 +270,44 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
               </Input.Root>
             </FormField>
           </div>
+
+          {/* Optional taxes */}
+          <div className="ring-stroke-soft-200 overflow-hidden rounded-xl ring-1">
+            <div className="bg-bg-weak-50 px-4 py-2.5">
+              <p className="text-text-sub-600 text-[11px] font-semibold tracking-wider uppercase">
+                {d.activities.optionalTaxes.title}
+              </p>
+            </div>
+            <div className="divide-stroke-soft-200 divide-y">
+              <Controller
+                control={control}
+                name="signsBillboardsTax"
+                render={({ field }) => (
+                  <SwitchRow
+                    label={d.activities.optionalTaxes.avisosTableros}
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="fireBrigadeSurcharge"
+                render={({ field }) => (
+                  <SwitchRow
+                    label={d.activities.optionalTaxes.sobretasaBomberil}
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+          </div>
         </div>
       )}
 
-      {/* ── Step 1: Base gravable ── */}
+      {/* ── Step 1: Actividades ── */}
       {step === 1 && (
-        <div className="ring-stroke-soft-200 overflow-hidden rounded-xl ring-1">
-          {gravableRows.map(row => (
-            <GravableRow key={row.id} {...row} />
-          ))}
-        </div>
-      )}
-
-      {/* ── Step 2: Actividades ── */}
-      {step === 2 && (
         <>
           <div className="flex flex-col gap-3">
             {fields.map((field, index) => (
@@ -397,30 +338,148 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
       )}
 
       {/* ── Navigation ── */}
-      <div className="border-stroke-soft-200 flex items-center justify-between border-t pt-4">
-        {step > 0 ? (
-          <Button.Root variant="neutral" mode="ghost" onClick={() => setStep(s => s - 1)}>
-            <Button.Icon as={RiArrowLeftSLine} />
-            {dict.common.back}
-          </Button.Root>
-        ) : (
-          <div />
+      <div className="border-stroke-soft-200 flex flex-col gap-3 border-t pt-4">
+        {isError && (
+          <div className="bg-error-lighter ring-error-base/20 rounded-lg px-3 py-2.5 ring-1">
+            <p className="text-error-dark text-xs font-semibold">
+              {error instanceof Error ? error.message : dict.common.serverError}
+            </p>
+          </div>
         )}
+        <div className="flex items-center justify-between">
+          {step > 0 ? (
+            <Button.Root variant="neutral" mode="ghost" onClick={() => setStep(s => s - 1)}>
+              <Button.Icon as={RiArrowLeftSLine} />
+              {dict.common.back}
+            </Button.Root>
+          ) : (
+            <div />
+          )}
 
-        {step < STEPS.length - 1 ? (
-          <FancyButton.Root size="medium" onClick={() => setStep(s => s + 1)}>
-            {STEPS[step + 1]}
-            <FancyButton.Icon as={RiArrowRightSLine} />
-          </FancyButton.Root>
-        ) : (
-          <FancyButton.Root size="medium" onClick={onSubmit}>
-            {d.calculate}
-          </FancyButton.Root>
-        )}
+          {step < STEPS.length - 1 ? (
+            <FancyButton.Root size="medium" onClick={() => setStep(s => s + 1)}>
+              {STEPS[step + 1]}
+              <FancyButton.Icon as={RiArrowRightSLine} />
+            </FancyButton.Root>
+          ) : (
+            <FancyButton.Root size="medium" onClick={onSubmit} disabled={isPending}>
+              {isPending ? dict.common.saving : d.calculate}
+            </FancyButton.Root>
+          )}
+        </div>
       </div>
     </div>
   );
 };
+
+/* ─── SettlementResult ─── */
+
+const TOTAL_ROWS = new Set([25, 33, 35, 38]);
+const SUBTOTAL_ROWS = new Set([20]);
+
+interface SettlementResultProps {
+  data: SettlementResponse;
+  dict: PradmaDictionary['settle'];
+  onNew: () => void;
+}
+
+const SettlementResult = ({ data, dict: d, onNew }: SettlementResultProps) => (
+  <div className="flex flex-col gap-5">
+    {/* Header */}
+    <div className="bg-success-lighter ring-success-base/20 rounded-xl px-4 py-3 ring-1">
+      <p className="text-success-dark mb-1 text-[11px] font-semibold tracking-wider uppercase">
+        {d.result.title}
+      </p>
+      <p className="text-text-strong-950 text-sm font-semibold">{data.establishment_name}</p>
+      <p className="text-text-sub-600 mt-0.5 text-xs">
+        {formatDate(data.start_date)} — {formatDate(data.end_date)}
+        <span className="ml-2 font-medium">({data.settlement_months} meses)</span>
+      </p>
+    </div>
+
+    {/* Activities summary */}
+    <div>
+      <p className="text-text-sub-600 mb-2 text-[11px] font-semibold tracking-wider uppercase">
+        {d.result.activitiesTitle}
+      </p>
+      <div className="ring-stroke-soft-200 overflow-hidden rounded-xl ring-1">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="bg-bg-weak-50 border-stroke-soft-200 border-b">
+              <th className="px-3 py-2 text-left">{d.activities.activityCode}</th>
+              <th className="px-3 py-2 text-right">{d.result.tariffRate} ‰</th>
+              <th className="px-3 py-2 text-right">{d.result.icaTax}</th>
+            </tr>
+          </thead>
+          <tbody className="divide-stroke-soft-200 divide-y">
+            {data.activities.map(a => (
+              <tr key={a.activity_code}>
+                <td className="px-3 py-2">
+                  <span className="text-text-strong-950 font-medium">{a.activity_code}</span>
+                  <span className="text-text-soft-400 ml-1">{truncate(a.activity_name, 36)}</span>
+                </td>
+                <td className="text-text-sub-600 px-3 py-2 text-right">{a.tariff_rate}</td>
+                <td className="text-text-strong-950 px-3 py-2 text-right font-medium">
+                  {formatCop(a.tax)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {/* Rows 17-38 */}
+    <div className="ring-stroke-soft-200 overflow-hidden rounded-xl ring-1">
+      {data.rows.map(row => {
+        const isTotal = TOTAL_ROWS.has(row.number);
+        const isSubtotal = SUBTOTAL_ROWS.has(row.number);
+        return (
+          <div
+            key={row.number}
+            className={cn(
+              'border-stroke-soft-200 flex items-center gap-3 border-b px-4 py-2.5 last:border-0',
+              isTotal && 'bg-success-lighter',
+              isSubtotal && 'bg-bg-weak-50'
+            )}
+          >
+            <span
+              className={cn(
+                'w-6 shrink-0 text-center text-[11px] font-bold',
+                isTotal ? 'text-success-dark' : 'text-text-soft-400'
+              )}
+            >
+              {row.number}
+            </span>
+            <span className="text-text-sub-600 min-w-0 flex-1 text-xs leading-snug">
+              {row.name}
+            </span>
+            <span
+              className={cn(
+                'shrink-0 text-right text-xs font-semibold tabular-nums',
+                isTotal ? 'text-success-dark text-sm' : 'text-text-strong-950',
+                row.value === 0 && !isTotal && 'text-text-soft-400 font-normal'
+              )}
+            >
+              {row.value === 0 ? '—' : formatCop(row.value)}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+
+    <Button.Root
+      variant="neutral"
+      mode="stroke"
+      size="small"
+      onClick={onNew}
+      className="self-start"
+    >
+      <Button.Icon as={RiRefreshLine} />
+      {d.result.newSettlement}
+    </Button.Root>
+  </div>
+);
 
 /* ─── ActivityCard ─── */
 
@@ -431,10 +490,7 @@ interface ActivityCardProps {
   setValue: SetValueFn;
   dict: PradmaDictionary['settle'];
   allActivities: import('../../models/establishment-activity.interface').EstablishmentActivity[];
-  onCopChange: (
-    index: number,
-    field: keyof FormValues['activities'][0]
-  ) => React.ChangeEventHandler<HTMLInputElement>;
+  onCopChange: (index: number) => React.ChangeEventHandler<HTMLInputElement>;
   onRemove?: () => void;
 }
 
@@ -449,22 +505,8 @@ const ActivityCard = ({
   onRemove
 }: ActivityCardProps) => {
   const annualSalesVal = toInt(useWatch({ control, name: `activities.${index}.annualSales` }));
-  const gamesTaxVal = toInt(useWatch({ control, name: `activities.${index}.gamesTax` }));
-  const creditBalanceVal = toInt(
-    useWatch({ control, name: `activities.${index}.lessCreditBalance` })
-  );
-  const advancePaymentVal = toInt(
-    useWatch({ control, name: `activities.${index}.lessAdvancePayment` })
-  );
-  const withholdingsVal = toInt(
-    useWatch({ control, name: `activities.${index}.lessWithholdings` })
-  );
   const watchCode = useWatch({ control, name: `activities.${index}.activityCode` });
   const watchName = useWatch({ control, name: `activities.${index}.activityName` });
-  const watchNoveltyValue = toInt(useWatch({ control, name: `activities.${index}.noveltyValue` }));
-  const watchSignsTax = useWatch({ control, name: `activities.${index}.signsBillboardsTax` });
-  const watchFireBrigade = useWatch({ control, name: `activities.${index}.fireBrigadeSurcharge` });
-  const watchCmgrd = useWatch({ control, name: `activities.${index}.cmgrdStamp` });
 
   return (
     <div className="ring-stroke-soft-200 overflow-hidden rounded-xl ring-1">
@@ -538,70 +580,22 @@ const ActivityCard = ({
         </div>
       )}
 
-      {/* Numeric rows */}
-      <div className="divide-stroke-soft-200 divide-y">
-        <ActivityRow
-          id={`annual-sales-${index}`}
-          label={d.activities.ventasAnuales}
-          value={formatCop(annualSalesVal)}
-          onChange={onCopChange(index, 'annualSales')}
-        />
-        <ActivityRow
-          id={`games-tax-${index}`}
-          label={d.activities.impuestoJuegos}
-          value={formatCop(gamesTaxVal)}
-          onChange={onCopChange(index, 'gamesTax')}
-        />
-        <ActivityRow
-          id={`credit-balance-${index}`}
-          label={d.activities.menosSaldo}
-          value={formatCop(creditBalanceVal)}
-          onChange={onCopChange(index, 'lessCreditBalance')}
-        />
-        <ActivityRow
-          id={`advance-pay-${index}`}
-          label={d.activities.menosAnticipo}
-          value={formatCop(advancePaymentVal)}
-          onChange={onCopChange(index, 'lessAdvancePayment')}
-        />
-        <ActivityRow
-          id={`withholdings-${index}`}
-          label={d.activities.menosRetenciones}
-          value={formatCop(withholdingsVal)}
-          onChange={onCopChange(index, 'lessWithholdings')}
-        />
-      </div>
-
-      {/* Optional taxes */}
-      <div className="border-stroke-soft-200 border-t">
-        <div className="bg-bg-weak-50 px-4 py-2">
-          <p className="text-text-sub-600 text-[11px] font-semibold tracking-wider uppercase">
-            {d.activities.optionalTaxes.title}
-          </p>
-        </div>
-        <div className="divide-stroke-soft-200 divide-y">
-          <SwitchRow
-            label={d.activities.optionalTaxes.avisosTableros}
-            checked={watchSignsTax}
-            onCheckedChange={v => setValue(`activities.${index}.signsBillboardsTax`, v)}
-          />
-          <SwitchRow
-            label={d.activities.optionalTaxes.sobretasaBomberil}
-            checked={watchFireBrigade}
-            onCheckedChange={v => setValue(`activities.${index}.fireBrigadeSurcharge`, v)}
-          />
-          <SwitchRow
-            label={d.activities.optionalTaxes.estampillaCMGRD}
-            checked={watchCmgrd}
-            onCheckedChange={v => setValue(`activities.${index}.cmgrdStamp`, v)}
-          />
-          <ActivityRow
-            id={`novelty-value-${index}`}
-            label={d.activities.optionalTaxes.valorNovedad}
-            value={formatCop(watchNoveltyValue)}
-            onChange={onCopChange(index, 'noveltyValue')}
-          />
-        </div>
+      {/* Annual sales */}
+      <div className="flex items-center gap-3 px-4 py-2.5">
+        <span className="text-text-sub-600 min-w-0 flex-1 text-xs leading-snug">
+          {d.activities.ventasAnuales}
+        </span>
+        <Input.Root className="w-36 shrink-0">
+          <Input.Wrapper>
+            <Input.Input
+              id={`annual-sales-${index}`}
+              value={formatCop(annualSalesVal).replace(/\s/g, '').replace('$', '')}
+              onChange={onCopChange(index)}
+              inputMode="numeric"
+              className="text-right text-xs"
+            />
+          </Input.Wrapper>
+        </Input.Root>
       </div>
     </div>
   );
@@ -654,78 +648,6 @@ const DateChip = ({ label, date }: { label: string; date: string }) => (
       {label}
     </p>
     <p className="text-text-strong-950 text-sm font-semibold">{date}</p>
-  </div>
-);
-
-/* ─── GravableRow ─── */
-
-const GravableRow = ({ num, label, value, onChange, isCalc, isTotal, op }: GravableRowDef) => {
-  const editable = !isCalc && !isTotal;
-  return (
-    <div
-      className={cn(
-        'border-stroke-soft-200 flex items-center gap-3 border-b px-4 py-2.5 last:border-0',
-        isCalc && 'bg-information-lighter',
-        isTotal && 'bg-success-lighter'
-      )}
-    >
-      <span
-        className={cn(
-          'w-4 shrink-0 text-center text-xs font-bold',
-          isCalc ? 'text-information-base' : isTotal ? 'text-success-base' : 'text-text-soft-400'
-        )}
-      >
-        {op}
-      </span>
-      <span
-        className={cn(
-          'w-5 shrink-0 text-center text-[11px] font-bold',
-          isCalc ? 'text-information-base' : isTotal ? 'text-success-base' : 'text-text-sub-600'
-        )}
-      >
-        {num}
-      </span>
-      <span className="text-text-sub-600 min-w-0 flex-1 text-xs leading-snug">{label}</span>
-      <Input.Root className="w-32 shrink-0">
-        <Input.Wrapper>
-          <Input.Input
-            id={`row-input-${num}`}
-            value={value}
-            onChange={onChange}
-            inputMode="numeric"
-            disabled={!editable}
-            readOnly={!editable}
-            className="text-right text-xs"
-          />
-        </Input.Wrapper>
-      </Input.Root>
-    </div>
-  );
-};
-
-/* ─── ActivityRow ─── */
-
-interface ActivityRowProps {
-  id: string;
-  label: string;
-  value: string;
-  onChange?: React.ChangeEventHandler<HTMLInputElement>;
-}
-
-const ActivityRow = ({ id, label, value, onChange }: ActivityRowProps) => (
-  <div className="flex items-center gap-3 px-4 py-2.5">
-    <span className="text-text-sub-600 min-w-0 flex-1 text-xs leading-snug">{label}</span>
-    <Input.Root className="w-32 shrink-0">
-      <Input.Wrapper>
-        <Input.Input
-          id={id}
-          value={value}
-          onChange={onChange}
-          inputMode="numeric"
-          className="text-right text-xs"
-        />
-      </Input.Wrapper>
-    </Input.Root>
   </div>
 );
 

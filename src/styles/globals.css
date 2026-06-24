@@ -42,19 +42,74 @@
   }
 }
 
-/* ── Pradma brand: blue-500 (#3b82f6) ── */
+/* ── Pradma brand palette ──────────────────────────────────────────────────
+   Accent:  blue-600 #2563eb (light) / blue-500 #3b82f6 (dark)
+   Applied to: primary-* (FancyButton + ring), information-* (info state),
+               brand-* (brand color utilities), fancy-drop-primary (shadow).
+   text-strong-950 / neutral-* tokens are untouched — safe to override here.
+   ──────────────────────────────────────────────────────────────────────── */
 :root {
+  /* Brand utilities */
   --color-brand-base: #3b82f6;
   --color-brand-hover: #2563eb;
   --color-brand-focus: #2563eb;
   --color-brand-soft: #1d4ed8;
+
+  /* Primary → blue-600 scale (FancyButton, focus rings) */
+  --color-primary-darker: #1e40af;   /* blue-800 */
+  --color-primary-dark: #1d4ed8;     /* blue-700 */
+  --color-primary-base: #2563eb;     /* blue-600 */
+  --color-primary-light: #dbeafe;    /* blue-100 */
+  --color-primary-lighter: #eff6ff;  /* blue-50  */
+  --color-primary-alpha-24: #2563eb3d;
+  --color-primary-alpha-16: #2563eb29;
+  --color-primary-alpha-10: #2563eb1a;
+
+  /* Information → blue scale (info alerts, calculated-row highlights) */
+  --color-information-dark: #1d4ed8;   /* blue-700 */
+  --color-information-base: #3b82f6;   /* blue-500 */
+  --color-information-light: #bfdbfe;  /* blue-200 */
+  --color-information-lighter: #eff6ff; /* blue-50  */
+
+  /* Fancy button drop shadow → blue-tinted */
+  --color-fancy-drop-primary: #2563eb3d;
 }
 
 .dark {
+  /* Brand utilities */
   --color-brand-base: #60a5fa;
   --color-brand-hover: #3b82f6;
   --color-brand-focus: #3b82f6;
   --color-brand-soft: #2563eb;
+
+  /* Primary → blue-500 scale (lighter for dark surfaces) */
+  --color-primary-base: #3b82f6;       /* blue-500 */
+  --color-primary-dark: #2563eb;       /* blue-600 */
+  --color-primary-darker: #1d4ed8;     /* blue-700 */
+  --color-primary-light: #3b82f629;    /* blue-500/16 */
+  --color-primary-lighter: #3b82f61a;  /* blue-500/10 */
+  --color-primary-alpha-24: #3b82f63d;
+  --color-primary-alpha-16: #3b82f629;
+  --color-primary-alpha-10: #3b82f61a;
+
+  /* Information → blue scale (dark mode) */
+  --color-information-dark: #93c5fd;   /* blue-300 */
+  --color-information-base: #3b82f6;   /* blue-500 */
+  --color-information-light: #2563eb29; /* blue-600/16 */
+  --color-information-lighter: #1d4ed81a; /* blue-800/10 */
+}
+
+/* Radix portals (Select, Dropdown, Tooltip…) must always render above page content.
+   Without this, cards with ring-1 / box-shadow create stacking contexts that
+   push the portal behind later DOM siblings. */
+[data-radix-popper-content-wrapper] {
+  z-index: 50 !important;
+}
+
+/* Sidebar dark surface — remap bg-white-0 from near-black (dark mode default)
+   to a subtle white shimmer so hover/active states are lighter than the navy bg. */
+[data-sidebar] {
+  --color-bg-white-0: rgb(255 255 255 / 0.10);
 }
 
 * {

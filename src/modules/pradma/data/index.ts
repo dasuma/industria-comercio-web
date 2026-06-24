@@ -42,6 +42,9 @@ export { useCreateUser } from './users/createUser';
 export { useUpdateUser } from './users/updateUser';
 export { useDeleteUser } from './users/deleteUser';
 
+// Settlements
+export { useCreateSettlement } from './settlements/createSettlement';
+
 // Invoices
 export { useGetInvoicesByEstablishment } from './invoices/getInvoicesByEstablishment';
 

@@ -201,6 +201,13 @@ export const pradmaDictEn: PradmaDictionary = {
       presentationDateFuture: 'Presentation date cannot be in the past',
       settlementDateRequired: 'Settlement date is required',
       settlementDateFuture: 'Settlement date cannot be in the past'
+    },
+    result: {
+      title: 'Settlement result',
+      newSettlement: 'New settlement',
+      activitiesTitle: 'Activities',
+      tariffRate: 'Rate',
+      icaTax: 'ICA'
     }
   },
   invoices: {

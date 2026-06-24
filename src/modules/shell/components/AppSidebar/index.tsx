@@ -91,15 +91,17 @@ export const AppSidebar = ({ workspace, activeHref, dict }: AppSidebarProps) => 
       )}
 
       <aside
+        data-sidebar
         className={cn(
+          'dark',
           isMobile
             ? cn(
-                'bg-bg-weak-25 ring-stroke-soft-200 fixed inset-y-0 left-0 z-40 flex w-60 flex-col overflow-hidden px-1.5 pt-1 ring-1',
+                'fixed inset-y-0 left-0 z-40 flex w-60 flex-col overflow-hidden bg-[#0a1628] px-1.5 pt-1 ring-1 ring-white/10',
                 drawerCanAnimate && 'transition-transform duration-300',
                 mobileNavOpen ? 'translate-x-0' : '-translate-x-full'
               )
             : cn(
-                'bia-resize flex shrink-0 flex-col overflow-hidden',
+                'bia-resize flex shrink-0 flex-col overflow-hidden rounded-2xl bg-[#0a1628]',
                 collapsed ? 'w-[52px]' : 'w-60'
               )
         )}

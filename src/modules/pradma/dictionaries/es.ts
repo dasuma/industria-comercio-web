@@ -199,6 +199,13 @@ export const pradmaDictEs = {
       presentationDateFuture: 'La fecha de presentación no puede ser anterior a hoy',
       settlementDateRequired: 'La fecha de liquidación es obligatoria',
       settlementDateFuture: 'La fecha de liquidación no puede ser anterior a hoy'
+    },
+    result: {
+      title: 'Resultado de la liquidación',
+      newSettlement: 'Nueva liquidación',
+      activitiesTitle: 'Actividades',
+      tariffRate: 'Tarifa',
+      icaTax: 'ICA'
     }
   },
   invoices: {
