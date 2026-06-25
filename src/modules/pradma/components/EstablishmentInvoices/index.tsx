@@ -1,6 +1,11 @@
 'use client';
 
+import { useState } from 'react';
+import { CompactButton } from '@biaenergy/ui';
+import { RiArrowDownSLine, RiArrowUpSLine, RiDownloadLine } from '@biaenergy/ui/icons';
+import { cn } from '@/utils/cn';
 import { useGetInvoicesByEstablishment } from '../../data';
+import type { Invoice, InvoiceDetail } from '../../models/invoice.interface';
 import type { PradmaDictionary } from '../../dictionaries';
 
 interface EstablishmentInvoicesProps {
@@ -8,94 +13,166 @@ interface EstablishmentInvoicesProps {
   dict: PradmaDictionary;
 }
 
-export const EstablishmentInvoices = ({ establishmentId, dict }: EstablishmentInvoicesProps) => {
-  const { invoicesDict } = { invoicesDict: dict.invoices };
-  const { data: invoices, isLoading, isError } = useGetInvoicesByEstablishment(establishmentId);
+// Kinds that render as totals (highlighted green)
+const TOTAL_KINDS = new Set(['gross_total', 'balance_due', 'amount_payable', 'total_payable']);
 
-  if (isLoading) {
-    return <p className="text-text-sub-600 py-4 text-center text-sm">{invoicesDict.loading}</p>;
-  }
+// Kinds that render as subtotals (light grey bg)
+const SUBTOTAL_KINDS = new Set(['subtotal_tax']);
 
-  if (isError) {
-    return (
-      <p className="text-text-sub-600 py-4 text-center text-sm">{invoicesDict.errorLoading}</p>
-    );
-  }
-
-  if (!invoices || invoices.length === 0) {
-    return <p className="text-text-sub-600 py-4 text-center text-sm">{invoicesDict.empty}</p>;
-  }
-
-  return (
-    <div className="flex flex-col gap-3">
-      {invoices.map(invoice => (
-        <div
-          key={invoice.id}
-          className="bg-bg-white-0 ring-stroke-soft-200 rounded-lg px-4 py-3 ring-1"
-        >
-          {/* Header row */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="text-text-strong-950 text-sm font-semibold">
-                {invoicesDict.year} {invoice.year}
-              </span>
-              <StatusBadge status={invoice.status} dict={invoicesDict} />
-            </div>
-            <span className="text-text-strong-950 text-sm font-medium">
-              {formatCurrency(invoice.total)}
-            </span>
-          </div>
-
-          {/* Expiration date */}
-          {invoice.expirationDate && (
-            <p className="text-text-sub-600 mt-1 text-xs">
-              {invoicesDict.expirationDate}: {new Date(invoice.expirationDate).toLocaleDateString()}
-            </p>
-          )}
-
-          {/* Details */}
-          {invoice.details.length > 0 && (
-            <div className="border-stroke-soft-200 mt-2 border-t pt-2">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="text-text-sub-600">
-                    <th className="pb-1 text-left font-medium">{invoicesDict.kind}</th>
-                    <th className="pb-1 text-right font-medium">{invoicesDict.amount}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {invoice.details.map(detail => (
-                    <tr key={detail.id} className="text-text-strong-950">
-                      <td className="py-0.5 capitalize">{detail.kind}</td>
-                      <td className="py-0.5 text-right">{formatCurrency(detail.amount)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-};
-
-/* ─── Helpers ─── */
-
-const formatCurrency = (value: number) =>
+const formatCop = (value: number) =>
   new Intl.NumberFormat('es-CO', {
     style: 'currency',
     currency: 'COP',
     maximumFractionDigits: 0
   }).format(value);
 
+const formatDate = (iso: string | null) => {
+  if (!iso) return '—';
+  return new Intl.DateTimeFormat('es-CO', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  }).format(new Date(iso.slice(0, 10) + 'T12:00:00'));
+};
+
 const STATUS_STYLES: Record<string, string> = {
-  paid: 'bg-success-lighter text-success-base',
+  draft: 'bg-bg-weak-50 text-text-sub-600',
+  pending: 'bg-warning-lighter text-warning-dark',
+  paid: 'bg-success-lighter text-success-dark',
+  overdue: 'bg-error-lighter text-error-dark',
   created: 'bg-bg-weak-50 text-text-sub-600'
 };
 
-const StatusBadge = ({ status, dict }: { status: string; dict: PradmaDictionary['invoices'] }) => {
-  const style = STATUS_STYLES[status] ?? 'bg-bg-weak-50 text-text-sub-600';
-  const label = dict.statuses[status as keyof typeof dict.statuses] ?? status;
-  return <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${style}`}>{label}</span>;
+const handleDownloadPdf = (pdfUrl: string, invoiceId: number, year: number) => {
+  const a = document.createElement('a');
+  a.href = pdfUrl;
+  a.download = `liquidacion-${invoiceId}-${year}.pdf`;
+  a.target = '_blank';
+  a.click();
+};
+
+/* ─── Row detail line ─── */
+const DetailRow = ({ detail }: { detail: InvoiceDetail }) => {
+  const isTotal = TOTAL_KINDS.has(detail.kind);
+  const isSubtotal = SUBTOTAL_KINDS.has(detail.kind);
+  return (
+    <div
+      className={cn(
+        'border-stroke-soft-200 flex items-center gap-3 border-b px-4 py-2 last:border-0',
+        isTotal && 'bg-success-lighter',
+        isSubtotal && 'bg-bg-weak-50'
+      )}
+    >
+      <span className="text-text-sub-600 min-w-0 flex-1 text-xs leading-snug">
+        {detail.description || detail.kind}
+      </span>
+      <span
+        className={cn(
+          'shrink-0 text-right text-xs font-semibold tabular-nums',
+          isTotal ? 'text-success-dark text-sm' : 'text-text-strong-950',
+          detail.amount === 0 && !isTotal && 'text-text-soft-400 font-normal'
+        )}
+      >
+        {detail.amount === 0 ? '—' : formatCop(detail.amount)}
+      </span>
+    </div>
+  );
+};
+
+/* ─── Invoice card ─── */
+const InvoiceCard = ({
+  invoice,
+  dict
+}: {
+  invoice: Invoice;
+  dict: PradmaDictionary['invoices'];
+}) => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="ring-stroke-soft-200 overflow-hidden rounded-xl ring-1">
+      {/* Header row — clickable */}
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="hover:bg-bg-weak-50 flex w-full items-center gap-3 px-4 py-3 text-left transition-colors"
+      >
+        {/* Year */}
+        <span className="text-text-strong-950 w-10 shrink-0 text-sm font-bold">{invoice.year}</span>
+
+        {/* Status badge */}
+        <span
+          className={cn(
+            'shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+            STATUS_STYLES[invoice.status] ?? STATUS_STYLES.pending
+          )}
+        >
+          {dict.status[invoice.status as keyof typeof dict.status] ?? invoice.status}
+        </span>
+
+        {/* Presentation date */}
+        <span className="text-text-sub-600 min-w-0 flex-1 text-xs">
+          {dict.columns.presentationDate}: {formatDate(invoice.presentationDate)}
+        </span>
+
+        {/* Total */}
+        <span className="text-text-strong-950 shrink-0 text-sm font-semibold tabular-nums">
+          {formatCop(invoice.total)}
+        </span>
+
+        {/* Chevron */}
+        <span className="text-text-soft-400 shrink-0">
+          {open ? <RiArrowUpSLine className="h-4 w-4" /> : <RiArrowDownSLine className="h-4 w-4" />}
+        </span>
+      </button>
+
+      {/* Expanded detail */}
+      {open && (
+        <div className="border-stroke-soft-200 border-t">
+          {/* Download button */}
+          {invoice.pdfUrl && (
+            <div className="border-stroke-soft-200 flex justify-end border-b px-4 py-2">
+              <CompactButton.Root
+                variant="ghost"
+                size="medium"
+                onClick={() => handleDownloadPdf(invoice.pdfUrl!, invoice.id, invoice.year)}
+              >
+                <CompactButton.Icon as={RiDownloadLine} />
+              </CompactButton.Root>
+            </div>
+          )}
+
+          {/* Rows */}
+          {invoice.details.length > 0 ? (
+            <div>
+              {invoice.details.map(d => (
+                <DetailRow key={d.id} detail={d} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-text-sub-600 px-4 py-3 text-xs">—</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ─── Main component ─── */
+export const EstablishmentInvoices = ({ establishmentId, dict }: EstablishmentInvoicesProps) => {
+  const d = dict.invoices;
+  const { data: invoices, isLoading, isError } = useGetInvoicesByEstablishment(establishmentId);
+
+  if (isLoading) return <p className="text-text-sub-600 py-6 text-center text-sm">{d.loading}</p>;
+  if (isError) return <p className="text-error-dark py-6 text-center text-sm">{d.errorLoading}</p>;
+  if (!invoices?.length)
+    return <p className="text-text-sub-600 py-6 text-center text-sm">{d.empty}</p>;
+
+  return (
+    <div className="flex flex-col gap-2">
+      {invoices.map(invoice => (
+        <InvoiceCard key={invoice.id} invoice={invoice} dict={d} />
+      ))}
+    </div>
+  );
 };

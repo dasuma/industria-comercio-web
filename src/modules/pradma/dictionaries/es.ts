@@ -150,6 +150,8 @@ export const pradmaDictEs = {
     }
   },
   settle: {
+    year: 'Año a liquidar',
+    noYearAvailable: 'Este establecimiento está al día con sus liquidaciones.',
     months: 'Meses de liquidación',
     startDate: 'Fecha inicial',
     endDate: 'Fecha final',
@@ -203,6 +205,7 @@ export const pradmaDictEs = {
     result: {
       title: 'Resultado de la liquidación',
       newSettlement: 'Nueva liquidación',
+      downloadPdf: 'Guardar liquidación',
       activitiesTitle: 'Actividades',
       tariffRate: 'Tarifa',
       icaTax: 'ICA'
@@ -276,6 +279,26 @@ export const pradmaDictEs = {
         hasErrors: 'Algunas migraciones tuvieron errores.',
         notRun: 'No ejecutado'
       }
+    }
+  },
+  invoices: {
+    title: 'Liquidaciones',
+    loading: 'Cargando liquidaciones...',
+    empty: 'No hay liquidaciones para mostrar.',
+    errorLoading: 'No se pudieron cargar las liquidaciones.',
+    columns: {
+      id: 'ID',
+      establishment: 'Establecimiento',
+      year: 'Año',
+      status: 'Estado',
+      total: 'Total',
+      presentationDate: 'Fecha presentación'
+    },
+    status: {
+      draft: 'Borrador',
+      pending: 'Pendiente',
+      paid: 'Pagada',
+      overdue: 'Vencida'
     }
   },
   common: {

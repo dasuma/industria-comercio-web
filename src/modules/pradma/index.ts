@@ -52,6 +52,7 @@ export { MigrationsWizard } from './components/MigrationsWizard';
 export { MigrationSummary } from './components/MigrationSummary';
 export { ClientList } from './components/ClientList';
 export { EstablishmentList } from './components/EstablishmentList';
+export { InvoiceList } from './components/InvoiceList';
 export { EstablishmentDetail } from './components/EstablishmentDetail';
 export { ActivityCategoryList } from './components/ActivityCategoryList';
 export { UserList } from './components/UserList';

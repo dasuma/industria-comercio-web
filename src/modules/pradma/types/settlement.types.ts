@@ -26,9 +26,33 @@ export interface SettlementActivityResponse {
 
 export interface SettlementRow {
   number: number;
+  kind: string;
   name: string;
   value: number;
   description: string;
+}
+
+export interface DraftInvoiceDetail {
+  kind: string;
+  amount: number;
+  description: string;
+  sort_index: number;
+}
+
+export interface CreateDraftInvoiceRequest {
+  establishment_id: number;
+  year: number;
+  total: number;
+  details: DraftInvoiceDetail[];
+}
+
+export interface CreateDraftInvoiceResponse {
+  id: number;
+}
+
+export interface SaveSettlementRequest extends SettlementResponse {
+  invoice_id: number;
+  pdf_url: string;
 }
 
 export interface SettlementResponse {

@@ -6,6 +6,7 @@ export const adaptInvoiceDetail = (raw: InvoiceDetailResponse): InvoiceDetail =>
   invoiceId: raw.invoice_id,
   kind: raw.kind,
   amount: raw.amount,
+  description: raw.description,
   createdAt: raw.created_at,
   updatedAt: raw.updated_at
 });
@@ -18,6 +19,7 @@ export const adaptInvoice = (raw: InvoiceResponse): Invoice => ({
   presentationDate: raw.presentation_date,
   expirationDate: raw.expiration_date,
   total: raw.total,
+  pdfUrl: raw.pdf_url,
   details: raw.details.map(adaptInvoiceDetail),
   createdAt: raw.created_at,
   updatedAt: raw.updated_at

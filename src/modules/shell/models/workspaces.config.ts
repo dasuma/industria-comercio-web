@@ -1,4 +1,5 @@
 import {
+  RiBillLine,
   RiBuildingLine,
   RiBuilding4Line,
   RiBuilding4Fill,
@@ -23,6 +24,12 @@ export const workspaces: Workspace[] = [
         key: 'establishments',
         href: APP_ROUTES.establishments,
         icon: RiBuildingLine
+      },
+      {
+        kind: 'item',
+        key: 'invoices',
+        href: APP_ROUTES.invoices,
+        icon: RiBillLine
       },
       {
         kind: 'item',

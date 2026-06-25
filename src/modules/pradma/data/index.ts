@@ -44,8 +44,11 @@ export { useDeleteUser } from './users/deleteUser';
 
 // Settlements
 export { useCreateSettlement } from './settlements/createSettlement';
+export { useSaveSettlement } from './settlements/saveSettlement';
 
 // Invoices
+export { useSearchInvoices } from './invoices/searchInvoices';
+export { useCreateDraftInvoice } from './invoices/createDraftInvoice';
 export { useGetInvoicesByEstablishment } from './invoices/getInvoicesByEstablishment';
 
 // Migrations

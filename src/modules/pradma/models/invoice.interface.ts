@@ -3,6 +3,7 @@ export interface InvoiceDetail {
   invoiceId: number;
   kind: string;
   amount: number;
+  description?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -15,6 +16,7 @@ export interface Invoice {
   presentationDate: string | null;
   expirationDate: string | null;
   total: number;
+  pdfUrl?: string;
   details: InvoiceDetail[];
   createdAt: string;
   updatedAt: string;

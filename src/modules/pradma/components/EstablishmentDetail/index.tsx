@@ -130,7 +130,7 @@ export const EstablishmentDetail = ({ locale, establishmentId }: EstablishmentDe
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Button.Root variant="neutral" size="xsmall" onClick={goBack}>
+          <Button.Root variant="primary" size="xsmall" onClick={goBack}>
             <Button.Icon as={RiArrowLeftSLine} />
           </Button.Root>
           <h1 className="text-text-strong-950 text-base font-semibold">

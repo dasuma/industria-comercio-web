@@ -4,22 +4,41 @@ import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm, useWatch, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@/utils/zodResolver';
 import { z } from 'zod';
-import { Button, CompactButton, FancyButton, Input, Label, Select, Switch } from '@biaenergy/ui';
+import {
+  Button,
+  CompactButton,
+  FancyButton,
+  Input,
+  Label,
+  Select,
+  Switch,
+  Tooltip,
+  toast
+} from '@biaenergy/ui';
 import {
   RiAddLine,
   RiArrowLeftSLine,
   RiArrowRightSLine,
   RiDeleteBinLine,
+  RiDownloadLine,
+  RiInformationLine,
   RiRefreshLine
 } from '@biaenergy/ui/icons';
+import { useRouter } from 'next/navigation';
 import { cn } from '@/utils/cn';
+import { APP_ROUTES } from '@/config/routes';
 import { FormField } from '@/components/FormField';
 import {
   useGetEstablishmentActivitiesByYear,
   useGetActivitiesByYear,
-  useCreateSettlement
+  useCreateSettlement,
+  useCreateDraftInvoice,
+  useSaveSettlement,
+  useGetInvoicesByEstablishment,
+  useGetClient
 } from '../../data';
 import type { Establishment } from '../../models/establishment.interface';
+import type { Client } from '../../models/client.interface';
 import type { PradmaDictionary } from '../../dictionaries';
 import type { SettlementResponse } from '../../types/settlement.types';
 
@@ -32,17 +51,15 @@ interface EstablishmentSettleProps {
 
 const TODAY = new Date().toISOString().slice(0, 10);
 const CURRENT_YEAR = new Date().getFullYear();
+// Can't settle the ongoing year — max is always the previous calendar year.
+const MAX_SETTLE_YEAR = CURRENT_YEAR - 1;
 
-const resolveStartDate = (e: Establishment): string =>
-  new Date(e.startDate).getFullYear() === CURRENT_YEAR
-    ? e.startDate.slice(0, 10)
-    : `${CURRENT_YEAR}-01-01`;
+const resolveStartDate = (e: Establishment, year: number): string =>
+  new Date(e.startDate).getFullYear() === year ? e.startDate.slice(0, 10) : `${year}-01-01`;
 
-const resolveEndDate = (e: Establishment): string => {
-  if (!e.endDate) return `${CURRENT_YEAR}-12-31`;
-  return new Date(e.endDate).getFullYear() === CURRENT_YEAR
-    ? e.endDate.slice(0, 10)
-    : `${CURRENT_YEAR}-12-31`;
+const resolveEndDate = (e: Establishment, year: number): string => {
+  if (!e.endDate) return `${year}-12-31`;
+  return new Date(e.endDate).getFullYear() === year ? e.endDate.slice(0, 10) : `${year}-12-31`;
 };
 
 const diffMonths = (start: string, end: string): number => {
@@ -76,9 +93,6 @@ const toInt = (v: string): number => {
   return isNaN(n) ? 0 : n;
 };
 
-const truncate = (str: string, max = 32): string =>
-  str.length > max ? `${str.slice(0, max)}…` : str;
-
 /* ─── Schema ─── */
 
 const activitySchema = z.object({
@@ -89,8 +103,6 @@ const activitySchema = z.object({
 });
 
 const schema = z.object({
-  startDate: z.string().min(1),
-  endDate: z.string().min(1),
   presentationDate: z
     .string()
     .min(1)
@@ -113,14 +125,39 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
   const [step, setStep] = useState(0);
   const d = dict.settle;
 
-  const { data: activitiesData } = useGetEstablishmentActivitiesByYear(
-    establishment.id,
-    CURRENT_YEAR
-  );
-  const { data: allActivitiesRaw = [] } = useGetActivitiesByYear(CURRENT_YEAR);
+  /* ── Client (needed for PDF) ── */
+  const { data: client } = useGetClient(establishment.clientId);
 
-  // Deduplicate by activityCode — the endpoint can return the same code
-  // multiple times (one per tariff year). Keep the first occurrence.
+  /* ── Year selection ── */
+  const { data: invoices = [], isSuccess: invoicesReady } = useGetInvoicesByEstablishment(
+    establishment.id
+  );
+
+  // Compute which years are pending: from (lastPaidYear + 1) up to MAX_SETTLE_YEAR.
+  // Before invoices load (invoices=[]) defaults to [MAX_SETTLE_YEAR] so the UI
+  // is never empty while the query is in flight.
+  const { availableYears, computedDefaultYear } = useMemo(() => {
+    const paid = invoices.filter(inv => inv.status === 'paid');
+    const lastPaid = paid.length > 0 ? Math.max(...paid.map(inv => inv.year)) : CURRENT_YEAR - 2;
+    const firstPending = lastPaid + 1;
+    const years: number[] = [];
+    for (let y = firstPending; y <= MAX_SETTLE_YEAR; y++) years.push(y);
+    return { availableYears: years, computedDefaultYear: years[0] ?? MAX_SETTLE_YEAR };
+  }, [invoices]);
+
+  // yearOverride is null until the user explicitly picks a year.
+  const [yearOverride, setYearOverride] = useState<number | null>(null);
+  const year = yearOverride ?? computedDefaultYear;
+
+  // Dates derived from selected year + establishment bounds.
+  const startDate = resolveStartDate(establishment, year);
+  const endDate = resolveEndDate(establishment, year);
+  const months = diffMonths(startDate, endDate);
+
+  /* ── Activities for the selected year ── */
+  const { data: activitiesData } = useGetEstablishmentActivitiesByYear(establishment.id, year);
+  const { data: allActivitiesRaw = [] } = useGetActivitiesByYear(year);
+
   const allActivities = useMemo(() => {
     const seen = new Set<string>();
     return allActivitiesRaw.filter(a => {
@@ -149,8 +186,6 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
     resolver: zodResolver(schema),
     mode: 'onChange',
     defaultValues: {
-      startDate: resolveStartDate(establishment),
-      endDate: resolveEndDate(establishment),
       presentationDate: TODAY,
       settlementDate: TODAY,
       signsBillboardsTax: true,
@@ -161,8 +196,9 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
 
   const { fields, append, remove, replace } = useFieldArray({ control, name: 'activities' });
 
+  // Reset activities whenever the year changes (activitiesData will be re-fetched).
   useEffect(() => {
-    if (activitiesData && fields.length === 0) {
+    if (activitiesData) {
       replace(
         activitiesData.map(a => ({
           activityCode: a.activityCode,
@@ -174,10 +210,6 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activitiesData]);
-
-  const watchStart = useWatch({ control, name: 'startDate' });
-  const watchEnd = useWatch({ control, name: 'endDate' });
-  const months = diffMonths(watchStart, watchEnd);
 
   const copChangeActivity = useCallback(
     (index: number) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -196,14 +228,15 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
   const handleNewSettlement = () => {
     resetMutation();
     setStep(0);
+    setYearOverride(null);
     resetForm();
   };
 
   const onSubmit = handleSubmit(values => {
     createSettlement({
       establishment_id: establishment.id,
-      start_date: values.startDate,
-      end_date: values.endDate,
+      start_date: startDate,
+      end_date: endDate,
       presentation_date: values.presentationDate,
       settlement_date: values.settlementDate,
       signs_billboards_tax: values.signsBillboardsTax,
@@ -217,7 +250,24 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
 
   /* ── Result view ── */
   if (result) {
-    return <SettlementResult data={result} dict={d} onNew={handleNewSettlement} />;
+    return (
+      <SettlementResult
+        data={result}
+        dict={d}
+        establishment={establishment}
+        client={client}
+        onNew={handleNewSettlement}
+      />
+    );
+  }
+
+  /* ── All caught up ── */
+  if (invoicesReady && availableYears.length === 0) {
+    return (
+      <div className="py-10 text-center">
+        <p className="text-text-sub-600 text-sm">{d.noYearAvailable}</p>
+      </div>
+    );
   }
 
   const STEPS = [d.steps.period, d.steps.activities];
@@ -230,9 +280,32 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
       {/* ── Step 0: Período ── */}
       {step === 0 && (
         <div className="space-y-4">
+          {/* Year selector */}
+          <FormField id="settle-year" label={d.year} required>
+            <Select.Root
+              value={String(year)}
+              onValueChange={v => {
+                setYearOverride(Number(v));
+                setStep(0);
+              }}
+            >
+              <Select.Trigger>
+                <Select.Value />
+              </Select.Trigger>
+              <Select.Content>
+                {availableYears.map(y => (
+                  <Select.Item key={y} value={String(y)}>
+                    {y}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Root>
+          </FormField>
+
+          {/* Date range — derived from selected year */}
           <div className="bg-bg-weak-50 rounded-2xl p-4">
             <div className="flex items-center gap-3">
-              <DateChip label={d.startDate} date={formatDate(watchStart)} />
+              <DateChip label={d.startDate} date={formatDate(startDate)} />
               <div className="flex shrink-0 flex-col items-center gap-1.5">
                 <div className="bg-stroke-soft-200 h-px w-6" />
                 <span className="bg-information-lighter text-information-dark rounded-full px-2.5 py-1 text-[11px] font-bold whitespace-nowrap">
@@ -240,7 +313,7 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
                 </span>
                 <div className="bg-stroke-soft-200 h-px w-6" />
               </div>
-              <DateChip label={d.endDate} date={formatDate(watchEnd)} />
+              <DateChip label={d.endDate} date={formatDate(endDate)} />
             </div>
           </div>
 
@@ -380,106 +453,191 @@ const SUBTOTAL_ROWS = new Set([20]);
 interface SettlementResultProps {
   data: SettlementResponse;
   dict: PradmaDictionary['settle'];
+  establishment: Establishment;
+  client: Client | undefined;
   onNew: () => void;
 }
 
-const SettlementResult = ({ data, dict: d, onNew }: SettlementResultProps) => (
-  <div className="flex flex-col gap-5">
-    {/* Header */}
-    <div className="bg-success-lighter ring-success-base/20 rounded-xl px-4 py-3 ring-1">
-      <p className="text-success-dark mb-1 text-[11px] font-semibold tracking-wider uppercase">
-        {d.result.title}
-      </p>
-      <p className="text-text-strong-950 text-sm font-semibold">{data.establishment_name}</p>
-      <p className="text-text-sub-600 mt-0.5 text-xs">
-        {formatDate(data.start_date)} — {formatDate(data.end_date)}
-        <span className="ml-2 font-medium">({data.settlement_months} meses)</span>
-      </p>
-    </div>
+const SettlementResult = ({
+  data,
+  dict: d,
+  establishment,
+  client,
+  onNew
+}: SettlementResultProps) => {
+  const router = useRouter();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { mutateAsync: createDraftInvoice } = useCreateDraftInvoice();
+  const { mutateAsync: saveSettlement } = useSaveSettlement();
 
-    {/* Activities summary */}
-    <div>
-      <p className="text-text-sub-600 mb-2 text-[11px] font-semibold tracking-wider uppercase">
-        {d.result.activitiesTitle}
-      </p>
-      <div className="ring-stroke-soft-200 overflow-hidden rounded-xl ring-1">
-        <table className="w-full text-xs">
-          <thead>
-            <tr className="bg-bg-weak-50 border-stroke-soft-200 border-b">
-              <th className="px-3 py-2 text-left">{d.activities.activityCode}</th>
-              <th className="px-3 py-2 text-right">{d.result.tariffRate} ‰</th>
-              <th className="px-3 py-2 text-right">{d.result.icaTax}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-stroke-soft-200 divide-y">
-            {data.activities.map(a => (
-              <tr key={a.activity_code}>
-                <td className="px-3 py-2">
-                  <span className="text-text-strong-950 font-medium">{a.activity_code}</span>
-                  <span className="text-text-soft-400 ml-1">{truncate(a.activity_name, 36)}</span>
-                </td>
-                <td className="text-text-sub-600 px-3 py-2 text-right">{a.tariff_rate}</td>
-                <td className="text-text-strong-950 px-3 py-2 text-right font-medium">
-                  {formatCop(a.tax)}
-                </td>
+  const handleSavePdf = async () => {
+    setIsGenerating(true);
+    try {
+      const year = new Date(data.start_date + 'T12:00:00').getFullYear();
+      const totalRow = [...data.rows].sort((a, b) => b.number - a.number)[0];
+      const total = totalRow?.value ?? 0;
+
+      // 1. Create draft invoice → get id for (8020) barcode field
+      const { id: invoiceId } = await createDraftInvoice({
+        establishment_id: establishment.id,
+        year,
+        total,
+        details: data.rows.map(r => ({
+          kind: r.kind,
+          amount: r.value,
+          description: r.description || r.name,
+          sort_index: r.number
+        }))
+      });
+
+      // 2. Generate PDF with invoice id padded as (8020) barcode reference
+      const { generateSettlementPdf } = await import('../../utils/generateSettlementPdf');
+      const blob = await generateSettlementPdf(data, establishment, client, invoiceId);
+
+      // 3. Upload to blob storage
+      const { uploadSettlementPdf } = await import('../../utils/uploadSettlementPdf');
+      const blobUrl = await uploadSettlementPdf(blob, establishment, year);
+
+      // 4. Trigger local download so the user has a copy
+      const filename = `liquidacion-${establishment.id}-${year}.pdf`;
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(objectUrl);
+
+      // 5. Persist settlement with invoice id + pdf url
+      await saveSettlement({ ...data, invoice_id: invoiceId, pdf_url: blobUrl });
+
+      toast.success('Liquidación guardada correctamente.');
+      router.push(APP_ROUTES.invoices);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : 'No se pudo guardar la liquidación. Intentá de nuevo.'
+      );
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-5">
+      {/* Header */}
+      <div className="bg-success-lighter ring-success-base/20 rounded-xl px-4 py-3 ring-1">
+        <p className="text-success-dark mb-1 text-[11px] font-semibold tracking-wider uppercase">
+          {d.result.title}
+        </p>
+        <p className="text-text-strong-950 text-sm font-semibold">{data.establishment_name}</p>
+        <p className="text-text-sub-600 mt-0.5 text-xs">
+          {formatDate(data.start_date)} — {formatDate(data.end_date)}
+          <span className="ml-2 font-medium">({data.settlement_months} meses)</span>
+        </p>
+      </div>
+
+      {/* Activities summary */}
+      <div>
+        <p className="text-text-sub-600 mb-2 text-[11px] font-semibold tracking-wider uppercase">
+          {d.result.activitiesTitle}
+        </p>
+        <div className="ring-stroke-soft-200 overflow-hidden rounded-xl ring-1">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="bg-bg-weak-50 border-stroke-soft-200 border-b">
+                <th className="px-3 py-2 text-left">{d.activities.activityCode}</th>
+                <th className="px-3 py-2 text-right">{d.result.tariffRate} ‰</th>
+                <th className="px-3 py-2 text-right">{d.result.icaTax}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-stroke-soft-200 divide-y">
+              {data.activities.map(a => (
+                <tr key={a.activity_code}>
+                  <td className="px-3 py-2">
+                    <span className="text-text-strong-950 font-medium">{a.activity_code}</span>
+                    <span className="text-text-soft-400 ml-1">{a.activity_name}</span>
+                  </td>
+                  <td className="text-text-sub-600 px-3 py-2 text-right">{a.tariff_rate}</td>
+                  <td className="text-text-strong-950 px-3 py-2 text-right font-medium">
+                    {formatCop(a.tax)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Rows */}
+      <div className="ring-stroke-soft-200 overflow-hidden rounded-xl ring-1">
+        {data.rows.map(row => {
+          const isTotal = TOTAL_ROWS.has(row.number);
+          const isSubtotal = SUBTOTAL_ROWS.has(row.number);
+          return (
+            <div
+              key={row.number}
+              className={cn(
+                'border-stroke-soft-200 flex items-center gap-3 border-b px-4 py-2.5 last:border-0',
+                isTotal && 'bg-success-lighter',
+                isSubtotal && 'bg-bg-weak-50'
+              )}
+            >
+              <span
+                className={cn(
+                  'w-6 shrink-0 text-center text-[11px] font-bold',
+                  isTotal ? 'text-success-dark' : 'text-text-soft-400'
+                )}
+              >
+                {row.number}
+              </span>
+              <span className="flex min-w-0 flex-1 items-center gap-1">
+                <span className="text-text-sub-600 text-xs leading-snug">{row.name}</span>
+                {row.description && (
+                  <Tooltip.Root>
+                    <Tooltip.Trigger asChild>
+                      <span className="text-text-soft-400 hover:text-text-sub-600 shrink-0 cursor-default">
+                        <RiInformationLine className="h-3.5 w-3.5" />
+                      </span>
+                    </Tooltip.Trigger>
+                    <Tooltip.Content size="small" className="max-w-56">
+                      {row.description}
+                    </Tooltip.Content>
+                  </Tooltip.Root>
+                )}
+              </span>
+              <span
+                className={cn(
+                  'shrink-0 text-right text-xs font-semibold tabular-nums',
+                  isTotal ? 'text-success-dark text-sm' : 'text-text-strong-950',
+                  row.value === 0 && !isTotal && 'text-text-soft-400 font-normal'
+                )}
+              >
+                {row.value === 0 ? '—' : formatCop(row.value)}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-3">
+        <FancyButton.Root
+          variant="primary"
+          size="medium"
+          onClick={handleSavePdf}
+          disabled={isGenerating}
+        >
+          <FancyButton.Icon as={RiDownloadLine} />
+          {isGenerating ? 'Guardando PDF…' : d.result.downloadPdf}
+        </FancyButton.Root>
+
+        <Button.Root variant="neutral" mode="stroke" size="medium" onClick={onNew}>
+          <Button.Icon as={RiRefreshLine} />
+          {d.result.newSettlement}
+        </Button.Root>
       </div>
     </div>
-
-    {/* Rows 17-38 */}
-    <div className="ring-stroke-soft-200 overflow-hidden rounded-xl ring-1">
-      {data.rows.map(row => {
-        const isTotal = TOTAL_ROWS.has(row.number);
-        const isSubtotal = SUBTOTAL_ROWS.has(row.number);
-        return (
-          <div
-            key={row.number}
-            className={cn(
-              'border-stroke-soft-200 flex items-center gap-3 border-b px-4 py-2.5 last:border-0',
-              isTotal && 'bg-success-lighter',
-              isSubtotal && 'bg-bg-weak-50'
-            )}
-          >
-            <span
-              className={cn(
-                'w-6 shrink-0 text-center text-[11px] font-bold',
-                isTotal ? 'text-success-dark' : 'text-text-soft-400'
-              )}
-            >
-              {row.number}
-            </span>
-            <span className="text-text-sub-600 min-w-0 flex-1 text-xs leading-snug">
-              {row.name}
-            </span>
-            <span
-              className={cn(
-                'shrink-0 text-right text-xs font-semibold tabular-nums',
-                isTotal ? 'text-success-dark text-sm' : 'text-text-strong-950',
-                row.value === 0 && !isTotal && 'text-text-soft-400 font-normal'
-              )}
-            >
-              {row.value === 0 ? '—' : formatCop(row.value)}
-            </span>
-          </div>
-        );
-      })}
-    </div>
-
-    <Button.Root
-      variant="neutral"
-      mode="stroke"
-      size="small"
-      onClick={onNew}
-      className="self-start"
-    >
-      <Button.Icon as={RiRefreshLine} />
-      {d.result.newSettlement}
-    </Button.Root>
-  </div>
-);
+  );
+};
 
 /* ─── ActivityCard ─── */
 
@@ -531,9 +689,9 @@ const ActivityCard = ({
               : `${d.activities.activity} ${index + 1}`}
           </span>
           {watchCode && (
-            <span className="text-text-sub-600 min-w-0 truncate text-xs font-medium">
+            <span className="text-text-sub-600 min-w-0 text-xs font-medium">
               {watchCode}
-              {watchName ? ` — ${truncate(watchName, 28)}` : ''}
+              {watchName ? ` — ${watchName}` : ''}
             </span>
           )}
         </div>
@@ -571,7 +729,7 @@ const ActivityCard = ({
               <Select.Content>
                 {allActivities.map(a => (
                   <Select.Item key={a.id} value={a.activityCode}>
-                    {a.activityCode} — {truncate(a.activityName)}
+                    {a.activityCode} — {a.activityName}
                   </Select.Item>
                 ))}
               </Select.Content>

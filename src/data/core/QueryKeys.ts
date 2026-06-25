@@ -15,7 +15,8 @@ enum QueryKeys {
   PRADMA_USER_DETAIL = 'pradma.users.detail',
   PRADMA_ACTIVITIES_BY_YEAR = 'pradma.activities.byYear',
   PRADMA_ESTABLISHMENT_ACTIVITIES_BY_YEAR = 'pradma.establishmentActivities.byYear',
-  PRADMA_INVOICES_BY_ESTABLISHMENT = 'pradma.invoices.byEstablishment'
+  PRADMA_INVOICES_BY_ESTABLISHMENT = 'pradma.invoices.byEstablishment',
+  PRADMA_INVOICES_SEARCH = 'pradma.invoices.search'
 }
 
 export default QueryKeys;

@@ -49,11 +49,12 @@
    text-strong-950 / neutral-* tokens are untouched — safe to override here.
    ──────────────────────────────────────────────────────────────────────── */
 :root {
-  /* Brand utilities */
-  --color-brand-base: #3b82f6;
-  --color-brand-hover: #2563eb;
-  --color-brand-focus: #2563eb;
-  --color-brand-soft: #1d4ed8;
+  /* Brand utilities — !important ensures these win over DS tokens.css
+     regardless of Next.js dev-mode CSS chunk injection order. */
+  --color-brand-base: #3b82f6 !important;
+  --color-brand-hover: #2563eb !important;
+  --color-brand-focus: #2563eb !important;
+  --color-brand-soft: #1d4ed8 !important;
 
   /* Primary → blue-600 scale (FancyButton, focus rings) */
   --color-primary-darker: #1e40af;   /* blue-800 */
@@ -77,10 +78,10 @@
 
 .dark {
   /* Brand utilities */
-  --color-brand-base: #60a5fa;
-  --color-brand-hover: #3b82f6;
-  --color-brand-focus: #3b82f6;
-  --color-brand-soft: #2563eb;
+  --color-brand-base: #60a5fa !important;
+  --color-brand-hover: #3b82f6 !important;
+  --color-brand-focus: #3b82f6 !important;
+  --color-brand-soft: #2563eb !important;
 
   /* Primary → blue-500 scale (lighter for dark surfaces) */
   --color-primary-base: #3b82f6;       /* blue-500 */

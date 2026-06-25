@@ -299,6 +299,13 @@ export const endpointsPradma: Record<string, IHttpClient> = {
     urlMock: ''
   },
   // Settlements
+  saveSettlement: {
+    url: `${base}/settlements/save`,
+    method: 'POST',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
   createSettlement: {
     url: `${base}/settlements`,
     method: 'POST',
@@ -307,6 +314,20 @@ export const endpointsPradma: Record<string, IHttpClient> = {
     urlMock: ''
   },
   // Invoices
+  searchInvoices: {
+    url: `${base}/invoices/search`,
+    method: 'POST',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  createDraftInvoice: {
+    url: `${base}/invoices/draft`,
+    method: 'POST',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
   getInvoicesByEstablishment: {
     url: `${base}/invoices/establishment`,
     method: 'GET',

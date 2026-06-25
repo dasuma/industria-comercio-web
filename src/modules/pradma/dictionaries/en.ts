@@ -152,6 +152,8 @@ export const pradmaDictEn: PradmaDictionary = {
     }
   },
   settle: {
+    year: 'Settlement year',
+    noYearAvailable: 'This establishment is up to date with its settlements.',
     months: 'Settlement months',
     startDate: 'Start date',
     endDate: 'End date',
@@ -205,6 +207,7 @@ export const pradmaDictEn: PradmaDictionary = {
     result: {
       title: 'Settlement result',
       newSettlement: 'New settlement',
+      downloadPdf: 'Save settlement',
       activitiesTitle: 'Activities',
       tariffRate: 'Rate',
       icaTax: 'ICA'
@@ -278,6 +281,26 @@ export const pradmaDictEn: PradmaDictionary = {
         hasErrors: 'Some migrations had errors.',
         notRun: 'Not run'
       }
+    }
+  },
+  invoices: {
+    title: 'Settlements',
+    loading: 'Loading settlements...',
+    empty: 'No settlements to show.',
+    errorLoading: 'Could not load settlements.',
+    columns: {
+      id: 'ID',
+      establishment: 'Establishment',
+      year: 'Year',
+      status: 'Status',
+      total: 'Total',
+      presentationDate: 'Presentation date'
+    },
+    status: {
+      draft: 'Draft',
+      pending: 'Pending',
+      paid: 'Paid',
+      overdue: 'Overdue'
     }
   },
   common: {
