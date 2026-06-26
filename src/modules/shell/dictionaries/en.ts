@@ -12,7 +12,8 @@ export const shellDictEn: ShellDictionary = {
     establishments: 'Establishments',
     activityCategories: 'Economic activities',
     users: 'Users',
-    migrations: 'Migrations'
+    migrations: 'Migrations',
+    invoices: 'Settlements'
   },
   itemDescriptions: {},
   subTabs: {},

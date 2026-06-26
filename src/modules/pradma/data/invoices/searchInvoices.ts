@@ -14,9 +14,9 @@ const searchInvoices = async (params: SearchRequest): Promise<SearchResponse<Inv
   });
   return {
     data: raw.data.map(adaptInvoice),
-    total: raw.total,
-    page: raw.page,
-    size: raw.size
+    total: raw.pagination.total,
+    offset: raw.pagination.current_offset,
+    limit: raw.pagination.current_limit
   };
 };
 

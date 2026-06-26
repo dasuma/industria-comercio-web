@@ -5,6 +5,7 @@ export const adaptInvoiceDetail = (raw: InvoiceDetailResponse): InvoiceDetail =>
   id: raw.id,
   invoiceId: raw.invoice_id,
   kind: raw.kind,
+  name: raw.name,
   amount: raw.amount,
   description: raw.description,
   createdAt: raw.created_at,

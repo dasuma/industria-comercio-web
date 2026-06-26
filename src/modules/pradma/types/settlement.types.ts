@@ -34,6 +34,7 @@ export interface SettlementRow {
 
 export interface DraftInvoiceDetail {
   kind: string;
+  name: string;
   amount: number;
   description: string;
   sort_index: number;

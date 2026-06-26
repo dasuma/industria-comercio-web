@@ -170,20 +170,14 @@ export const InvoiceList = ({ locale }: InvoiceListProps) => {
             {dict.common.page} {currentPage} {dict.common.of} {totalPages}
           </p>
           <Pagination.Root>
-            <Pagination.Prev asChild>
-              <Button.Root
-                variant="neutral"
-                mode="ghost"
-                size="small"
-                onClick={prevPage}
-                disabled={!hasPrevPage}
-              >
-                <Button.Icon as={RiArrowLeftSLine} />
-              </Button.Root>
-            </Pagination.Prev>
+            <Pagination.NavButton onClick={prevPage} disabled={!hasPrevPage}>
+              <Pagination.NavIcon as={RiArrowLeftSLine} />
+            </Pagination.NavButton>
             {pageNumbers.map((n, i) =>
               n === -1 ? (
-                <Pagination.Ellipsis key={`e-${i}`} />
+                <span key={`e-${i}`} className="text-text-soft-400 px-1 text-xs">
+                  …
+                </span>
               ) : (
                 <Pagination.Item key={n} asChild>
                   <Button.Root
@@ -197,17 +191,9 @@ export const InvoiceList = ({ locale }: InvoiceListProps) => {
                 </Pagination.Item>
               )
             )}
-            <Pagination.Next asChild>
-              <Button.Root
-                variant="neutral"
-                mode="ghost"
-                size="small"
-                onClick={nextPage}
-                disabled={!hasNextPage}
-              >
-                <Button.Icon as={RiArrowRightSLine} />
-              </Button.Root>
-            </Pagination.Next>
+            <Pagination.NavButton onClick={nextPage} disabled={!hasNextPage}>
+              <Pagination.NavIcon as={RiArrowRightSLine} />
+            </Pagination.NavButton>
           </Pagination.Root>
         </div>
       )}

@@ -12,17 +12,13 @@ import {
   Label,
   Select,
   Switch,
-  Tooltip,
   toast
 } from '@biaenergy/ui';
 import {
   RiAddLine,
   RiArrowLeftSLine,
   RiArrowRightSLine,
-  RiDeleteBinLine,
-  RiDownloadLine,
-  RiInformationLine,
-  RiRefreshLine
+  RiDeleteBinLine
 } from '@biaenergy/ui/icons';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/utils/cn';
@@ -38,9 +34,8 @@ import {
   useGetClient
 } from '../../data';
 import type { Establishment } from '../../models/establishment.interface';
-import type { Client } from '../../models/client.interface';
 import type { PradmaDictionary } from '../../dictionaries';
-import type { SettlementResponse } from '../../types/settlement.types';
+import { SettlementSheet } from '../SettlementSheet';
 
 interface EstablishmentSettleProps {
   establishment: Establishment;
@@ -123,10 +118,14 @@ type SetValueFn = ReturnType<typeof useForm<FormValues>>['setValue'];
 
 export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettleProps) => {
   const [step, setStep] = useState(0);
+  const [isGenerating, setIsGenerating] = useState(false);
   const d = dict.settle;
+  const router = useRouter();
 
   /* ── Client (needed for PDF) ── */
   const { data: client } = useGetClient(establishment.clientId);
+  const { mutateAsync: createDraftInvoice } = useCreateDraftInvoice();
+  const { mutateAsync: saveSettlement } = useSaveSettlement();
 
   /* ── Year selection ── */
   const { data: invoices = [], isSuccess: invoicesReady } = useGetInvoicesByEstablishment(
@@ -232,6 +231,54 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
     resetForm();
   };
 
+  const handleSavePdf = async () => {
+    if (!result) return;
+    setIsGenerating(true);
+    try {
+      const pdfYear = new Date(result.start_date + 'T12:00:00').getFullYear();
+      const totalRow = [...result.rows].sort((a, b) => b.number - a.number)[0];
+      const total = totalRow?.value ?? 0;
+
+      const { id: invoiceId } = await createDraftInvoice({
+        establishment_id: establishment.id,
+        year: pdfYear,
+        total,
+        details: result.rows.map(r => ({
+          kind: r.kind,
+          name: r.name,
+          amount: r.value,
+          description: r.description || r.name,
+          sort_index: r.number
+        }))
+      });
+
+      const { generateSettlementPdf } = await import('../../utils/generateSettlementPdf');
+      const blob = await generateSettlementPdf(result, establishment, client, invoiceId);
+
+      const { uploadSettlementPdf } = await import('../../utils/uploadSettlementPdf');
+      const blobUrl = await uploadSettlementPdf(blob, establishment, pdfYear);
+
+      const filename = `liquidacion-${establishment.id}-${pdfYear}.pdf`;
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(objectUrl);
+
+      await saveSettlement({ ...result, invoice_id: invoiceId, pdf_url: blobUrl });
+
+      toast.success('Liquidación guardada correctamente.');
+      router.push(APP_ROUTES.invoices);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : 'No se pudo guardar la liquidación. Intentá de nuevo.'
+      );
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const onSubmit = handleSubmit(values => {
     createSettlement({
       establishment_id: establishment.id,
@@ -248,15 +295,18 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
     });
   });
 
-  /* ── Result view ── */
+  /* ── Result view: overlay sheet ── */
   if (result) {
     return (
-      <SettlementResult
+      <SettlementSheet
+        mode="draft"
         data={result}
-        dict={d}
         establishment={establishment}
-        client={client}
-        onNew={handleNewSettlement}
+        isSaving={isGenerating}
+        onSave={handleSavePdf}
+        onClose={handleNewSettlement}
+        saveLabel={d.result.downloadPdf}
+        newLabel={d.result.newSettlement}
       />
     );
   }
@@ -440,200 +490,6 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
             </FancyButton.Root>
           )}
         </div>
-      </div>
-    </div>
-  );
-};
-
-/* ─── SettlementResult ─── */
-
-const TOTAL_ROWS = new Set([25, 33, 35, 38]);
-const SUBTOTAL_ROWS = new Set([20]);
-
-interface SettlementResultProps {
-  data: SettlementResponse;
-  dict: PradmaDictionary['settle'];
-  establishment: Establishment;
-  client: Client | undefined;
-  onNew: () => void;
-}
-
-const SettlementResult = ({
-  data,
-  dict: d,
-  establishment,
-  client,
-  onNew
-}: SettlementResultProps) => {
-  const router = useRouter();
-  const [isGenerating, setIsGenerating] = useState(false);
-  const { mutateAsync: createDraftInvoice } = useCreateDraftInvoice();
-  const { mutateAsync: saveSettlement } = useSaveSettlement();
-
-  const handleSavePdf = async () => {
-    setIsGenerating(true);
-    try {
-      const year = new Date(data.start_date + 'T12:00:00').getFullYear();
-      const totalRow = [...data.rows].sort((a, b) => b.number - a.number)[0];
-      const total = totalRow?.value ?? 0;
-
-      // 1. Create draft invoice → get id for (8020) barcode field
-      const { id: invoiceId } = await createDraftInvoice({
-        establishment_id: establishment.id,
-        year,
-        total,
-        details: data.rows.map(r => ({
-          kind: r.kind,
-          amount: r.value,
-          description: r.description || r.name,
-          sort_index: r.number
-        }))
-      });
-
-      // 2. Generate PDF with invoice id padded as (8020) barcode reference
-      const { generateSettlementPdf } = await import('../../utils/generateSettlementPdf');
-      const blob = await generateSettlementPdf(data, establishment, client, invoiceId);
-
-      // 3. Upload to blob storage
-      const { uploadSettlementPdf } = await import('../../utils/uploadSettlementPdf');
-      const blobUrl = await uploadSettlementPdf(blob, establishment, year);
-
-      // 4. Trigger local download so the user has a copy
-      const filename = `liquidacion-${establishment.id}-${year}.pdf`;
-      const objectUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = objectUrl;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(objectUrl);
-
-      // 5. Persist settlement with invoice id + pdf url
-      await saveSettlement({ ...data, invoice_id: invoiceId, pdf_url: blobUrl });
-
-      toast.success('Liquidación guardada correctamente.');
-      router.push(APP_ROUTES.invoices);
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : 'No se pudo guardar la liquidación. Intentá de nuevo.'
-      );
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  return (
-    <div className="flex flex-col gap-5">
-      {/* Header */}
-      <div className="bg-success-lighter ring-success-base/20 rounded-xl px-4 py-3 ring-1">
-        <p className="text-success-dark mb-1 text-[11px] font-semibold tracking-wider uppercase">
-          {d.result.title}
-        </p>
-        <p className="text-text-strong-950 text-sm font-semibold">{data.establishment_name}</p>
-        <p className="text-text-sub-600 mt-0.5 text-xs">
-          {formatDate(data.start_date)} — {formatDate(data.end_date)}
-          <span className="ml-2 font-medium">({data.settlement_months} meses)</span>
-        </p>
-      </div>
-
-      {/* Activities summary */}
-      <div>
-        <p className="text-text-sub-600 mb-2 text-[11px] font-semibold tracking-wider uppercase">
-          {d.result.activitiesTitle}
-        </p>
-        <div className="ring-stroke-soft-200 overflow-hidden rounded-xl ring-1">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="bg-bg-weak-50 border-stroke-soft-200 border-b">
-                <th className="px-3 py-2 text-left">{d.activities.activityCode}</th>
-                <th className="px-3 py-2 text-right">{d.result.tariffRate} ‰</th>
-                <th className="px-3 py-2 text-right">{d.result.icaTax}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-stroke-soft-200 divide-y">
-              {data.activities.map(a => (
-                <tr key={a.activity_code}>
-                  <td className="px-3 py-2">
-                    <span className="text-text-strong-950 font-medium">{a.activity_code}</span>
-                    <span className="text-text-soft-400 ml-1">{a.activity_name}</span>
-                  </td>
-                  <td className="text-text-sub-600 px-3 py-2 text-right">{a.tariff_rate}</td>
-                  <td className="text-text-strong-950 px-3 py-2 text-right font-medium">
-                    {formatCop(a.tax)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Rows */}
-      <div className="ring-stroke-soft-200 overflow-hidden rounded-xl ring-1">
-        {data.rows.map(row => {
-          const isTotal = TOTAL_ROWS.has(row.number);
-          const isSubtotal = SUBTOTAL_ROWS.has(row.number);
-          return (
-            <div
-              key={row.number}
-              className={cn(
-                'border-stroke-soft-200 flex items-center gap-3 border-b px-4 py-2.5 last:border-0',
-                isTotal && 'bg-success-lighter',
-                isSubtotal && 'bg-bg-weak-50'
-              )}
-            >
-              <span
-                className={cn(
-                  'w-6 shrink-0 text-center text-[11px] font-bold',
-                  isTotal ? 'text-success-dark' : 'text-text-soft-400'
-                )}
-              >
-                {row.number}
-              </span>
-              <span className="flex min-w-0 flex-1 items-center gap-1">
-                <span className="text-text-sub-600 text-xs leading-snug">{row.name}</span>
-                {row.description && (
-                  <Tooltip.Root>
-                    <Tooltip.Trigger asChild>
-                      <span className="text-text-soft-400 hover:text-text-sub-600 shrink-0 cursor-default">
-                        <RiInformationLine className="h-3.5 w-3.5" />
-                      </span>
-                    </Tooltip.Trigger>
-                    <Tooltip.Content size="small" className="max-w-56">
-                      {row.description}
-                    </Tooltip.Content>
-                  </Tooltip.Root>
-                )}
-              </span>
-              <span
-                className={cn(
-                  'shrink-0 text-right text-xs font-semibold tabular-nums',
-                  isTotal ? 'text-success-dark text-sm' : 'text-text-strong-950',
-                  row.value === 0 && !isTotal && 'text-text-soft-400 font-normal'
-                )}
-              >
-                {row.value === 0 ? '—' : formatCop(row.value)}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Actions */}
-      <div className="flex items-center gap-3">
-        <FancyButton.Root
-          variant="primary"
-          size="medium"
-          onClick={handleSavePdf}
-          disabled={isGenerating}
-        >
-          <FancyButton.Icon as={RiDownloadLine} />
-          {isGenerating ? 'Guardando PDF…' : d.result.downloadPdf}
-        </FancyButton.Root>
-
-        <Button.Root variant="neutral" mode="stroke" size="medium" onClick={onNew}>
-          <Button.Icon as={RiRefreshLine} />
-          {d.result.newSettlement}
-        </Button.Root>
       </div>
     </div>
   );

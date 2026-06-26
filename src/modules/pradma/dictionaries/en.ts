@@ -213,19 +213,6 @@ export const pradmaDictEn: PradmaDictionary = {
       icaTax: 'ICA'
     }
   },
-  invoices: {
-    loading: 'Loading settlements...',
-    empty: 'No settlements found for this establishment.',
-    errorLoading: 'Could not load settlements.',
-    year: 'Year',
-    expirationDate: 'Due date',
-    kind: 'Concept',
-    amount: 'Amount',
-    statuses: {
-      paid: 'Paid',
-      created: 'Created'
-    }
-  },
   migrations: {
     title: 'Migrations',
     upload: 'Upload DBF file',

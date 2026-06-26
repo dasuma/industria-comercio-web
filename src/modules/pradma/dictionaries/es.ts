@@ -211,19 +211,6 @@ export const pradmaDictEs = {
       icaTax: 'ICA'
     }
   },
-  invoices: {
-    loading: 'Cargando liquidaciones...',
-    empty: 'No hay liquidaciones para este establecimiento.',
-    errorLoading: 'No se pudieron cargar las liquidaciones.',
-    year: 'Año',
-    expirationDate: 'Vencimiento',
-    kind: 'Concepto',
-    amount: 'Monto',
-    statuses: {
-      paid: 'Pagado',
-      created: 'Creado'
-    }
-  },
   migrations: {
     title: 'Migraciones',
     upload: 'Subir archivo DBF',

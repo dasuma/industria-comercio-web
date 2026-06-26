@@ -2,6 +2,7 @@ export interface InvoiceDetailResponse {
   id: number;
   invoice_id: number;
   kind: string;
+  name?: string;
   amount: number;
   description?: string;
   created_at: string;

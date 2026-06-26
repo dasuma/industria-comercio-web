@@ -14,7 +14,8 @@ export const shellDictEs = {
     establishments: 'Establecimientos',
     activityCategories: 'Actividades económicas',
     users: 'Usuarios',
-    migrations: 'Migraciones'
+    migrations: 'Migraciones',
+    invoices: 'Liquidaciones'
   } satisfies Record<NavItemKey, string>,
   itemDescriptions: itemDescriptionsEs,
   subTabs: {} satisfies Record<never, string>,
