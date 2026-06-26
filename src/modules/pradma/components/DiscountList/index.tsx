@@ -277,7 +277,7 @@ export const DiscountList = ({ locale }: DiscountListProps) => {
     setTotal,
     setFilters,
     pageNumbers
-  } = useSearchPagination({ defaultSort: 'year' });
+  } = useSearchPagination({ defaultSort: 'year desc' });
 
   const handleSearch = useCallback(
     (value: string) => {

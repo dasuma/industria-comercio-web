@@ -300,7 +300,7 @@ export const SanctionList = ({ locale }: SanctionListProps) => {
     setTotal,
     setFilters,
     pageNumbers
-  } = useSearchPagination({ defaultSort: 'year' });
+  } = useSearchPagination({ defaultSort: 'year desc' });
 
   const handleSearch = useCallback(
     (value: string) => {

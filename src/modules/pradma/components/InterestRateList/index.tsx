@@ -373,7 +373,7 @@ export const InterestRateList = ({ locale }: InterestRateListProps) => {
     setTotal,
     setFilters,
     pageNumbers
-  } = useSearchPagination({ defaultSort: 'year' });
+  } = useSearchPagination({ defaultSort: 'year desc' });
 
   const handleSearch = useCallback(
     (value: string) => {
