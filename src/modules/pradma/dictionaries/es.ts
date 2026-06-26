@@ -283,9 +283,149 @@ export const pradmaDictEs = {
     },
     status: {
       draft: 'Borrador',
+      created: 'Creado',
       pending: 'Pendiente',
       paid: 'Pagada',
-      overdue: 'Vencida'
+      overdue: 'Vencida',
+      expired: 'Expirada'
+    },
+    expirationDate: 'Vence'
+  },
+  sanctions: {
+    title: 'Sanciones',
+    loading: 'Cargando sanciones...',
+    empty: 'No hay sanciones para mostrar.',
+    errorLoading: 'No se pudieron cargar las sanciones.',
+    create: 'Crear sanción',
+    edit: 'Editar sanción',
+    delete: 'Eliminar sanción',
+    deleteConfirm: '¿Está seguro de eliminar esta sanción?',
+    success: {
+      created: 'Sanción creada correctamente.',
+      updated: 'Sanción actualizada correctamente.',
+      deleted: 'Sanción eliminada correctamente.'
+    },
+    columns: {
+      id: 'ID',
+      year: 'Año',
+      percentage: 'Porcentaje',
+      minSanction: 'Mínima sanción',
+      minSanctionAlt: 'Mínima sanción alt.'
+    },
+    fields: {
+      year: 'Año',
+      percentage: 'Porcentaje (%)',
+      minSanction: 'Mínima sanción',
+      minSanctionAlt: 'Mínima sanción alternativa'
+    },
+    form: {
+      errors: {
+        yearRequired: 'El año es obligatorio',
+        yearInvalid: 'El año debe ser un número válido',
+        percentageRequired: 'El porcentaje es obligatorio',
+        percentageInvalid: 'El porcentaje debe ser un número válido',
+        minSanctionRequired: 'La mínima sanción es obligatoria',
+        minSanctionInvalid: 'Debe ser un número válido',
+        minSanctionAltRequired: 'La mínima sanción alternativa es obligatoria',
+        minSanctionAltInvalid: 'Debe ser un número válido',
+        serverError: 'No se pudo guardar la sanción. Intentá de nuevo.'
+      },
+      success: {
+        created: 'Sanción creada correctamente.',
+        updated: 'Sanción actualizada correctamente.'
+      }
+    }
+  },
+  interestRates: {
+    title: 'Tasas de interés',
+    loading: 'Cargando tasas de interés...',
+    empty: 'No hay tasas de interés para mostrar.',
+    errorLoading: 'No se pudieron cargar las tasas de interés.',
+    create: 'Crear tasa de interés',
+    edit: 'Editar tasa de interés',
+    delete: 'Eliminar tasa de interés',
+    deleteConfirm: '¿Está seguro de eliminar esta tasa de interés?',
+    success: {
+      created: 'Tasa de interés creada correctamente.',
+      updated: 'Tasa de interés actualizada correctamente.',
+      deleted: 'Tasa de interés eliminada correctamente.'
+    },
+    columns: {
+      id: 'ID',
+      year: 'Año',
+      startDate: 'Fecha inicio',
+      endDate: 'Fecha fin',
+      percentage: 'Porcentaje',
+      interestPercentage: 'Interés'
+    },
+    fields: {
+      year: 'Año',
+      startDate: 'Fecha inicio',
+      endDate: 'Fecha fin',
+      rateValue1: 'Valor tasa 1',
+      rateValue2: 'Valor tasa 2',
+      rateValue3: 'Valor tasa 3',
+      percentage: 'Porcentaje (%)',
+      surchargePercentage: 'Porcentaje recargo (%)',
+      interestPercentage: 'Porcentaje interés (%)'
+    },
+    form: {
+      errors: {
+        yearRequired: 'El año es obligatorio',
+        yearInvalid: 'El año debe ser un número válido',
+        startDateRequired: 'La fecha inicio es obligatoria',
+        endDateRequired: 'La fecha fin es obligatoria',
+        percentageRequired: 'El porcentaje es obligatorio',
+        percentageInvalid: 'Debe ser un número válido',
+        serverError: 'No se pudo guardar la tasa de interés. Intentá de nuevo.'
+      },
+      success: {
+        created: 'Tasa de interés creada correctamente.',
+        updated: 'Tasa de interés actualizada correctamente.'
+      }
+    }
+  },
+  discounts: {
+    title: 'Descuentos',
+    loading: 'Cargando descuentos...',
+    empty: 'No hay descuentos para mostrar.',
+    errorLoading: 'No se pudieron cargar los descuentos.',
+    create: 'Crear descuento',
+    edit: 'Editar descuento',
+    delete: 'Eliminar descuento',
+    deleteConfirm: '¿Está seguro de eliminar este descuento?',
+    success: {
+      created: 'Descuento creado correctamente.',
+      updated: 'Descuento actualizado correctamente.',
+      deleted: 'Descuento eliminado correctamente.'
+    },
+    columns: {
+      id: 'ID',
+      year: 'Año',
+      startDate: 'Fecha inicio',
+      endDate: 'Fecha fin',
+      percentage: 'Porcentaje'
+    },
+    fields: {
+      year: 'Año',
+      startDate: 'Fecha inicio',
+      endDate: 'Fecha fin',
+      percentage: 'Porcentaje (%)'
+    },
+    form: {
+      errors: {
+        yearRequired: 'El año es obligatorio',
+        yearInvalid: 'El año debe ser un número válido',
+        startDateRequired: 'La fecha inicio es obligatoria',
+        endDateRequired: 'La fecha fin es obligatoria',
+        percentageRequired: 'El porcentaje es obligatorio',
+        percentageInvalid: 'Debe ser un número válido',
+        serverError: 'No se pudo guardar el descuento. Intentá de nuevo.'
+      },
+      success: {
+        created: 'Descuento creado correctamente.',
+        updated: 'Descuento actualizado correctamente.'
+      }
     }
   },
   common: {

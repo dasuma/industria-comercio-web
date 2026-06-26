@@ -15,52 +15,25 @@ import { LoginGoogleButton } from '../LoginGoogleButton';
 
 interface LoginCardProps {
   locale: Locale;
-  // Strings del dict global (home.title / home.subtitle). Las recibimos por
-  // prop desde el server para evitar resolver el dict en client.
   homeTitle: string;
   homeSubtitle: string;
 }
 
-// Phase machine. Cada paso disparado por su timeout — la separación en 4
-// fases (en vez de 2) es lo que hace el morph "smooth": el resize ocurre
-// con el contenido del login todavía montado pero invisible (acolcha la
-// altura) y el picker no monta hasta que el card está estable. Sin eso, el
-// grid del picker reflowea durante el resize y se ve glitchy.
-//
-//   login     → contenido de login visible, card 24rem
-//   fading    → contenido de login con opacity 0 (todavía montado), card 24rem
-//   expanding → card crece a 38rem × 22rem, login sigue montado (invisible)
-//               como "shim" de altura para que la transición no salte
-//   picker    → swap final: login unmount, picker mount con su stagger
+// Phase machine — same 4-phase morph as before.
+//   login → fading → expanding → picker
 type Phase = 'login' | 'fading' | 'expanding' | 'picker';
 
-// Tiempos del morph. POST_AUTH_HOLD_MS se siente como "verificando…" — el
-// hook `useGoogleSignIn` awaitea el callback, así el botón mantiene
-// `state='loading'` durante todo el hold y los fades.
 const POST_AUTH_HOLD_MS = 2000;
 const LOGIN_FADE_OUT_MS = 220;
 const CARD_EXPAND_MS = 760;
 
-// Anclamos los dos extremos de la transición a la altura natural de cada
-// fase, así `actual = max(contenido, min-height)` queda dominado por el
-// min-height interpolado y la altura crece de manera continua (sin meseta
-// inicial ni snap final).
-//
-// Login natural (~232px): logo 48 + heading + botón + paddings p-8.
-// Picker natural (~540px): título 2 líneas (64) + gap-1 (4) + frase
-//   inspiradora 1 línea (~20, puede wrap a 2 líneas con nombres largos),
-//   gap-5 (20) y lista de 6 cards de 56px cada uno + 5 gaps × 6 = 366,
-//   paddings p-8 (64). 35rem (560px) deja holgura para que el browser
-//   nunca tenga que crecer la altura más allá del min-height interpolado
-//   — sin esa holgura el último frame del resize hace snap visible
-//   cuando el contenido natural supera al min-height. Subdimensionar
-//   PICKER_MIN_HEIGHT_REM era el origen del "brinco" final del morph.
-const LOGIN_MIN_HEIGHT_REM = '14.5rem';
-const PICKER_MIN_HEIGHT_REM = '35rem';
+// Solid white card — login content + picker live at the same horizontal width.
+// Min-heights tuned to natural content sizes at p-10 (padding: 40px):
+//   Login: logo(52) + gap(16) + wordmark(16) + title(28) + subtitle(20) + gap-5(20) + button(40) + padding-y(80) ≈ 272px → 17rem
+//   Picker: title(28) + sub(20) + gap-5(20) + 1 card × 52px + padding-y(80) → flexible. 34rem allows comfortable content.
+const LOGIN_MIN_HEIGHT_REM = '17rem';
+const PICKER_MIN_HEIGHT_REM = '36rem';
 
-// Easing del DS — la misma curva swift-out que usan modal/popover. Aplicarla
-// consistente en card + fade hace que el morph se sienta como una sola
-// animación coherente y no como tres efectos sumados con curvas distintas.
 const SWIFT_OUT = 'cubic-bezier(0.32, 0.72, 0, 1)';
 
 const wait = (ms: number): Promise<void> => new Promise(resolve => window.setTimeout(resolve, ms));
@@ -71,10 +44,6 @@ export const LoginCard = ({ locale, homeTitle, homeSubtitle }: LoginCardProps) =
 
   const [phase, setPhase] = useState<Phase>('login');
 
-  // Awaited por el hook → mantiene `isLoading=true` (loader visible en el
-  // botón) durante todo el morph hasta que arranca el fade-out. Sin este
-  // await el botón vuelve a "Continuar con Google" un instante antes y se
-  // ve un flicker.
   const handleLoginSuccess = useCallback(async () => {
     await wait(POST_AUTH_HOLD_MS);
     setPhase('fading');
@@ -101,19 +70,16 @@ export const LoginCard = ({ locale, homeTitle, homeSubtitle }: LoginCardProps) =
     <section
       aria-busy={phase === 'fading' || phase === 'expanding'}
       className={cn(
-        'glass-popup relative flex w-full max-w-sm flex-col items-center overflow-hidden rounded-2xl p-8',
-        // Compositing hints — promovemos el card a su propia capa GPU
-        // para que el resize no gatille reflows de pintado en el root.
+        'relative flex w-full max-w-[440px] flex-col items-center overflow-hidden rounded-2xl px-10 py-10',
         'transform-gpu will-change-[min-height]',
-        // backface-visibility: hidden + perspective evita un sub-pixel
-        // jitter que aparece cuando una capa promovida se redimensiona
-        // en safari.
         '[backface-visibility:hidden] [perspective:1000px]',
         'transition-[min-height]'
       )}
       style={{
-        // El picker es vertical (1 card por fila) — mismo ancho que el
-        // login. El morph solo crece en altura, sin reflow horizontal.
+        background: '#ffffff',
+        border: '1px solid rgba(0,0,0,0.06)',
+        boxShadow:
+          '0 2px 4px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.12), 0 32px 64px rgba(0,0,0,0.32)',
         minHeight: isExpanded ? PICKER_MIN_HEIGHT_REM : LOGIN_MIN_HEIGHT_REM,
         transitionDuration: `${CARD_EXPAND_MS}ms`,
         transitionTimingFunction: SWIFT_OUT
@@ -122,7 +88,7 @@ export const LoginCard = ({ locale, homeTitle, homeSubtitle }: LoginCardProps) =
       {loginRendered && (
         <div
           className={cn(
-            'flex w-full flex-col items-center gap-5',
+            'flex w-full flex-col items-center gap-6',
             'transform-gpu will-change-[opacity,transform]',
             'transition-[opacity,transform]',
             loginVisible ? 'scale-100 opacity-100' : 'pointer-events-none scale-[0.96] opacity-0'
@@ -133,11 +99,13 @@ export const LoginCard = ({ locale, homeTitle, homeSubtitle }: LoginCardProps) =
           }}
           aria-hidden={!loginVisible}
         >
-          <header className="flex flex-col items-center text-center">
-            <div className="mb-3 size-12" aria-hidden>
+          {/* ── Brand mark ── */}
+          <header className="flex w-full flex-col items-center gap-4 text-center">
+            {/* Logo */}
+            <div className="size-[52px]" aria-hidden>
               <svg
-                width="48"
-                height="48"
+                width="52"
+                height="52"
                 viewBox="0 0 32 32"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -182,10 +150,33 @@ export const LoginCard = ({ locale, homeTitle, homeSubtitle }: LoginCardProps) =
                 />
               </svg>
             </div>
-            <h1 className="text-title-h5 text-text-strong-950">{homeTitle}</h1>
-            <p className="text-paragraph-sm text-text-sub-600">{homeSubtitle}</p>
+
+            {/* App wordmark */}
+            <span
+              className="text-[10px] font-bold tracking-[0.18em] uppercase"
+              style={{ color: '#94a3b8' }}
+            >
+              PRADMA
+            </span>
+
+            {/* Title + subtitle */}
+            <div className="flex flex-col gap-1">
+              <h1
+                className="text-[22px] leading-tight font-bold tracking-tight"
+                style={{ color: '#0a1628' }}
+              >
+                {homeTitle}
+              </h1>
+              <p className="text-[13px] leading-relaxed" style={{ color: '#64748b' }}>
+                {homeSubtitle}
+              </p>
+            </div>
           </header>
 
+          {/* ── Divider ── */}
+          <div className="w-full border-t" style={{ borderColor: 'rgba(0,0,0,0.07)' }} />
+
+          {/* ── Action ── */}
           <LoginGoogleButton locale={locale} onSuccess={handleLoginSuccess} />
         </div>
       )}

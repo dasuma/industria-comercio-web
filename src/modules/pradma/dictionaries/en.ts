@@ -285,9 +285,149 @@ export const pradmaDictEn: PradmaDictionary = {
     },
     status: {
       draft: 'Draft',
+      created: 'Created',
       pending: 'Pending',
       paid: 'Paid',
-      overdue: 'Overdue'
+      overdue: 'Overdue',
+      expired: 'Expired'
+    },
+    expirationDate: 'Due'
+  },
+  sanctions: {
+    title: 'Sanctions',
+    loading: 'Loading sanctions...',
+    empty: 'No sanctions to show.',
+    errorLoading: 'Could not load sanctions.',
+    create: 'Create sanction',
+    edit: 'Edit sanction',
+    delete: 'Delete sanction',
+    deleteConfirm: 'Are you sure you want to delete this sanction?',
+    success: {
+      created: 'Sanction created successfully.',
+      updated: 'Sanction updated successfully.',
+      deleted: 'Sanction deleted successfully.'
+    },
+    columns: {
+      id: 'ID',
+      year: 'Year',
+      percentage: 'Percentage',
+      minSanction: 'Min. sanction',
+      minSanctionAlt: 'Min. sanction alt.'
+    },
+    fields: {
+      year: 'Year',
+      percentage: 'Percentage (%)',
+      minSanction: 'Minimum sanction',
+      minSanctionAlt: 'Alternative minimum sanction'
+    },
+    form: {
+      errors: {
+        yearRequired: 'Year is required',
+        yearInvalid: 'Year must be a valid number',
+        percentageRequired: 'Percentage is required',
+        percentageInvalid: 'Must be a valid number',
+        minSanctionRequired: 'Minimum sanction is required',
+        minSanctionInvalid: 'Must be a valid number',
+        minSanctionAltRequired: 'Alternative minimum sanction is required',
+        minSanctionAltInvalid: 'Must be a valid number',
+        serverError: 'Could not save sanction. Try again.'
+      },
+      success: {
+        created: 'Sanction created successfully.',
+        updated: 'Sanction updated successfully.'
+      }
+    }
+  },
+  interestRates: {
+    title: 'Interest Rates',
+    loading: 'Loading interest rates...',
+    empty: 'No interest rates to show.',
+    errorLoading: 'Could not load interest rates.',
+    create: 'Create interest rate',
+    edit: 'Edit interest rate',
+    delete: 'Delete interest rate',
+    deleteConfirm: 'Are you sure you want to delete this interest rate?',
+    success: {
+      created: 'Interest rate created successfully.',
+      updated: 'Interest rate updated successfully.',
+      deleted: 'Interest rate deleted successfully.'
+    },
+    columns: {
+      id: 'ID',
+      year: 'Year',
+      startDate: 'Start date',
+      endDate: 'End date',
+      percentage: 'Percentage',
+      interestPercentage: 'Interest'
+    },
+    fields: {
+      year: 'Year',
+      startDate: 'Start date',
+      endDate: 'End date',
+      rateValue1: 'Rate value 1',
+      rateValue2: 'Rate value 2',
+      rateValue3: 'Rate value 3',
+      percentage: 'Percentage (%)',
+      surchargePercentage: 'Surcharge percentage (%)',
+      interestPercentage: 'Interest percentage (%)'
+    },
+    form: {
+      errors: {
+        yearRequired: 'Year is required',
+        yearInvalid: 'Year must be a valid number',
+        startDateRequired: 'Start date is required',
+        endDateRequired: 'End date is required',
+        percentageRequired: 'Percentage is required',
+        percentageInvalid: 'Must be a valid number',
+        serverError: 'Could not save interest rate. Try again.'
+      },
+      success: {
+        created: 'Interest rate created successfully.',
+        updated: 'Interest rate updated successfully.'
+      }
+    }
+  },
+  discounts: {
+    title: 'Discounts',
+    loading: 'Loading discounts...',
+    empty: 'No discounts to show.',
+    errorLoading: 'Could not load discounts.',
+    create: 'Create discount',
+    edit: 'Edit discount',
+    delete: 'Delete discount',
+    deleteConfirm: 'Are you sure you want to delete this discount?',
+    success: {
+      created: 'Discount created successfully.',
+      updated: 'Discount updated successfully.',
+      deleted: 'Discount deleted successfully.'
+    },
+    columns: {
+      id: 'ID',
+      year: 'Year',
+      startDate: 'Start date',
+      endDate: 'End date',
+      percentage: 'Percentage'
+    },
+    fields: {
+      year: 'Year',
+      startDate: 'Start date',
+      endDate: 'End date',
+      percentage: 'Percentage (%)'
+    },
+    form: {
+      errors: {
+        yearRequired: 'Year is required',
+        yearInvalid: 'Year must be a valid number',
+        startDateRequired: 'Start date is required',
+        endDateRequired: 'End date is required',
+        percentageRequired: 'Percentage is required',
+        percentageInvalid: 'Must be a valid number',
+        serverError: 'Could not save discount. Try again.'
+      },
+      success: {
+        created: 'Discount created successfully.',
+        updated: 'Discount updated successfully.'
+      }
     }
   },
   common: {

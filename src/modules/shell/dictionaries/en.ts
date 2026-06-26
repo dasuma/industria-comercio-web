@@ -13,7 +13,10 @@ export const shellDictEn: ShellDictionary = {
     activityCategories: 'Economic activities',
     users: 'Users',
     migrations: 'Migrations',
-    invoices: 'Settlements'
+    invoices: 'Settlements',
+    sanctions: 'Sanctions',
+    interestRates: 'Interest Rates',
+    discounts: 'Discounts'
   },
   itemDescriptions: {},
   subTabs: {},

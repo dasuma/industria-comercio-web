@@ -21,7 +21,8 @@ export const metadata: Metadata = {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
     apple: '/pradma-logo.png'
-  }
+  },
+  themeColor: '#0a1628'
 };
 
 // Spanish-first: ignoramos accept-language del browser. Solo respetamos la

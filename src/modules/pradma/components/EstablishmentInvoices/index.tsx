@@ -32,6 +32,8 @@ export const EstablishmentInvoices = ({ establishmentId, dict }: EstablishmentIn
             status={invoice.status}
             total={invoice.total}
             statusLabel={d.status[invoice.status as keyof typeof d.status] ?? invoice.status}
+            expirationDate={invoice.expirationDate}
+            expirationLabel={d.expirationDate}
             onClick={() => setSelected(invoice)}
           />
         ))}

@@ -342,5 +342,113 @@ export const endpointsPradma: Record<string, IHttpClient> = {
     headers: { 'Content-Type': 'multipart/form-data' },
     isMocked: false,
     urlMock: ''
+  },
+  // Sanctions
+  searchSanctions: {
+    url: `${base}/sanctions/search`,
+    method: 'POST',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  getSanction: {
+    url: `${base}/sanctions`,
+    method: 'GET',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  createSanction: {
+    url: `${base}/sanctions`,
+    method: 'POST',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  updateSanction: {
+    url: `${base}/sanctions`,
+    method: 'PUT',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  deleteSanction: {
+    url: `${base}/sanctions`,
+    method: 'DELETE',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  // Interest Rates
+  searchInterestRates: {
+    url: `${base}/interest-rates/search`,
+    method: 'POST',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  getInterestRate: {
+    url: `${base}/interest-rates`,
+    method: 'GET',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  createInterestRate: {
+    url: `${base}/interest-rates`,
+    method: 'POST',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  updateInterestRate: {
+    url: `${base}/interest-rates`,
+    method: 'PUT',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  deleteInterestRate: {
+    url: `${base}/interest-rates`,
+    method: 'DELETE',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  // Discounts
+  searchDiscounts: {
+    url: `${base}/discounts/search`,
+    method: 'POST',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  getDiscount: {
+    url: `${base}/discounts`,
+    method: 'GET',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  createDiscount: {
+    url: `${base}/discounts`,
+    method: 'POST',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  updateDiscount: {
+    url: `${base}/discounts`,
+    method: 'PUT',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  deleteDiscount: {
+    url: `${base}/discounts`,
+    method: 'DELETE',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
   }
 };

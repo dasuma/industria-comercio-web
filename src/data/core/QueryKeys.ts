@@ -16,7 +16,13 @@ enum QueryKeys {
   PRADMA_ACTIVITIES_BY_YEAR = 'pradma.activities.byYear',
   PRADMA_ESTABLISHMENT_ACTIVITIES_BY_YEAR = 'pradma.establishmentActivities.byYear',
   PRADMA_INVOICES_BY_ESTABLISHMENT = 'pradma.invoices.byEstablishment',
-  PRADMA_INVOICES_SEARCH = 'pradma.invoices.search'
+  PRADMA_INVOICES_SEARCH = 'pradma.invoices.search',
+  PRADMA_SANCTIONS_SEARCH = 'pradma.sanctions.search',
+  PRADMA_SANCTION_DETAIL = 'pradma.sanctions.detail',
+  PRADMA_INTEREST_RATES_SEARCH = 'pradma.interestRates.search',
+  PRADMA_INTEREST_RATE_DETAIL = 'pradma.interestRates.detail',
+  PRADMA_DISCOUNTS_SEARCH = 'pradma.discounts.search',
+  PRADMA_DISCOUNT_DETAIL = 'pradma.discounts.detail'
 }
 
 export default QueryKeys;

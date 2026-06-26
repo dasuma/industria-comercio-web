@@ -8,7 +8,10 @@ export const APP_ROUTES = {
   invoices: '/pradma/invoices',
   activityCategories: '/pradma/activity-categories',
   users: '/pradma/users',
-  migrations: '/pradma/migrations'
+  migrations: '/pradma/migrations',
+  sanctions: '/pradma/sanctions',
+  interestRates: '/pradma/interest-rates',
+  discounts: '/pradma/discounts'
 } as const;
 
 export const DEFAULT_AUTHED_ROUTE: string = APP_ROUTES.clients;

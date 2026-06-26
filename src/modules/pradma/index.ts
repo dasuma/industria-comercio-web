@@ -1,5 +1,23 @@
 // Data layer hooks
 export {
+  // Sanctions
+  useSearchSanctions,
+  useGetSanction,
+  useCreateSanction,
+  useUpdateSanction,
+  useDeleteSanction,
+  // Interest Rates
+  useSearchInterestRates,
+  useGetInterestRate,
+  useCreateInterestRate,
+  useUpdateInterestRate,
+  useDeleteInterestRate,
+  // Discounts
+  useSearchDiscounts,
+  useGetDiscount,
+  useCreateDiscount,
+  useUpdateDiscount,
+  useDeleteDiscount,
   // Clients
   useSearchClients,
   useGetClient,
@@ -56,6 +74,9 @@ export { InvoiceList } from './components/InvoiceList';
 export { EstablishmentDetail } from './components/EstablishmentDetail';
 export { ActivityCategoryList } from './components/ActivityCategoryList';
 export { UserList } from './components/UserList';
+export { SanctionList } from './components/SanctionList';
+export { InterestRateList } from './components/InterestRateList';
+export { DiscountList } from './components/DiscountList';
 
 // Dictionaries
 export { getPradmaDict } from './dictionaries';

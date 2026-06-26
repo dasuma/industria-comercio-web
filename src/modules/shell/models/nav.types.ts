@@ -5,5 +5,8 @@ export type NavItemKey =
   | 'invoices'
   | 'activityCategories'
   | 'users'
-  | 'migrations';
+  | 'migrations'
+  | 'sanctions'
+  | 'interestRates'
+  | 'discounts';
 export type NavSubTabKey = never;

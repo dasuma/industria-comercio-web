@@ -26,10 +26,10 @@ const formatCop = (v: number) =>
     maximumFractionDigits: 0
   }).format(v);
 
-const formatDateShort = (iso: string) =>
-  new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'short', year: 'numeric' }).format(
-    new Date(iso + 'T12:00:00')
-  );
+const formatDateShort = (iso: string | null | undefined): string => {
+  if (!iso) return '—';
+  return iso.slice(0, 10); // yyyy-mm-dd
+};
 
 /* ── Normalized row ── */
 
@@ -49,7 +49,8 @@ const STATUS_STYLES: Record<string, string> = {
   created: 'bg-bg-weak-50 text-text-sub-600',
   pending: 'bg-warning-lighter text-warning-dark',
   paid: 'bg-success-lighter text-success-dark',
-  overdue: 'bg-error-lighter text-error-dark'
+  overdue: 'bg-error-lighter text-error-dark',
+  expired: 'bg-error-lighter text-error-dark'
 };
 
 /* ── Props ── */
@@ -126,45 +127,45 @@ export const SettlementSheet = (props: SettlementSheetProps) => {
       <div
         className={cn(
           'bg-bg-white-0 relative flex w-full flex-col overflow-hidden shadow-2xl',
-          'rounded-t-2xl sm:max-w-2xl sm:rounded-2xl',
-          'h-[94dvh] sm:h-[90vh]'
+          'rounded-t-2xl sm:max-w-5xl sm:rounded-2xl',
+          'h-[96dvh] sm:h-[95vh]'
         )}
         onClick={e => e.stopPropagation()}
       >
-        {/* ── Header ── */}
-        <div className="border-stroke-soft-200 shrink-0 border-b px-4 py-3.5">
-          <div className="flex items-start gap-3">
-            {/* Info */}
-            <div className="min-w-0 flex-1">
-              <p className="text-text-strong-950 truncate text-sm font-semibold">{title}</p>
-              <div className="mt-1 flex flex-wrap items-center gap-2">
-                <p className="text-text-sub-600 text-xs">{subtitle}</p>
-                {invoiceStatus && props.mode === 'saved' && (
-                  <span
-                    className={cn(
-                      'rounded-full px-2 py-0.5 text-[11px] font-semibold',
-                      STATUS_STYLES[props.invoice.status] ?? STATUS_STYLES.pending
-                    )}
-                  >
-                    {invoiceStatus}
-                  </span>
-                )}
-                {isDraft && (
-                  <span className="bg-information-lighter text-information-dark rounded-full px-2 py-0.5 text-[11px] font-semibold">
-                    Borrador
-                  </span>
-                )}
-              </div>
-            </div>
+        {/* ── Header — single compact row ── */}
+        <div className="border-stroke-soft-200 shrink-0 border-b px-3 py-2">
+          <div className="flex items-center gap-2">
+            {/* Title */}
+            <p className="text-text-strong-950 min-w-0 flex-1 truncate text-sm font-semibold">
+              {title}
+            </p>
 
-            {/* Detalle / PDF toggle — only when pdfUrl available */}
+            {/* Subtitle + badges */}
+            <span className="text-text-sub-600 shrink-0 text-xs">{subtitle}</span>
+            {invoiceStatus && props.mode === 'saved' && (
+              <span
+                className={cn(
+                  'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold',
+                  STATUS_STYLES[props.invoice.status] ?? STATUS_STYLES.pending
+                )}
+              >
+                {invoiceStatus}
+              </span>
+            )}
+            {isDraft && (
+              <span className="bg-information-lighter text-information-dark shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold">
+                Borrador
+              </span>
+            )}
+
+            {/* Detalle / PDF toggle */}
             {pdfUrl && (
               <div className="ring-stroke-soft-200 flex shrink-0 overflow-hidden rounded-lg ring-1">
                 <button
                   type="button"
                   onClick={() => setView('detail')}
                   className={cn(
-                    'px-3 py-1.5 text-[11px] font-semibold transition-colors',
+                    'px-2.5 py-1 text-[11px] font-semibold transition-colors',
                     view === 'detail'
                       ? 'bg-text-strong-950 text-bg-white-0'
                       : 'text-text-sub-600 hover:bg-bg-weak-50'
@@ -176,7 +177,7 @@ export const SettlementSheet = (props: SettlementSheetProps) => {
                   type="button"
                   onClick={() => setView('pdf')}
                   className={cn(
-                    'border-stroke-soft-200 border-l px-3 py-1.5 text-[11px] font-semibold transition-colors',
+                    'border-stroke-soft-200 border-l px-2.5 py-1 text-[11px] font-semibold transition-colors',
                     view === 'pdf'
                       ? 'bg-text-strong-950 text-bg-white-0'
                       : 'text-text-sub-600 hover:bg-bg-weak-50'
@@ -202,7 +203,11 @@ export const SettlementSheet = (props: SettlementSheetProps) => {
         {/* ── Body ── */}
         <div className="min-h-0 flex-1 overflow-y-auto">
           {view === 'pdf' && pdfUrl ? (
-            <iframe src={pdfUrl} className="h-full w-full border-0" title="Liquidación PDF" />
+            <iframe
+              src={`/api/proxy-pdf?url=${encodeURIComponent(pdfUrl)}`}
+              className="h-full w-full border-0"
+              title="Liquidación PDF"
+            />
           ) : (
             <div className="flex flex-col gap-5 p-4 pb-6">
               {/* Activities table — draft only */}
@@ -363,10 +368,20 @@ interface InvoiceRowProps {
   status: string;
   total: number;
   statusLabel: string;
+  expirationDate?: string | null;
+  expirationLabel?: string;
   onClick: () => void;
 }
 
-export const InvoiceRow = ({ year, status, total, statusLabel, onClick }: InvoiceRowProps) => (
+export const InvoiceRow = ({
+  year,
+  status,
+  total,
+  statusLabel,
+  expirationDate,
+  expirationLabel = 'Vence',
+  onClick
+}: InvoiceRowProps) => (
   <button
     type="button"
     onClick={onClick}
@@ -382,6 +397,11 @@ export const InvoiceRow = ({ year, status, total, statusLabel, onClick }: Invoic
       {statusLabel}
     </span>
     <span className="min-w-0 flex-1" />
+    {expirationDate && (
+      <span className="text-text-soft-400 shrink-0 text-xs">
+        {expirationLabel} {formatDateShort(expirationDate)}
+      </span>
+    )}
     <span className="text-text-strong-950 shrink-0 text-sm font-semibold tabular-nums">
       {new Intl.NumberFormat('es-CO', {
         style: 'currency',

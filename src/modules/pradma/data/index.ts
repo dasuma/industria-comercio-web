@@ -51,6 +51,27 @@ export { useSearchInvoices } from './invoices/searchInvoices';
 export { useCreateDraftInvoice } from './invoices/createDraftInvoice';
 export { useGetInvoicesByEstablishment } from './invoices/getInvoicesByEstablishment';
 
+// Sanctions
+export { useSearchSanctions } from './sanctions/searchSanctions';
+export { useGetSanction } from './sanctions/getSanction';
+export { useCreateSanction } from './sanctions/createSanction';
+export { useUpdateSanction } from './sanctions/updateSanction';
+export { useDeleteSanction } from './sanctions/deleteSanction';
+
+// Interest Rates
+export { useSearchInterestRates } from './interest-rates/searchInterestRates';
+export { useGetInterestRate } from './interest-rates/getInterestRate';
+export { useCreateInterestRate } from './interest-rates/createInterestRate';
+export { useUpdateInterestRate } from './interest-rates/updateInterestRate';
+export { useDeleteInterestRate } from './interest-rates/deleteInterestRate';
+
+// Discounts
+export { useSearchDiscounts } from './discounts/searchDiscounts';
+export { useGetDiscount } from './discounts/getDiscount';
+export { useCreateDiscount } from './discounts/createDiscount';
+export { useUpdateDiscount } from './discounts/updateDiscount';
+export { useDeleteDiscount } from './discounts/deleteDiscount';
+
 // Migrations
 export { useMigrateClients } from './migrations/migrateClients';
 export { useMigrateActivityCategories } from './migrations/migrateActivityCategories';

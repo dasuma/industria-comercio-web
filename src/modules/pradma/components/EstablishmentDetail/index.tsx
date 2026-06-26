@@ -126,7 +126,7 @@ export const EstablishmentDetail = ({ locale, establishmentId }: EstablishmentDe
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -153,11 +153,11 @@ export const EstablishmentDetail = ({ locale, establishmentId }: EstablishmentDe
       </div>
 
       {/* Establishment form — always visible */}
-      <div className="bg-bg-white-0 ring-stroke-soft-200 rounded-lg px-4 py-3 ring-1">
+      <div className="bg-bg-white-0 ring-stroke-soft-200 rounded-lg px-3 py-2.5 ring-1">
         <form
           onSubmit={onSubmit}
           noValidate
-          className="grid grid-cols-2 gap-x-4 gap-y-2.5 lg:grid-cols-3"
+          className="grid grid-cols-2 gap-x-3 gap-y-2 lg:grid-cols-3"
         >
           <FormField id="est-name" label={fields.name} required error={errors.name?.message}>
             <Input.Root hasError={Boolean(errors.name)}>
@@ -257,9 +257,9 @@ export const EstablishmentDetail = ({ locale, establishmentId }: EstablishmentDe
           <TabMenuHorizontal.Trigger value="settle">{tabs.settle}</TabMenuHorizontal.Trigger>
         </TabMenuHorizontal.List>
 
-        <TabMenuHorizontal.Content value="client" className="pt-3">
+        <TabMenuHorizontal.Content value="client" className="pt-2">
           {client ? (
-            <div className="bg-bg-white-0 ring-stroke-soft-200 grid grid-cols-2 gap-x-4 gap-y-2 rounded-lg px-4 py-3 ring-1 lg:grid-cols-3">
+            <div className="bg-bg-white-0 ring-stroke-soft-200 grid grid-cols-2 gap-x-3 gap-y-1.5 rounded-lg px-3 py-2.5 ring-1 lg:grid-cols-3">
               <InfoRow label={fields.clientId} value={String(client.id)} />
               <InfoRow label={dict.clients.fields.name} value={client.name} />
               <InfoRow label={dict.clients.fields.documentType} value={client.documentType} />
@@ -274,13 +274,13 @@ export const EstablishmentDetail = ({ locale, establishmentId }: EstablishmentDe
           )}
         </TabMenuHorizontal.Content>
 
-        <TabMenuHorizontal.Content value="payments" className="pt-3">
+        <TabMenuHorizontal.Content value="payments" className="pt-2">
           <p className="text-text-sub-600 py-4 text-center text-sm">
             {dict.establishments.comingSoon}
           </p>
         </TabMenuHorizontal.Content>
 
-        <TabMenuHorizontal.Content value="settlements" className="pt-3">
+        <TabMenuHorizontal.Content value="settlements" className="pt-2">
           {isEditing ? (
             <EstablishmentInvoices establishmentId={establishmentId} dict={dict} />
           ) : (
@@ -290,7 +290,7 @@ export const EstablishmentDetail = ({ locale, establishmentId }: EstablishmentDe
           )}
         </TabMenuHorizontal.Content>
 
-        <TabMenuHorizontal.Content value="settle" className="pt-3">
+        <TabMenuHorizontal.Content value="settle" className="pt-2">
           {isEditing && establishment ? (
             <EstablishmentSettle establishment={establishment} dict={dict} />
           ) : (

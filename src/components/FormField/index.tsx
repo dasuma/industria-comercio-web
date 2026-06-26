@@ -13,7 +13,7 @@ interface FormFieldProps {
 // Espaciado label → input → hint que usa CreateReportModal. Candidato a
 // promoverlo al DS si validamos el patrón con más formularios.
 export const FormField = ({ id, label, required, error, hint, children }: FormFieldProps) => (
-  <div className="flex flex-col gap-1.5">
+  <div className="flex flex-col gap-1">
     <Label.Root htmlFor={id}>
       {label}
       {required ? <Label.Asterisk /> : null}

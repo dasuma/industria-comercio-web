@@ -6,7 +6,10 @@ import {
   RiGroupLine,
   RiStackLine,
   RiUploadCloud2Line,
-  RiUserLine
+  RiUserLine,
+  RiAlertLine,
+  RiPercentLine,
+  RiCouponLine
 } from '@biaenergy/ui/icons';
 import { APP_ROUTES, DEFAULT_AUTHED_ROUTE } from '@/config/routes';
 import type { NavItemKey, WorkspaceKey } from './nav.types';
@@ -43,6 +46,24 @@ export const workspaces: Workspace[] = [
         key: 'migrations',
         href: APP_ROUTES.migrations,
         icon: RiUploadCloud2Line
+      },
+      {
+        kind: 'item',
+        key: 'sanctions',
+        href: APP_ROUTES.sanctions,
+        icon: RiAlertLine
+      },
+      {
+        kind: 'item',
+        key: 'interestRates',
+        href: APP_ROUTES.interestRates,
+        icon: RiPercentLine
+      },
+      {
+        kind: 'item',
+        key: 'discounts',
+        href: APP_ROUTES.discounts,
+        icon: RiCouponLine
       }
     ]
   }

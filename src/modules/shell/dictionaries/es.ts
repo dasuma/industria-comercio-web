@@ -15,7 +15,10 @@ export const shellDictEs = {
     activityCategories: 'Actividades económicas',
     users: 'Usuarios',
     migrations: 'Migraciones',
-    invoices: 'Liquidaciones'
+    invoices: 'Liquidaciones',
+    sanctions: 'Sanciones',
+    interestRates: 'Tasas de interés',
+    discounts: 'Descuentos'
   } satisfies Record<NavItemKey, string>,
   itemDescriptions: itemDescriptionsEs,
   subTabs: {} satisfies Record<never, string>,
