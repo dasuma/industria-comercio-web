@@ -22,7 +22,8 @@ enum QueryKeys {
   PRADMA_INTEREST_RATES_SEARCH = 'pradma.interestRates.search',
   PRADMA_INTEREST_RATE_DETAIL = 'pradma.interestRates.detail',
   PRADMA_DISCOUNTS_SEARCH = 'pradma.discounts.search',
-  PRADMA_DISCOUNT_DETAIL = 'pradma.discounts.detail'
+  PRADMA_DISCOUNT_DETAIL = 'pradma.discounts.detail',
+  PRADMA_PUBLIC_ACTIVITIES_BY_YEAR = 'pradma.public.activities.byYear'
 }
 
 export default QueryKeys;

@@ -415,6 +415,30 @@ export const endpointsPradma: Record<string, IHttpClient> = {
     isMocked: false,
     urlMock: ''
   },
+  // Settlements — public (no auth, used in citizen portal simulator)
+  simulateSettlement: {
+    url: `${base}/settlements/simulate`,
+    method: 'POST',
+    requiresAuthorization: false,
+    isMocked: false,
+    urlMock: ''
+  },
+  // Activities by year — public (no auth, used in citizen portal simulator)
+  getActivitiesByYearPublic: {
+    url: `${base}/establishment-activities/year`,
+    method: 'GET',
+    requiresAuthorization: false,
+    isMocked: false,
+    urlMock: ''
+  },
+  // Discounts (public — no auth, used in citizen portal)
+  searchDiscountsPublic: {
+    url: `${base}/discounts/search`,
+    method: 'POST',
+    requiresAuthorization: false,
+    isMocked: false,
+    urlMock: ''
+  },
   // Discounts
   searchDiscounts: {
     url: `${base}/discounts/search`,

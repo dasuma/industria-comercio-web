@@ -17,6 +17,7 @@ export { useSearchEstablishmentActivities } from './establishment-activities/sea
 export { useGetEstablishmentActivitiesByYear } from './establishment-activities/getEstablishmentActivitiesByYear';
 export { useGetActivitiesByYear } from './establishment-activities/getActivitiesByYear';
 export { useGetEstablishmentActivity } from './establishment-activities/getEstablishmentActivity';
+export { useGetPublicActivitiesByYear } from './establishment-activities/getPublicActivitiesByYear';
 export { useCreateEstablishmentActivity } from './establishment-activities/createEstablishmentActivity';
 export { useUpdateEstablishmentActivity } from './establishment-activities/updateEstablishmentActivity';
 export { useDeleteEstablishmentActivity } from './establishment-activities/deleteEstablishmentActivity';
@@ -45,6 +46,8 @@ export { useDeleteUser } from './users/deleteUser';
 // Settlements
 export { useCreateSettlement } from './settlements/createSettlement';
 export { useSaveSettlement } from './settlements/saveSettlement';
+export { useSimulateSettlement } from './settlements/simulateSettlement';
+export type { SimulateSettlementRequest } from './settlements/simulateSettlement';
 
 // Invoices
 export { useSearchInvoices } from './invoices/searchInvoices';

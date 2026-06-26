@@ -1,3 +1,8 @@
+// Data layer hooks — public (no auth, portal simulator)
+export { useSimulateSettlement } from './data';
+export type { SimulateSettlementRequest } from './data';
+export { useGetPublicActivitiesByYear } from './data';
+
 // Data layer hooks
 export {
   // Sanctions
@@ -78,6 +83,9 @@ export { SanctionList } from './components/SanctionList';
 export { InterestRateList } from './components/InterestRateList';
 export { DiscountList } from './components/DiscountList';
 
+// Server-side data fetchers (no auth)
+export { getPublicDiscountsByYear } from './data/discounts/getPublicDiscountsByYear';
+
 // Dictionaries
 export { getPradmaDict } from './dictionaries';
 export type { PradmaDictionary } from './dictionaries';
@@ -95,6 +103,7 @@ export type { MigrationResult } from './models/migration.interface';
 
 // Types
 export type { SearchRequest, SearchResponse, ApiSearchResponse } from './types/search.types';
+export type { SettlementResponse } from './types/settlement.types';
 export type { CreateClientRequest, UpdateClientRequest } from './types/client.requests';
 export type {
   CreateEstablishmentRequest,
