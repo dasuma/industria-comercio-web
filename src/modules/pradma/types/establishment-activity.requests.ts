@@ -1,6 +1,7 @@
 export interface CreateEstablishmentActivityRequest {
   establishment_id: number;
-  activity_type_id: number;
+  activity_code: string;
+  valor: number;
   start_date: string;
   end_date?: string | null;
 }

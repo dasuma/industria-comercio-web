@@ -1,6 +1,6 @@
-# Olibia Web — BIA
+# Pradma — Industria y Comercio
 
-Aplicación web de BIA. Hub interno con workspaces por área (Operaciones, Growth) construido sobre la arquitectura modular del template-web.
+Sistema de gestión de Industria y Comercio. Construido sobre la arquitectura modular del template-web.
 
 ## Stack
 
@@ -200,11 +200,11 @@ Tres cookies forman la sesión:
 
 | Cookie                  | Contenido         | TTL    | httpOnly |
 | ----------------------- | ----------------- | ------ | -------- |
-| `olibia_session`        | Firebase ID token | 60 min | ✅       |
-| `olibia_session_userId` | uid               | 60 min | ✅       |
-| `olibia_session_email`  | email             | 60 min | ✅       |
+| `pradma_session`        | Firebase ID token | 60 min | ✅       |
+| `pradma_session_userId` | uid               | 60 min | ✅       |
+| `pradma_session_email`  | email             | 60 min | ✅       |
 
-En `localStorage` solo guardamos el **perfil mínimo** (`olibia_session_profile` — vía Zustand persist del módulo auth) y el flag `persistSession`. **Nunca el token.**
+En `localStorage` solo guardamos el **perfil mínimo** (`pradma_session_profile` — vía Zustand persist del módulo auth) y el flag `persistSession`. **Nunca el token.**
 
 ### Flujos
 
@@ -227,7 +227,7 @@ En `localStorage` solo guardamos el **perfil mínimo** (`olibia_session_profile`
 
 **Persistencia entre tabs:**
 
-Firebase usa [`browserSessionPersistence`](./src/auth/firebase.ts) — el `User` de Firebase vive solo en el tab actual y se va al cerrarlo. La persistencia entre tabs/refresh la garantizan las cookies (60 min) y `olibia_session_profile` en localStorage.
+Firebase usa [`browserSessionPersistence`](./src/auth/firebase.ts) — el `User` de Firebase vive solo en el tab actual y se va al cerrarlo. La persistencia entre tabs/refresh la garantizan las cookies (60 min) y `pradma_session_profile` en localStorage.
 
 ### Authorization al backend BIA
 
@@ -244,7 +244,7 @@ Endpoints con `requiresProfile: true` también reciben `x-user-id` — desde `lo
 
 ### Middleware y protección de rutas
 
-[`src/proxy.ts`](./src/proxy.ts) (Next 16 renombró `middleware.ts` → `proxy.ts`) valida **presencia** de la cookie `olibia_session` en cada request:
+[`src/proxy.ts`](./src/proxy.ts) (Next 16 renombró `middleware.ts` → `proxy.ts`) valida **presencia** de la cookie `pradma_session` en cada request:
 
 - Cookie ausente + ruta protegida → redirect a `PUBLIC_ROUTES.login`.
 - Cookie presente + ruta pública (login) → redirect a `DEFAULT_AUTHED_ROUTE`.

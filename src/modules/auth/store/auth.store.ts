@@ -26,7 +26,7 @@ export const useAuthStore = create<AuthState>()(
       clear: () => set({ user: null, persistSession: false })
     }),
     {
-      name: 'olibia_session_profile',
+      name: 'pradma_session_profile',
       storage: createJSONStorage(() => localStorage),
       // Persistimos solo el perfil y el flag — explícitamente NUNCA el token.
       partialize: state => ({ user: state.user, persistSession: state.persistSession }),

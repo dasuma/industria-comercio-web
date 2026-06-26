@@ -1,9 +1,7 @@
 export interface ActivityType {
   id: number;
-  name: string;
-  code: string;
-  rate: number;
-  activityCategoryId: number;
+  activityCode: string;
+  activityName: string;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

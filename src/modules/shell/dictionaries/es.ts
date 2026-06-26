@@ -1,74 +1,39 @@
-import type { NavItemKey, NavSubTabKey, WorkspaceKey } from '../models/nav.types';
+import type { NavItemKey, WorkspaceKey } from '../models/nav.types';
 
-// Override opcional de la descripción del PageHeader por item. Si no hay
-// entrada, se usa `descriptions[workspace]`. Tipado como Partial para que
-// PageHeader pueda hacer lookup con cualquier `NavItemKey` y caer al
-// fallback cuando no haya override.
-const itemDescriptionsEs: Partial<Record<NavItemKey, string>> = {
-  cgmAnalysis: 'Análisis, informes y reportes de consumo de nuestros clientes.'
-};
+const itemDescriptionsEs: Partial<Record<NavItemKey, string>> = {};
 
 export const shellDictEs = {
   workspaces: {
-    operations: 'Operaciones',
-    growth: 'Adquisición',
-    energy: 'Energía',
-    finance: 'Finanzas',
-    retention: 'Retención'
+    pradma: 'Industria y Comercio'
   } satisfies Record<WorkspaceKey, string>,
   descriptions: {
-    operations: 'Operación diaria del sistema: monitoreo, control y gestión.',
-    growth: 'Gestión de Bia Networkers',
-    energy: 'Sección en construcción — próximamente disponible.',
-    finance: 'Sección en construcción — próximamente disponible.',
-    retention: 'Sección en construcción — próximamente disponible.'
+    pradma: 'Gestión del impuesto de Industria y Comercio.'
   } satisfies Record<WorkspaceKey, string>,
   items: {
-    cgm: 'CGM',
-    cgmReport: 'Reporte CGM',
-    cgmAnalysis: 'Análisis',
-    supply: 'Supply',
-    bianetwork: 'Bia Network',
-    energy: 'Energía',
-    finance: 'Finanzas',
-    retention: 'Retención'
+    clients: 'Contribuyentes',
+    establishments: 'Establecimientos',
+    activityCategories: 'Actividades económicas',
+    users: 'Usuarios',
+    migrations: 'Migraciones',
+    invoices: 'Liquidaciones',
+    sanctions: 'Sanciones',
+    interestRates: 'Tasas de interés',
+    discounts: 'Descuentos'
   } satisfies Record<NavItemKey, string>,
   itemDescriptions: itemDescriptionsEs,
-  subTabs: {
-    users: 'Usuarios',
-    usersPro: 'Usuarios Pro',
-    accounts: 'Cuentas',
-    transactions: 'Transacciones',
-    invoices: 'Facturas'
-  } satisfies Record<NavSubTabKey, string>,
+  subTabs: {} satisfies Record<never, string>,
   switchSection: 'Cambiar sección',
   picker: {
-    title: '¿En qué equipo\ntrabajamos hoy?',
+    title: 'Industria y Comercio',
     comingSoon: 'Próximamente',
-    // Frases que se concatenan después del nombre — "FNAME, {frase}". Se
-    // elige una al azar al montar el picker. Mantenelas en minúscula y
-    // sin punto final: el nombre + coma ya inician la oración, y la
-    // ausencia de punto las hace sentir conversacionales.
     inspirations: [
       'que sea un gran día',
       'vamos con todo hoy',
-      'todo está por hacerse',
       'hoy se construye lo importante',
       'un paso más cerca de la meta',
-      'tu energía marca la diferencia',
       'hagamos que cuente',
       'el momento es ahora',
-      'el progreso empieza con un click',
-      'cada decisión te acerca',
-      'lo mejor está por venir',
-      'el equipo te necesita',
-      'que el día rinda',
-      'construyamos algo grande',
-      'todo empieza con el primer paso',
-      'tu enfoque crea impacto',
       'manos a la obra',
-      'que las ideas fluyan',
-      'hoy se decide algo bueno',
       'el futuro empieza acá'
     ]
   },

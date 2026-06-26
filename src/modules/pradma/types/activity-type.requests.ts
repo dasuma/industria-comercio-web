@@ -1,8 +1,6 @@
 export interface CreateActivityTypeRequest {
-  name: string;
-  code: string;
-  rate: number;
-  activity_category_id: number;
+  activity_code: string;
+  activity_name: string;
 }
 
 export type UpdateActivityTypeRequest = CreateActivityTypeRequest;

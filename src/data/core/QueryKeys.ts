@@ -1,17 +1,6 @@
 enum QueryKeys {
   AUTH_PROFILE = 'auth.profile',
   EXAMPLE_LIST = 'example.list',
-  BIANETWORK_USERS = 'bianetwork.users',
-  CGM_REPORTS_LIST = 'cgm-report.list',
-  CGM_ANALYSIS_SEARCH = 'cgm-analysis.search',
-  CGM_ANALYSIS_WIDGETS = 'cgm-analysis.widgets',
-  BIANETWORK_USERS_PRO = 'bianetwork.usersPro',
-  BIANETWORK_ACCOUNTS = 'bianetwork.accounts',
-  BIANETWORK_ACCOUNT_DETAIL = 'bianetwork.accounts.detail',
-  BIANETWORK_TRANSACTIONS = 'bianetwork.transactions',
-  BIANETWORK_TRANSACTION_DETAIL = 'bianetwork.transactions.detail',
-  BIANETWORK_INVOICES = 'bianetwork.invoices',
-  BIANETWORK_PENDING_COUNTS = 'bianetwork.pendingCounts',
   PRADMA_CLIENTS_SEARCH = 'pradma.clients.search',
   PRADMA_CLIENT_DETAIL = 'pradma.clients.detail',
   PRADMA_ESTABLISHMENTS_SEARCH = 'pradma.establishments.search',
@@ -23,7 +12,18 @@ enum QueryKeys {
   PRADMA_ACTIVITY_CATEGORIES_SEARCH = 'pradma.activityCategories.search',
   PRADMA_ACTIVITY_CATEGORY_DETAIL = 'pradma.activityCategories.detail',
   PRADMA_USERS_SEARCH = 'pradma.users.search',
-  PRADMA_USER_DETAIL = 'pradma.users.detail'
+  PRADMA_USER_DETAIL = 'pradma.users.detail',
+  PRADMA_ACTIVITIES_BY_YEAR = 'pradma.activities.byYear',
+  PRADMA_ESTABLISHMENT_ACTIVITIES_BY_YEAR = 'pradma.establishmentActivities.byYear',
+  PRADMA_INVOICES_BY_ESTABLISHMENT = 'pradma.invoices.byEstablishment',
+  PRADMA_INVOICES_SEARCH = 'pradma.invoices.search',
+  PRADMA_SANCTIONS_SEARCH = 'pradma.sanctions.search',
+  PRADMA_SANCTION_DETAIL = 'pradma.sanctions.detail',
+  PRADMA_INTEREST_RATES_SEARCH = 'pradma.interestRates.search',
+  PRADMA_INTEREST_RATE_DETAIL = 'pradma.interestRates.detail',
+  PRADMA_DISCOUNTS_SEARCH = 'pradma.discounts.search',
+  PRADMA_DISCOUNT_DETAIL = 'pradma.discounts.detail',
+  PRADMA_PUBLIC_ACTIVITIES_BY_YEAR = 'pradma.public.activities.byYear'
 }
 
 export default QueryKeys;

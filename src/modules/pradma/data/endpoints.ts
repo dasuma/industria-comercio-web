@@ -5,8 +5,8 @@ const base = '/ms-pradma';
 export const endpointsPradma: Record<string, IHttpClient> = {
   // Clients
   searchClients: {
-    url: `${base}/clients`,
-    method: 'GET',
+    url: `${base}/clients/search`,
+    method: 'POST',
     requiresAuthorization: true,
     isMocked: false,
     urlMock: ''
@@ -41,8 +41,8 @@ export const endpointsPradma: Record<string, IHttpClient> = {
   },
   // Establishments
   searchEstablishments: {
-    url: `${base}/establishments`,
-    method: 'GET',
+    url: `${base}/establishments/search`,
+    method: 'POST',
     requiresAuthorization: true,
     isMocked: false,
     urlMock: ''
@@ -77,8 +77,8 @@ export const endpointsPradma: Record<string, IHttpClient> = {
   },
   // Establishment Activities
   searchEstablishmentActivities: {
-    url: `${base}/establishment-activities`,
-    method: 'GET',
+    url: `${base}/establishment-activities/search`,
+    method: 'POST',
     requiresAuthorization: true,
     isMocked: false,
     urlMock: ''
@@ -113,8 +113,8 @@ export const endpointsPradma: Record<string, IHttpClient> = {
   },
   // Activity Types
   searchActivityTypes: {
-    url: `${base}/activity-types`,
-    method: 'GET',
+    url: `${base}/activity-types/search`,
+    method: 'POST',
     requiresAuthorization: true,
     isMocked: false,
     urlMock: ''
@@ -149,8 +149,8 @@ export const endpointsPradma: Record<string, IHttpClient> = {
   },
   // Activity Categories
   searchActivityCategories: {
-    url: `${base}/activity-categories`,
-    method: 'GET',
+    url: `${base}/activity-categories/search`,
+    method: 'POST',
     requiresAuthorization: true,
     isMocked: false,
     urlMock: ''
@@ -185,8 +185,8 @@ export const endpointsPradma: Record<string, IHttpClient> = {
   },
   // Users
   searchUsers: {
-    url: `${base}/users`,
-    method: 'GET',
+    url: `${base}/users/search`,
+    method: 'POST',
     requiresAuthorization: true,
     isMocked: false,
     urlMock: ''
@@ -268,11 +268,210 @@ export const endpointsPradma: Record<string, IHttpClient> = {
     isMocked: false,
     urlMock: ''
   },
+  migrateEstablishments: {
+    url: `${base}/migrations/establishments`,
+    method: 'POST',
+    requiresAuthorization: true,
+    headers: { 'Content-Type': 'multipart/form-data' },
+    isMocked: false,
+    urlMock: ''
+  },
   migrateEstablishmentTariffs: {
     url: `${base}/migrations/establishment-tariffs`,
     method: 'POST',
     requiresAuthorization: true,
     headers: { 'Content-Type': 'multipart/form-data' },
+    isMocked: false,
+    urlMock: ''
+  },
+  getActivitiesByYear: {
+    url: `${base}/establishment-activities/year`,
+    method: 'GET',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  getEstablishmentActivitiesByYear: {
+    url: `${base}/establishment-activities/establishment`,
+    method: 'GET',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  // Settlements
+  saveSettlement: {
+    url: `${base}/settlements/save`,
+    method: 'POST',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  createSettlement: {
+    url: `${base}/settlements`,
+    method: 'POST',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  // Invoices
+  searchInvoices: {
+    url: `${base}/invoices/search`,
+    method: 'POST',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  createDraftInvoice: {
+    url: `${base}/invoices/draft`,
+    method: 'POST',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  getInvoicesByEstablishment: {
+    url: `${base}/invoices/establishment`,
+    method: 'GET',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  migrateInvoices: {
+    url: `${base}/migrations/invoices`,
+    method: 'POST',
+    requiresAuthorization: true,
+    headers: { 'Content-Type': 'multipart/form-data' },
+    isMocked: false,
+    urlMock: ''
+  },
+  // Sanctions
+  searchSanctions: {
+    url: `${base}/sanctions/search`,
+    method: 'POST',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  getSanction: {
+    url: `${base}/sanctions`,
+    method: 'GET',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  createSanction: {
+    url: `${base}/sanctions`,
+    method: 'POST',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  updateSanction: {
+    url: `${base}/sanctions`,
+    method: 'PUT',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  deleteSanction: {
+    url: `${base}/sanctions`,
+    method: 'DELETE',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  // Interest Rates
+  searchInterestRates: {
+    url: `${base}/interest-rates/search`,
+    method: 'POST',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  getInterestRate: {
+    url: `${base}/interest-rates`,
+    method: 'GET',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  createInterestRate: {
+    url: `${base}/interest-rates`,
+    method: 'POST',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  updateInterestRate: {
+    url: `${base}/interest-rates`,
+    method: 'PUT',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  deleteInterestRate: {
+    url: `${base}/interest-rates`,
+    method: 'DELETE',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  // Settlements — public (no auth, used in citizen portal simulator)
+  simulateSettlement: {
+    url: `${base}/settlements/simulate`,
+    method: 'POST',
+    requiresAuthorization: false,
+    isMocked: false,
+    urlMock: ''
+  },
+  // Activities by year — public (no auth, used in citizen portal simulator)
+  getActivitiesByYearPublic: {
+    url: `${base}/establishment-activities/year`,
+    method: 'GET',
+    requiresAuthorization: false,
+    isMocked: false,
+    urlMock: ''
+  },
+  // Discounts (public — no auth, used in citizen portal)
+  searchDiscountsPublic: {
+    url: `${base}/discounts/search`,
+    method: 'POST',
+    requiresAuthorization: false,
+    isMocked: false,
+    urlMock: ''
+  },
+  // Discounts
+  searchDiscounts: {
+    url: `${base}/discounts/search`,
+    method: 'POST',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  getDiscount: {
+    url: `${base}/discounts`,
+    method: 'GET',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  createDiscount: {
+    url: `${base}/discounts`,
+    method: 'POST',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  updateDiscount: {
+    url: `${base}/discounts`,
+    method: 'PUT',
+    requiresAuthorization: true,
+    isMocked: false,
+    urlMock: ''
+  },
+  deleteDiscount: {
+    url: `${base}/discounts`,
+    method: 'DELETE',
+    requiresAuthorization: true,
     isMocked: false,
     urlMock: ''
   }

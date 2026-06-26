@@ -1,5 +1,5 @@
 export interface CreatePradmaUserRequest {
-  name: string;
+  id: string;
   email: string;
   role: string;
 }

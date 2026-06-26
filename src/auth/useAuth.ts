@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { signInWithPopup, signOut } from 'firebase/auth';
+import { signInWithPopup, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getFirebaseAuth, googleProvider } from './firebase';
 import { useSessionContext } from './SessionProvider';
 import { createSession, destroySession } from './sessionCookies';
@@ -23,6 +23,17 @@ export const useAuth = () => {
     return { user: credential.user, idToken };
   }, []);
 
+  const loginWithEmailPassword = useCallback(async (email: string, password: string) => {
+    const credential = await signInWithEmailAndPassword(getFirebaseAuth(), email, password);
+    const idToken = await credential.user.getIdToken();
+    await createSession({
+      idToken,
+      userId: credential.user.uid,
+      email: credential.user.email ?? ''
+    });
+    return { user: credential.user, idToken };
+  }, []);
+
   const logout = useCallback(async () => {
     // Limpiamos cookies ANTES de signOut: si Firebase falla por red, la
     // sesión local ya queda invalidada y el proxy patea al login en el
@@ -31,5 +42,12 @@ export const useAuth = () => {
     await signOut(getFirebaseAuth());
   }, []);
 
-  return { user, isLoading, isAuthenticated: !!user, loginWithGoogle, logout };
+  return {
+    user,
+    isLoading,
+    isAuthenticated: !!user,
+    loginWithGoogle,
+    loginWithEmailPassword,
+    logout
+  };
 };

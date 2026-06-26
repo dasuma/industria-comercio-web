@@ -5,7 +5,7 @@ import { SESSION_TOKEN_COOKIE, SESSION_USER_ID_COOKIE } from '@/auth/sessionCook
 
 const isServer = typeof window === 'undefined';
 const METHODS_WITH_BODY = ['POST', 'PATCH', 'PUT', 'DELETE'];
-const PROFILE_STORAGE_KEY = 'olibia_session_profile';
+const PROFILE_STORAGE_KEY = 'pradma_session_profile';
 
 // Lee el ID token desde la cookie httpOnly. SOLO en server (RSC/route handlers)
 // — el browser NO puede leer cookies httpOnly por diseño. En cliente
@@ -19,8 +19,8 @@ const getSessionToken = async (): Promise<string | undefined> => {
 };
 
 // `x-user-id` viene de localStorage en cliente (perfil persistido por el
-// Zustand store con key `olibia_session_profile`). En server (SSR/RSC) cae
-// a la cookie httpOnly `olibia_session_userId`, que sí es legible
+// Zustand store con key `pradma_session_profile`). En server (SSR/RSC) cae
+// a la cookie httpOnly `pradma_session_userId`, que sí es legible
 // server-side via next/headers.
 const getProfileUserId = async (): Promise<string | undefined> => {
   if (isServer) {
@@ -54,6 +54,7 @@ export const buildHeaders = async (
     'x-platform': 'web',
     'x-timezone': isServer ? 'UTC' : Intl.DateTimeFormat().resolvedOptions().timeZone,
     'x-web-app-version': env.NEXT_PUBLIC_APP_VERSION ?? '',
+    'X-App-Name': env.NEXT_PUBLIC_APP_NAME,
     'Accept-Language': await getActiveLocale()
   };
 
@@ -70,10 +71,8 @@ export const buildHeaders = async (
     if (bearer) headers.Authorization = `Bearer ${bearer}`;
   }
 
-  if (endpoint.requiresProfile) {
-    const userId = await getProfileUserId();
-    if (userId) headers['x-user-id'] = userId;
-  }
+  const userId = await getProfileUserId();
+  if (userId) headers['X-User-ID'] = userId;
 
   return { ...headers, ...(endpoint.headers ?? {}) };
 };

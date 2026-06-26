@@ -7,23 +7,12 @@ import type { SearchRequest, SearchResponse } from '../../types/search.types';
 import type { ActivityTypeResponse } from '../../types/activity-type.responses';
 import { adaptActivityTypesResponse } from './adapter';
 
-const buildQuery = (params: SearchRequest): string => {
-  const usp = new URLSearchParams();
-  if (params.limit !== undefined) usp.set('limit', String(params.limit));
-  if (params.offset !== undefined) usp.set('offset', String(params.offset));
-  if (params.search) usp.set('search', params.search);
-  const query = usp.toString();
-  return query ? `?${query}` : '';
-};
-
 export const searchActivityTypes = async (
   params: SearchRequest
 ): Promise<SearchResponse<ActivityType>> => {
-  const raw = await doFetch<void, SearchResponse<ActivityTypeResponse>>({
-    endpoint: {
-      ...endpointsPradma.searchActivityTypes,
-      url: `${endpointsPradma.searchActivityTypes.url}${buildQuery(params)}`
-    }
+  const raw = await doFetch<SearchRequest, SearchResponse<ActivityTypeResponse>>({
+    endpoint: endpointsPradma.searchActivityTypes,
+    params
   });
   return adaptActivityTypesResponse(raw);
 };

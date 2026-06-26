@@ -1,9 +1,7 @@
 export interface ClientResponse {
   id: number;
   name: string;
-  number_identification: string;
   document_type: string;
-  nit: string;
   address: string;
   phone: string;
   email: string;
