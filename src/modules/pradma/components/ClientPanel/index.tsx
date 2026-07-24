@@ -14,8 +14,8 @@ import {
   Select,
   Switch,
   toast
-} from '@biaenergy/ui';
-import { RiCloseLine, RiErrorWarningFill } from '@biaenergy/ui/icons';
+} from '@dasuma/pradma-ui';
+import { RiCloseLine, RiErrorWarningFill } from '@dasuma/pradma-ui/icons';
 import type { Locale } from '@/i18n/config';
 import { getPradmaDict } from '../../dictionaries';
 import { useCreateClient, useUpdateClient, useGetClient } from '../../data';

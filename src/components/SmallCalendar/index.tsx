@@ -1,7 +1,7 @@
 'use client';
 
 import type { ComponentProps } from 'react';
-import { Datepicker } from '@biaenergy/ui';
+import { Datepicker } from '@dasuma/pradma-ui';
 import { cn } from '@/utils/cn';
 
 type CalendarProps = ComponentProps<typeof Datepicker.Calendar>;

@@ -1,4 +1,4 @@
-import { LoaderBrand } from '@biaenergy/ui';
+import { LoaderBrand } from '@dasuma/pradma-ui';
 
 const Loading = () => (
   <div className="flex h-full min-h-[60vh] items-center justify-center">

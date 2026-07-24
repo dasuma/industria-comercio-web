@@ -1,7 +1,7 @@
 'use client';
 
-import { CompactButton, FancyButton } from '@biaenergy/ui';
-import { RiHistoryLine, RiSparkling2Fill } from '@biaenergy/ui/icons';
+import { CompactButton, FancyButton } from '@dasuma/pradma-ui';
+import { RiHistoryLine, RiSparkling2Fill } from '@dasuma/pradma-ui/icons';
 import type { ShellDictionary } from '../../dictionaries';
 
 interface HeaderActionsProps {

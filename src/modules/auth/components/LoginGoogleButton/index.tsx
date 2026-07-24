@@ -1,7 +1,7 @@
 'use client';
 
-import { FancyButton } from '@biaenergy/ui';
-import { RiGoogleFill } from '@biaenergy/ui/icons';
+import { FancyButton } from '@dasuma/pradma-ui';
+import { RiGoogleFill } from '@dasuma/pradma-ui/icons';
 import { useGoogleSignIn } from '../../hooks/useGoogleSignIn';
 import { getAuthDict } from '../../dictionaries';
 import type { Locale } from '@/i18n/config';

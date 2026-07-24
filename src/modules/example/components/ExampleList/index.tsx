@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@biaenergy/ui';
+import { Button } from '@dasuma/pradma-ui';
 import { useGetExamples } from '../../data/list/getExamples';
 import { getExampleDict } from '../../dictionaries';
 import type { Locale } from '@/i18n/config';

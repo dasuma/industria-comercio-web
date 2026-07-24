@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { Tooltip } from '@biaenergy/ui';
+import { Tooltip } from '@dasuma/pradma-ui';
 import { useSessionContext } from '@/auth/SessionProvider';
 import type { ShellDictionary } from '../../dictionaries';
 import { defaultRoute, defaultWorkspace, findItemByHref } from '../../models/workspaces.config';

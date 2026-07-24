@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTheme } from 'next-themes';
-import { Avatar, Dropdown } from '@biaenergy/ui';
+import { Avatar, Dropdown } from '@dasuma/pradma-ui';
 import {
   RiBuilding4Line,
   RiExpandUpDownLine,
@@ -11,7 +11,7 @@ import {
   RiSettings3Line,
   RiSunLine,
   RiUserLine
-} from '@biaenergy/ui/icons';
+} from '@dasuma/pradma-ui/icons';
 import { useAuth } from '@/auth/useAuth';
 import { selectUser, useAuthStore, useLogout } from '@modules/auth';
 import { cn } from '@/utils/cn';
@@ -150,11 +150,11 @@ export const UserMenu = ({ dict }: UserMenuProps) => {
               aria-label={themeAriaLabel}
               className="text-text-sub-600 hover:text-text-strong-950 focus-visible:ring-stroke-strong-950 dark:hover:bg-bg-white-0/60 flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg transition outline-none hover:bg-neutral-200/70 focus-visible:ring-2"
             >
-              <span className="bia-icon-swap" data-state={isDark ? 'b' : 'a'}>
-                <span className="bia-icon-swap-item" data-icon="a">
+              <span className="pradma-icon-swap" data-state={isDark ? 'b' : 'a'}>
+                <span className="pradma-icon-swap-item" data-icon="a">
                   <RiMoonLine className="size-[18px]" />
                 </span>
-                <span className="bia-icon-swap-item" data-icon="b">
+                <span className="pradma-icon-swap-item" data-icon="b">
                   <RiSunLine className="size-[18px]" />
                 </span>
               </span>

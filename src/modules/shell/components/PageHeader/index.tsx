@@ -87,9 +87,9 @@ export const PageHeader = ({ workspace, activeHref, dict }: PageHeaderProps) => 
 
   return (
     <div className="flex shrink-0 flex-col px-6 pt-5.5">
-      <div className="bia-page-slide relative h-14" data-page={slot}>
+      <div className="pradma-page-slide relative h-14" data-page={slot}>
         {([1, 2] as const).map(id => (
-          <section key={id} className="bia-page" data-page-id={id} aria-hidden={slot !== id}>
+          <section key={id} className="pradma-page" data-page-id={id} aria-hidden={slot !== id}>
             <div className="text-title-h5 text-text-strong-950">{pageContent[id].label}</div>
             <p className="text-paragraph-sm text-text-sub-600 mt-1 max-w-2xl">
               {pageContent[id].description}

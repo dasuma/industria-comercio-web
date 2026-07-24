@@ -1,7 +1,7 @@
 'use client';
 
-import { Kbd, Tooltip } from '@biaenergy/ui';
-import { RiSearchLine } from '@biaenergy/ui/icons';
+import { Kbd, Tooltip } from '@dasuma/pradma-ui';
+import { RiSearchLine } from '@dasuma/pradma-ui/icons';
 import { cn } from '@/utils/cn';
 import type { ShellDictionary } from '../../dictionaries';
 import { selectSetSearchOpen, selectSidebarCollapsed, useShellUiStore } from '../../store/ui.store';

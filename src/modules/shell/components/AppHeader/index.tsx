@@ -22,7 +22,7 @@ export const AppHeader = ({ workspace, dict }: AppHeaderProps) => {
     <header className="flex h-12 shrink-0 items-center gap-2">
       <div
         className={cn(
-          'bia-resize hidden shrink-0 items-center overflow-x-clip px-1.5 pt-1 sm:flex',
+          'pradma-resize hidden shrink-0 items-center overflow-x-clip px-1.5 pt-1 sm:flex',
           collapsed ? 'w-[52px]' : 'w-60'
         )}
       >

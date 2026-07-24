@@ -1,8 +1,13 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { FancyButton, Table, Pagination, Button, Input } from '@biaenergy/ui';
-import { RiAddLine, RiArrowLeftSLine, RiArrowRightSLine, RiSearchLine } from '@biaenergy/ui/icons';
+import { FancyButton, Table, Pagination, Button, Input } from '@dasuma/pradma-ui';
+import {
+  RiAddLine,
+  RiArrowLeftSLine,
+  RiArrowRightSLine,
+  RiSearchLine
+} from '@dasuma/pradma-ui/icons';
 import type { Locale } from '@/i18n/config';
 import { getPradmaDict } from '../../dictionaries';
 import { useSearchClients } from '../../data';

@@ -1,8 +1,8 @@
 'use client';
 
 import { type ChangeEvent, useCallback, useRef, useState } from 'react';
-import { Button, FancyButton, Switch, toast } from '@biaenergy/ui';
-import { RiUploadCloud2Line, RiCheckDoubleLine, RiErrorWarningLine } from '@biaenergy/ui/icons';
+import { Button, FancyButton, Switch, toast } from '@dasuma/pradma-ui';
+import { RiUploadCloud2Line, RiCheckDoubleLine, RiErrorWarningLine } from '@dasuma/pradma-ui/icons';
 import { cn } from '@/utils/cn';
 import type { MigrationResult } from '../../models/migration.interface';
 import type { MigrationResponse } from '../../types/migration.types';

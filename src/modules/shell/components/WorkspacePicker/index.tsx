@@ -19,7 +19,7 @@ interface WorkspacePickerProps {
 
 // El header (greeting + título) entra primero con fade + slide-from-top
 // (duración 500ms, arrancando a 120ms). Cuando termina, gatillamos la
-// cascada del listado con el recipe `bia-accordion-stagger` del DS. La
+// cascada del listado con el recipe `pradma-accordion-stagger` del DS. La
 // secuencia "header → opciones" es explícita para que se lea como dos
 // pasos, no como una sola entrada.
 const HEADER_DELAY_MS = 120;
@@ -44,7 +44,7 @@ export const WorkspacePicker = ({ onSelect, dict, animate = true }: WorkspacePic
   });
 
   // Hasta que el header termina, los `<li>` quedan con opacity 0 y el
-  // `<ul>` no tiene `bia-accordion-stagger`. Al activarse, se aplica la
+  // `<ul>` no tiene `pradma-accordion-stagger`. Al activarse, se aplica la
   // clase del stagger en el mismo render que se quita el `opacity-0`, así
   // la animación arranca limpia desde su `from` (blur+translateY+opacity 0).
   const [cascadeReady, setCascadeReady] = useState(!animate);
@@ -83,13 +83,13 @@ export const WorkspacePicker = ({ onSelect, dict, animate = true }: WorkspacePic
 
       <ul
         className={cn(
-          // 1 card por fila. La cascada usa el recipe `bia-accordion-stagger`
+          // 1 card por fila. La cascada usa el recipe `pradma-accordion-stagger`
           // del DS (opacity + translateY + blur, con stagger por nth-child) —
           // el mismo que el sidebar al abrir un group. Sólo aplica una vez
           // que el header terminó su entrada.
           'flex flex-col gap-1.5',
           animate && !cascadeReady && '[&>li]:opacity-0',
-          animate && cascadeReady && 'bia-accordion-stagger'
+          animate && cascadeReady && 'pradma-accordion-stagger'
         )}
       >
         {workspaces.map(workspace => {

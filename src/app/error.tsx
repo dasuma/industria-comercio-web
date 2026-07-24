@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Button } from '@biaenergy/ui';
-import { RiRefreshLine } from '@biaenergy/ui/icons';
+import { Button } from '@dasuma/pradma-ui';
+import { RiRefreshLine } from '@dasuma/pradma-ui/icons';
 
 interface ErrorPageProps {
   error: Error & { digest?: string };

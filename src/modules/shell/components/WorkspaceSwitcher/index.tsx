@@ -1,8 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Dropdown } from '@biaenergy/ui';
-import { RiExpandUpDownLine } from '@biaenergy/ui/icons';
+import { Dropdown } from '@dasuma/pradma-ui';
+import { RiExpandUpDownLine } from '@dasuma/pradma-ui/icons';
 import { cn } from '@/utils/cn';
 import { firstHrefInWorkspace, workspaces } from '../../models/workspaces.config';
 import type { Workspace } from '../../models/nav.interface';
