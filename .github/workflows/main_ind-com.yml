@@ -19,22 +19,38 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Log in to container registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: zuama.azurecr.io/
           username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_41CDDECCA97847C7BEF45AFC374BF2A8 }}
           password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_39A32153E62F48188701E88AD8843501 }}
 
       - name: Build and push container image to registry
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: zuama.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_41CDDECCA97847C7BEF45AFC374BF2A8 }}/indcom-img:${{ github.sha }}
           file: ./Dockerfile
+          # NPM_TOKEN: acceso a GitHub Packages (@dasuma/pradma-ui).
+          # NEXT_PUBLIC_*: Next.js las inlinea en build time, por eso van como build-args.
+          build-args: |
+            NPM_TOKEN=${{ secrets.NPM_TOKEN }}
+            NEXT_PUBLIC_BACKEND_URL=${{ secrets.NEXT_PUBLIC_BACKEND_URL }}
+            NEXT_PUBLIC_BLOB_URL=${{ secrets.NEXT_PUBLIC_BLOB_URL }}
+            NEXT_PUBLIC_CITY_URL=${{ secrets.NEXT_PUBLIC_CITY_URL }}
+            NEXT_PUBLIC_APP_NAME=${{ secrets.NEXT_PUBLIC_APP_NAME }}
+            NEXT_PUBLIC_CITY_NAME=${{ secrets.NEXT_PUBLIC_CITY_NAME }}
+            NEXT_PUBLIC_APP_VERSION=${{ github.sha }}
+            NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+            NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+            NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+            NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+            NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+            NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
 
   deploy:
     runs-on: ubuntu-latest
