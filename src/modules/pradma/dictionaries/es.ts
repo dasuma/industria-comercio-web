@@ -7,6 +7,7 @@ export const pradmaDictEs = {
     empty: 'No hay contribuyentes para mostrar.',
     errorLoading: 'No se pudieron cargar los contribuyentes.',
     create: 'Crear contribuyente',
+    searchPlaceholder: 'Buscar por nombre o identificación',
     edit: 'Editar contribuyente',
     delete: 'Eliminar contribuyente',
     deleteConfirm: '¿Está seguro de eliminar este contribuyente?',
@@ -66,6 +67,8 @@ export const pradmaDictEs = {
       updated: 'Establecimiento actualizado correctamente.',
       deleted: 'Establecimiento eliminado correctamente.'
     },
+    searchPlaceholder: 'Buscar por nombre o ID',
+    new: 'Nuevo establecimiento',
     columns: {
       id: 'ID',
       registrationNumber: 'N.° registro',
@@ -82,11 +85,16 @@ export const pradmaDictEs = {
       description: 'Descripción',
       startDate: 'Fecha inicio',
       endDate: 'Fecha fin',
-      clientId: 'Número de identificación'
+      clientId: 'Contribuyente',
+      clientPlaceholder: 'Buscar contribuyente...',
+      clientNoResults: 'No se encontraron contribuyentes',
+      registrationNumber: 'Número de registro',
+      numberIdentification: 'Número de identificación',
+      documentType: 'Tipo de documento'
     },
     tabs: {
       data: 'Datos',
-      client: 'Cliente',
+      client: 'Contribuyente',
       payments: 'Pagos',
       settlements: 'Liquidaciones',
       settle: 'Liquidar'
@@ -98,11 +106,13 @@ export const pradmaDictEs = {
         startDateRequired: 'La fecha de inicio es obligatoria',
         phoneOnlyNumbers: 'El teléfono solo debe contener números',
         clientIdRequired: 'El contribuyente es obligatorio',
-        serverError: 'No se pudo guardar el establecimiento.'
+        serverError: 'No se pudo guardar el establecimiento.',
+        deleteError: 'No se pudo eliminar el establecimiento.'
       },
       success: {
         created: 'Establecimiento creado correctamente.',
-        updated: 'Establecimiento actualizado correctamente.'
+        updated: 'Establecimiento actualizado correctamente.',
+        deleted: 'Establecimiento eliminado correctamente.'
       }
     },
     comingSoon: 'Próximamente'
@@ -121,12 +131,33 @@ export const pradmaDictEs = {
       updated: 'Actividad económica actualizada correctamente.',
       deleted: 'Actividad económica eliminada correctamente.'
     },
+    searchPlaceholder: 'Buscar por código o nombre',
     columns: {
       id: 'ID',
       activityTypeCode: 'Código tipo',
       activityTypeName: 'Nombre tipo',
       yearInitial: 'Año inicial',
       yearEnd: 'Año final'
+    },
+    fields: {
+      activityTypeCode: 'Código de actividad',
+      activityTypeName: 'Nombre de la actividad',
+      yearInitial: 'Año inicial',
+      yearEnd: 'Año final'
+    },
+    form: {
+      errors: {
+        codeRequired: 'El código es obligatorio',
+        nameRequired: 'El nombre es obligatorio',
+        yearRequired: 'El año es obligatorio',
+        yearInvalid: 'Ingresá un año de 4 dígitos',
+        yearEndBeforeStart: 'El año final debe ser mayor o igual al inicial',
+        serverError: 'No se pudo guardar la actividad económica. Intentá de nuevo.'
+      },
+      success: {
+        created: 'Actividad económica creada correctamente.',
+        updated: 'Actividad económica actualizada correctamente.'
+      }
     }
   },
   users: {
@@ -143,10 +174,34 @@ export const pradmaDictEs = {
       updated: 'Usuario actualizado correctamente.',
       deleted: 'Usuario eliminado correctamente.'
     },
+    searchPlaceholder: 'Buscar por correo',
     columns: {
       id: 'ID',
       email: 'Correo',
       role: 'Rol'
+    },
+    fields: {
+      id: 'UID',
+      idHint: 'UID de Firebase Authentication del usuario',
+      email: 'Correo electrónico',
+      role: 'Rol'
+    },
+    roles: {
+      ADMIN: 'Administrador',
+      OPERATOR: 'Operador'
+    },
+    form: {
+      errors: {
+        idRequired: 'El UID es obligatorio',
+        emailRequired: 'El correo es obligatorio',
+        emailInvalid: 'Correo electrónico inválido',
+        roleRequired: 'El rol es obligatorio',
+        serverError: 'No se pudo guardar el usuario. Intentá de nuevo.'
+      },
+      success: {
+        created: 'Usuario creado correctamente.',
+        updated: 'Usuario actualizado correctamente.'
+      }
     }
   },
   settle: {
@@ -158,6 +213,8 @@ export const pradmaDictEs = {
     presentationDate: 'Fecha de presentación',
     settlementDate: 'Fecha de liquidación',
     calculate: 'Calcular',
+    month: 'mes',
+    monthsPlural: 'meses',
     steps: {
       period: 'Período',
       activities: 'Actividades'
@@ -200,7 +257,8 @@ export const pradmaDictEs = {
       presentationDateRequired: 'La fecha de presentación es obligatoria',
       presentationDateFuture: 'La fecha de presentación no puede ser anterior a hoy',
       settlementDateRequired: 'La fecha de liquidación es obligatoria',
-      settlementDateFuture: 'La fecha de liquidación no puede ser anterior a hoy'
+      settlementDateFuture: 'La fecha de liquidación no puede ser anterior a hoy',
+      activitiesInvalid: 'Completá el código y las ventas de todas las actividades'
     },
     result: {
       title: 'Resultado de la liquidación',
@@ -208,7 +266,14 @@ export const pradmaDictEs = {
       downloadPdf: 'Guardar liquidación',
       activitiesTitle: 'Actividades',
       tariffRate: 'Tarifa',
-      icaTax: 'ICA'
+      icaTax: 'ICA',
+      saved: 'Liquidación guardada correctamente.',
+      saveError: 'No se pudo guardar la liquidación. Intentá de nuevo.',
+      savingPdf: 'Guardando PDF…',
+      discardTitle: '¿Descartar esta liquidación?',
+      discardDescription:
+        'El cálculo no se guardó. Si cerrás, vas a tener que calcularlo de nuevo.',
+      discardConfirm: 'Descartar'
     }
   },
   migrations: {
@@ -217,6 +282,10 @@ export const pradmaDictEs = {
     clearData: 'Limpiar datos existentes antes de migrar',
     success: 'Migración completada correctamente.',
     error: 'Error durante la migración.',
+    migrating: 'Migrando archivo, puede tardar unos minutos…',
+    recordsMigrated: '{success}/{total} registros migrados',
+    moreErrors: '… y {count} errores más',
+    invalidFile: 'Solo se aceptan archivos .dbf',
     clients: 'Migrar contribuyentes',
     activityCategories: 'Migrar categorías de actividad',
     tariffs: 'Migrar tarifas',
@@ -264,7 +333,8 @@ export const pradmaDictEs = {
         totals: 'Totales',
         allSuccess: 'Todas las migraciones completadas sin errores.',
         hasErrors: 'Algunas migraciones tuvieron errores.',
-        notRun: 'No ejecutado'
+        notRun: 'No ejecutado',
+        skipped: 'Omitido'
       }
     }
   },
@@ -272,7 +342,24 @@ export const pradmaDictEs = {
     title: 'Liquidaciones',
     loading: 'Cargando liquidaciones...',
     empty: 'No hay liquidaciones para mostrar.',
+    emptyHint: 'Las liquidaciones se generan desde el detalle de cada establecimiento.',
     errorLoading: 'No se pudieron cargar las liquidaciones.',
+    searchPlaceholder: 'Buscar por año, ID o establecimiento',
+    filters: {
+      all: 'Todos'
+    },
+    sheet: {
+      draft: 'Borrador',
+      detail: 'Detalle',
+      pdf: 'PDF',
+      pdfTitle: 'Liquidación en PDF',
+      activities: 'Actividades',
+      settlement: 'Liquidación',
+      activity: 'Actividad',
+      tariff: 'Tarifa ‰',
+      ica: 'ICA',
+      months: 'meses'
+    },
     columns: {
       id: 'ID',
       establishment: 'Establecimiento',
@@ -367,14 +454,21 @@ export const pradmaDictEs = {
       rateValue3: 'Valor tasa 3',
       percentage: 'Porcentaje (%)',
       surchargePercentage: 'Porcentaje recargo (%)',
-      interestPercentage: 'Porcentaje interés (%)'
+      interestPercentage: 'Porcentaje interés (%)',
+      rateValuesHint: 'Valores de referencia usados por la liquidación según el tramo de mora'
     },
     form: {
+      sections: {
+        validity: 'Vigencia',
+        rateValues: 'Valores de tasa',
+        percentages: 'Porcentajes'
+      },
       errors: {
         yearRequired: 'El año es obligatorio',
         yearInvalid: 'El año debe ser un número válido',
         startDateRequired: 'La fecha inicio es obligatoria',
         endDateRequired: 'La fecha fin es obligatoria',
+        endDateBeforeStart: 'La fecha fin debe ser posterior a la fecha inicio',
         percentageRequired: 'El porcentaje es obligatorio',
         percentageInvalid: 'Debe ser un número válido',
         serverError: 'No se pudo guardar la tasa de interés. Intentá de nuevo.'
@@ -420,6 +514,7 @@ export const pradmaDictEs = {
         endDateRequired: 'La fecha fin es obligatoria',
         percentageRequired: 'El porcentaje es obligatorio',
         percentageInvalid: 'Debe ser un número válido',
+        endDateBeforeStart: 'La fecha fin debe ser posterior a la fecha inicio',
         serverError: 'No se pudo guardar el descuento. Intentá de nuevo.'
       },
       success: {

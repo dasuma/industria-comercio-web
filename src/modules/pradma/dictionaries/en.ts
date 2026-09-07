@@ -9,6 +9,7 @@ export const pradmaDictEn: PradmaDictionary = {
     empty: 'No taxpayers to show.',
     errorLoading: 'Could not load taxpayers.',
     create: 'Create taxpayer',
+    searchPlaceholder: 'Search by name or ID',
     edit: 'Edit taxpayer',
     delete: 'Delete taxpayer',
     deleteConfirm: 'Are you sure you want to delete this taxpayer?',
@@ -68,6 +69,8 @@ export const pradmaDictEn: PradmaDictionary = {
       updated: 'Establishment updated successfully.',
       deleted: 'Establishment deleted successfully.'
     },
+    searchPlaceholder: 'Search by name or ID',
+    new: 'New establishment',
     columns: {
       id: 'ID',
       registrationNumber: 'Reg. number',
@@ -84,11 +87,16 @@ export const pradmaDictEn: PradmaDictionary = {
       description: 'Description',
       startDate: 'Start date',
       endDate: 'End date',
-      clientId: 'Identification number'
+      clientId: 'Taxpayer',
+      clientPlaceholder: 'Search taxpayer...',
+      clientNoResults: 'No taxpayers found',
+      registrationNumber: 'Registration number',
+      numberIdentification: 'Identification number',
+      documentType: 'Document type'
     },
     tabs: {
       data: 'Data',
-      client: 'Client',
+      client: 'Taxpayer',
       payments: 'Payments',
       settlements: 'Settlements',
       settle: 'Settle'
@@ -100,11 +108,13 @@ export const pradmaDictEn: PradmaDictionary = {
         startDateRequired: 'Start date is required',
         phoneOnlyNumbers: 'Phone must contain only numbers',
         clientIdRequired: 'Taxpayer is required',
-        serverError: 'Could not save establishment.'
+        serverError: 'Could not save establishment.',
+        deleteError: 'Could not delete establishment.'
       },
       success: {
         created: 'Establishment created successfully.',
-        updated: 'Establishment updated successfully.'
+        updated: 'Establishment updated successfully.',
+        deleted: 'Establishment deleted successfully.'
       }
     },
     comingSoon: 'Coming soon'
@@ -123,12 +133,33 @@ export const pradmaDictEn: PradmaDictionary = {
       updated: 'Economic activity updated successfully.',
       deleted: 'Economic activity deleted successfully.'
     },
+    searchPlaceholder: 'Search by code or name',
     columns: {
       id: 'ID',
       activityTypeCode: 'Type code',
       activityTypeName: 'Type name',
       yearInitial: 'Start year',
       yearEnd: 'End year'
+    },
+    fields: {
+      activityTypeCode: 'Activity code',
+      activityTypeName: 'Activity name',
+      yearInitial: 'Start year',
+      yearEnd: 'End year'
+    },
+    form: {
+      errors: {
+        codeRequired: 'Code is required',
+        nameRequired: 'Name is required',
+        yearRequired: 'Year is required',
+        yearInvalid: 'Enter a 4-digit year',
+        yearEndBeforeStart: 'End year must be greater than or equal to start year',
+        serverError: 'Could not save the economic activity. Try again.'
+      },
+      success: {
+        created: 'Economic activity created successfully.',
+        updated: 'Economic activity updated successfully.'
+      }
     }
   },
   users: {
@@ -145,10 +176,34 @@ export const pradmaDictEn: PradmaDictionary = {
       updated: 'User updated successfully.',
       deleted: 'User deleted successfully.'
     },
+    searchPlaceholder: 'Search by email',
     columns: {
       id: 'ID',
       email: 'Email',
       role: 'Role'
+    },
+    fields: {
+      id: 'UID',
+      idHint: 'Firebase Authentication UID of the user',
+      email: 'Email',
+      role: 'Role'
+    },
+    roles: {
+      ADMIN: 'Administrator',
+      OPERATOR: 'Operator'
+    },
+    form: {
+      errors: {
+        idRequired: 'UID is required',
+        emailRequired: 'Email is required',
+        emailInvalid: 'Invalid email',
+        roleRequired: 'Role is required',
+        serverError: 'Could not save the user. Try again.'
+      },
+      success: {
+        created: 'User created successfully.',
+        updated: 'User updated successfully.'
+      }
     }
   },
   settle: {
@@ -160,6 +215,8 @@ export const pradmaDictEn: PradmaDictionary = {
     presentationDate: 'Presentation date',
     settlementDate: 'Settlement date',
     calculate: 'Calculate',
+    month: 'month',
+    monthsPlural: 'months',
     steps: {
       period: 'Period',
       activities: 'Activities'
@@ -202,7 +259,8 @@ export const pradmaDictEn: PradmaDictionary = {
       presentationDateRequired: 'Presentation date is required',
       presentationDateFuture: 'Presentation date cannot be in the past',
       settlementDateRequired: 'Settlement date is required',
-      settlementDateFuture: 'Settlement date cannot be in the past'
+      settlementDateFuture: 'Settlement date cannot be in the past',
+      activitiesInvalid: 'Fill in the code and sales for every activity'
     },
     result: {
       title: 'Settlement result',
@@ -210,7 +268,14 @@ export const pradmaDictEn: PradmaDictionary = {
       downloadPdf: 'Save settlement',
       activitiesTitle: 'Activities',
       tariffRate: 'Rate',
-      icaTax: 'ICA'
+      icaTax: 'ICA',
+      saved: 'Settlement saved successfully.',
+      saveError: 'Could not save the settlement. Try again.',
+      savingPdf: 'Saving PDF…',
+      discardTitle: 'Discard this settlement?',
+      discardDescription:
+        'The calculation was not saved. If you close, you will need to calculate it again.',
+      discardConfirm: 'Discard'
     }
   },
   migrations: {
@@ -219,6 +284,10 @@ export const pradmaDictEn: PradmaDictionary = {
     clearData: 'Clear existing data before migrating',
     success: 'Migration completed successfully.',
     error: 'Error during migration.',
+    migrating: 'Migrating file, this may take a few minutes…',
+    recordsMigrated: '{success}/{total} records migrated',
+    moreErrors: '… and {count} more errors',
+    invalidFile: 'Only .dbf files are accepted',
     clients: 'Migrate taxpayers',
     activityCategories: 'Migrate activity categories',
     tariffs: 'Migrate tariffs',
@@ -266,7 +335,8 @@ export const pradmaDictEn: PradmaDictionary = {
         totals: 'Totals',
         allSuccess: 'All migrations completed without errors.',
         hasErrors: 'Some migrations had errors.',
-        notRun: 'Not run'
+        notRun: 'Not run',
+        skipped: 'Skipped'
       }
     }
   },
@@ -274,7 +344,24 @@ export const pradmaDictEn: PradmaDictionary = {
     title: 'Settlements',
     loading: 'Loading settlements...',
     empty: 'No settlements to show.',
+    emptyHint: 'Settlements are generated from each establishment detail.',
     errorLoading: 'Could not load settlements.',
+    searchPlaceholder: 'Search by year, ID or establishment',
+    filters: {
+      all: 'All'
+    },
+    sheet: {
+      draft: 'Draft',
+      detail: 'Detail',
+      pdf: 'PDF',
+      pdfTitle: 'Settlement PDF',
+      activities: 'Activities',
+      settlement: 'Settlement',
+      activity: 'Activity',
+      tariff: 'Rate ‰',
+      ica: 'ICA',
+      months: 'months'
+    },
     columns: {
       id: 'ID',
       establishment: 'Establishment',
@@ -369,14 +456,21 @@ export const pradmaDictEn: PradmaDictionary = {
       rateValue3: 'Rate value 3',
       percentage: 'Percentage (%)',
       surchargePercentage: 'Surcharge percentage (%)',
-      interestPercentage: 'Interest percentage (%)'
+      interestPercentage: 'Interest percentage (%)',
+      rateValuesHint: 'Reference values used by the settlement depending on the delinquency period'
     },
     form: {
+      sections: {
+        validity: 'Validity',
+        rateValues: 'Rate values',
+        percentages: 'Percentages'
+      },
       errors: {
         yearRequired: 'Year is required',
         yearInvalid: 'Year must be a valid number',
         startDateRequired: 'Start date is required',
         endDateRequired: 'End date is required',
+        endDateBeforeStart: 'End date must be after start date',
         percentageRequired: 'Percentage is required',
         percentageInvalid: 'Must be a valid number',
         serverError: 'Could not save interest rate. Try again.'
@@ -422,6 +516,7 @@ export const pradmaDictEn: PradmaDictionary = {
         endDateRequired: 'End date is required',
         percentageRequired: 'Percentage is required',
         percentageInvalid: 'Must be a valid number',
+        endDateBeforeStart: 'End date must be after start date',
         serverError: 'Could not save discount. Try again.'
       },
       success: {

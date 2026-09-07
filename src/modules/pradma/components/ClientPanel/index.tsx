@@ -1,27 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@/utils/zodResolver';
 import { z } from 'zod';
-import {
-  Button,
-  CompactButton,
-  FancyButton,
-  Hint,
-  Input,
-  Label,
-  Select,
-  Switch,
-  toast
-} from '@dasuma/pradma-ui';
-import { RiCloseLine, RiErrorWarningFill } from '@dasuma/pradma-ui/icons';
+import { Button, Input, Label, Select, Skeleton, Switch, toast } from '@dasuma/pradma-ui';
+import { RiDeleteBinLine } from '@dasuma/pradma-ui/icons';
 import type { Locale } from '@/i18n/config';
-import { getPradmaDict } from '../../dictionaries';
-import { useCreateClient, useUpdateClient, useGetClient } from '../../data';
-import { DOCUMENT_TYPE } from '../../models/shared';
-import { cn } from '@/utils/cn';
+import { EntityDrawer } from '@/components/EntityDrawer';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { FormField } from '@/components/FormField';
+import { getPradmaDict } from '../../dictionaries';
+import { useCreateClient, useDeleteClient, useGetClient, useUpdateClient } from '../../data';
+import { DOCUMENT_TYPE } from '../../models/shared';
 
 interface ClientPanelProps {
   locale: Locale;
@@ -29,25 +20,32 @@ interface ClientPanelProps {
   onClose: () => void;
 }
 
+const FormSkeleton = () => (
+  <div className="flex flex-col gap-4" aria-busy>
+    {Array.from({ length: 5 }, (_, i) => (
+      <div key={i} className="flex flex-col gap-1.5">
+        <Skeleton.Root className="h-3 w-28" />
+        <Skeleton.Root className="h-9 w-full" />
+      </div>
+    ))}
+  </div>
+);
+
 export const ClientPanel = ({ locale, clientId, onClose }: ClientPanelProps) => {
   const dict = getPradmaDict(locale);
   const isEditing = clientId !== null;
   const { data: client } = useGetClient(clientId);
   const { mutate: createClient, isPending: isCreating } = useCreateClient();
   const { mutate: updateClient, isPending: isUpdating } = useUpdateClient();
+  const { mutate: deleteClient, isPending: isDeleting } = useDeleteClient();
   const isPending = isCreating || isUpdating;
-  const [visible, setVisible] = useState(false);
+  const [open, setOpen] = useState(true);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
-  useEffect(() => {
-    const r = requestAnimationFrame(() => {
-      requestAnimationFrame(() => setVisible(true));
-    });
-    return () => cancelAnimationFrame(r);
-  }, []);
-
+  // El Drawer del DS anima la salida: primero cerramos, después desmontamos.
   const handleClose = () => {
-    setVisible(false);
-    setTimeout(onClose, 300);
+    setOpen(false);
+    window.setTimeout(onClose, 350);
   };
 
   const schema = z.object({
@@ -75,12 +73,11 @@ export const ClientPanel = ({ locale, clientId, onClose }: ClientPanelProps) => 
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
-    setValue,
+    formState: { errors },
     control
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    mode: 'onChange',
+    mode: 'onTouched',
     values: client
       ? {
           id: String(client.id),
@@ -103,236 +100,218 @@ export const ClientPanel = ({ locale, clientId, onClose }: ClientPanelProps) => 
   });
 
   const onSubmit = handleSubmit(values => {
+    const request = {
+      name: values.name,
+      document_type: values.documentType,
+      address: values.address,
+      phone: values.phone,
+      email: values.email,
+      is_company: values.isCompany
+    };
+    const callbacks = (message: string) => ({
+      onSuccess: () => {
+        toast.success(message);
+        handleClose();
+      },
+      onError: () => toast.error(dict.clients.form.errors.serverError)
+    });
+
     if (isEditing && client) {
-      updateClient(
-        {
-          id: client.id,
-          request: {
-            name: values.name,
-            document_type: values.documentType,
-            address: values.address,
-            phone: values.phone,
-            email: values.email,
-            is_company: values.isCompany
-          }
-        },
-        {
-          onSuccess: () => {
-            toast.success(dict.clients.form.success.updated);
-            handleClose();
-          },
-          onError: () => toast.error(dict.clients.form.errors.serverError)
-        }
-      );
+      updateClient({ id: client.id, request }, callbacks(dict.clients.form.success.updated));
     } else {
       createClient(
-        {
-          id: Number(values.id),
-          name: values.name,
-          document_type: values.documentType,
-          address: values.address,
-          phone: values.phone,
-          email: values.email,
-          is_company: values.isCompany
-        },
-        {
-          onSuccess: () => {
-            toast.success(dict.clients.form.success.created);
-            handleClose();
-          },
-          onError: () => toast.error(dict.clients.form.errors.serverError)
-        }
+        { id: Number(values.id), ...request },
+        callbacks(dict.clients.form.success.created)
       );
     }
   });
 
+  const handleDelete = () => {
+    if (!client) return;
+    deleteClient(client.id, {
+      onSuccess: () => {
+        toast.success(dict.clients.success.deleted);
+        setConfirmDelete(false);
+        handleClose();
+      },
+      onError: () => toast.error(dict.common.deleteError)
+    });
+  };
+
   const documentTypes = Object.values(DOCUMENT_TYPE);
-  const watchDocumentType = useWatch({ control, name: 'documentType' });
-  const watchIsCompany = useWatch({ control, name: 'isCompany' });
 
   return (
     <>
-      <button
-        type="button"
-        aria-label="Cerrar"
-        onClick={handleClose}
-        className={cn(
-          'fixed inset-0 z-40 cursor-default bg-black/30 backdrop-blur-[2px]',
-          'transition-opacity duration-300',
-          visible ? 'opacity-100' : 'opacity-0'
-        )}
-      />
-
-      <div
-        className={cn(
-          'bg-bg-white-0 ring-stroke-soft-200 fixed top-0 right-0 z-50 flex h-full w-full max-w-lg flex-col ring-1',
-          'transition-transform duration-300 ease-out',
-          visible ? 'translate-x-0' : 'translate-x-full'
-        )}
+      <EntityDrawer
+        open={open}
+        onClose={handleClose}
+        title={isEditing ? dict.clients.edit : dict.clients.create}
+        cancelLabel={dict.common.cancel}
+        submitLabel={dict.common.save}
+        onSubmit={() => void onSubmit()}
+        isSubmitting={isPending}
+        loading={isEditing && !client}
+        loadingSlot={<FormSkeleton />}
+        footerStart={
+          isEditing ? (
+            // [R7] destructivo no protagonista → Button error stroke
+            <Button.Root
+              variant="error"
+              mode="stroke"
+              size="small"
+              onClick={() => setConfirmDelete(true)}
+              disabled={isPending || !client}
+            >
+              <Button.Icon as={RiDeleteBinLine} />
+              {dict.common.delete}
+            </Button.Root>
+          ) : null
+        }
       >
-        <div className="border-stroke-soft-200 flex items-center justify-between border-b px-6 py-4">
-          <h2 className="text-text-strong-950 text-lg font-semibold">
-            {isEditing ? dict.clients.edit : dict.clients.create}
-          </h2>
-          <CompactButton.Root
-            variant="ghost"
-            size="medium"
-            onClick={handleClose}
-            aria-label="Cerrar"
+        <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
+          <FormField
+            id="client-name"
+            label={dict.clients.fields.name}
+            required
+            error={errors.name?.message}
           >
-            <CompactButton.Icon as={RiCloseLine} />
-          </CompactButton.Root>
-        </div>
+            <Input.Root hasError={Boolean(errors.name)}>
+              <Input.Wrapper>
+                <Input.Input id="client-name" autoFocus {...register('name')} />
+              </Input.Wrapper>
+            </Input.Root>
+          </FormField>
 
-        {isEditing && !client ? (
-          <div className="flex flex-1 items-center justify-center">
-            <p className="text-text-sub-600">{dict.clients.loading}</p>
-          </div>
-        ) : (
-          <>
-            <div className="flex-1 overflow-y-auto p-6">
-              <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
-                <FormField
-                  id="client-name"
-                  label={dict.clients.fields.name}
-                  required
-                  error={errors.name?.message}
-                >
-                  <Input.Root hasError={Boolean(errors.name)}>
-                    <Input.Wrapper>
-                      <Input.Input id="client-name" {...register('name')} />
-                    </Input.Wrapper>
-                  </Input.Root>
-                </FormField>
-
-                <div className="flex flex-col gap-1.5">
-                  <Label.Root htmlFor="client-document-type">
-                    {dict.clients.fields.documentType}
-                    <Label.Asterisk />
-                  </Label.Root>
-                  <Select.Root
-                    key={watchDocumentType}
-                    value={watchDocumentType}
-                    onValueChange={v => setValue('documentType', v, { shouldValidate: true })}
-                    hasError={Boolean(errors.documentType)}
-                  >
-                    <Select.Trigger>
-                      <Select.Value placeholder="Seleccionar..." />
-                    </Select.Trigger>
-                    <Select.Content>
-                      {documentTypes.map(dt => (
-                        <Select.Item key={dt} value={dt}>
-                          {dt}
-                        </Select.Item>
-                      ))}
-                    </Select.Content>
-                  </Select.Root>
-                  {errors.documentType && (
-                    <Hint.Root hasError>
-                      <Hint.Icon as={RiErrorWarningFill} />
-                      {errors.documentType.message}
-                    </Hint.Root>
-                  )}
-                </div>
-
-                <FormField
-                  id="client-id"
-                  label={dict.clients.fields.id}
-                  required={!isEditing}
-                  error={errors.id?.message}
-                >
-                  <Input.Root hasError={Boolean(errors.id)}>
-                    <Input.Wrapper>
-                      <Input.Input
-                        id="client-id"
-                        inputMode="numeric"
-                        readOnly={isEditing}
-                        className={isEditing ? 'text-text-sub-600' : ''}
-                        {...register('id')}
-                      />
-                    </Input.Wrapper>
-                  </Input.Root>
-                </FormField>
-
-                <FormField
-                  id="client-address"
-                  label={dict.clients.fields.address}
-                  required
-                  error={errors.address?.message}
-                >
-                  <Input.Root hasError={Boolean(errors.address)}>
-                    <Input.Wrapper>
-                      <Input.Input id="client-address" {...register('address')} />
-                    </Input.Wrapper>
-                  </Input.Root>
-                </FormField>
-
-                <FormField
-                  id="client-phone"
-                  label={dict.clients.fields.phone}
-                  error={errors.phone?.message}
-                >
-                  <Input.Root hasError={Boolean(errors.phone)}>
-                    <Input.Wrapper>
-                      <Input.Input
-                        id="client-phone"
-                        inputMode="numeric"
-                        onKeyDown={e => {
-                          if (e.key.length === 1 && !/\d/.test(e.key)) e.preventDefault();
-                        }}
-                        {...register('phone')}
-                      />
-                    </Input.Wrapper>
-                  </Input.Root>
-                </FormField>
-
-                <FormField
-                  id="client-email"
-                  label={dict.clients.fields.email}
-                  error={errors.email?.message}
-                >
-                  <Input.Root hasError={Boolean(errors.email)}>
-                    <Input.Wrapper>
-                      <Input.Input
-                        id="client-email"
-                        type="email"
-                        onKeyDown={e => {
-                          if (e.key === ' ') e.preventDefault();
-                        }}
-                        {...register('email')}
-                      />
-                    </Input.Wrapper>
-                  </Input.Root>
-                </FormField>
-
-                <div className="flex flex-col gap-1.5">
-                  <Label.Root htmlFor="client-is-company">
-                    {dict.clients.fields.isCompany}
-                  </Label.Root>
-                  <Switch.Root
-                    id="client-is-company"
-                    checked={watchIsCompany}
-                    onCheckedChange={v => setValue('isCompany', v, { shouldValidate: true })}
-                  />
-                </div>
-              </form>
-            </div>
-
-            <div className="border-stroke-soft-200 flex items-center justify-end gap-3 border-t px-6 py-4">
-              <Button.Root variant="basic" onClick={handleClose}>
-                {dict.common.cancel}
-              </Button.Root>
-              <FancyButton.Root
-                variant="primary"
-                onClick={onSubmit}
-                disabled={!isValid || isPending}
+          <Controller
+            control={control}
+            name="documentType"
+            render={({ field }) => (
+              <FormField
+                id="client-document-type"
+                label={dict.clients.fields.documentType}
+                required
+                error={errors.documentType?.message}
               >
-                {isPending ? dict.common.saving : dict.common.save}
-              </FancyButton.Root>
+                <Select.Root
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  hasError={Boolean(errors.documentType)}
+                >
+                  <Select.Trigger id="client-document-type" onBlur={field.onBlur}>
+                    <Select.Value placeholder={dict.common.selectPlaceholder} />
+                  </Select.Trigger>
+                  <Select.Content>
+                    {documentTypes.map(dt => (
+                      <Select.Item key={dt} value={dt}>
+                        {dt}
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Root>
+              </FormField>
+            )}
+          />
+
+          {isEditing ? (
+            <div className="flex flex-col gap-1">
+              <Label.Root>{dict.clients.fields.id}</Label.Root>
+              <p className="bg-bg-weak-50 text-paragraph-sm text-text-sub-600 rounded-lg px-3 py-2 tabular-nums">
+                {client?.id}
+              </p>
             </div>
-          </>
-        )}
-      </div>
+          ) : (
+            <FormField
+              id="client-id"
+              label={dict.clients.fields.id}
+              required
+              error={errors.id?.message}
+            >
+              <Input.Root hasError={Boolean(errors.id)}>
+                <Input.Wrapper>
+                  <Input.Input id="client-id" inputMode="numeric" {...register('id')} />
+                </Input.Wrapper>
+              </Input.Root>
+            </FormField>
+          )}
+
+          <FormField
+            id="client-address"
+            label={dict.clients.fields.address}
+            required
+            error={errors.address?.message}
+          >
+            <Input.Root hasError={Boolean(errors.address)}>
+              <Input.Wrapper>
+                <Input.Input id="client-address" {...register('address')} />
+              </Input.Wrapper>
+            </Input.Root>
+          </FormField>
+
+          <FormField
+            id="client-phone"
+            label={dict.clients.fields.phone}
+            error={errors.phone?.message}
+          >
+            <Input.Root hasError={Boolean(errors.phone)}>
+              <Input.Wrapper>
+                <Input.Input
+                  id="client-phone"
+                  inputMode="numeric"
+                  onKeyDown={e => {
+                    if (e.key.length === 1 && !/\d/.test(e.key)) e.preventDefault();
+                  }}
+                  {...register('phone')}
+                />
+              </Input.Wrapper>
+            </Input.Root>
+          </FormField>
+
+          <FormField
+            id="client-email"
+            label={dict.clients.fields.email}
+            error={errors.email?.message}
+          >
+            <Input.Root hasError={Boolean(errors.email)}>
+              <Input.Wrapper>
+                <Input.Input
+                  id="client-email"
+                  type="email"
+                  onKeyDown={e => {
+                    if (e.key === ' ') e.preventDefault();
+                  }}
+                  {...register('email')}
+                />
+              </Input.Wrapper>
+            </Input.Root>
+          </FormField>
+
+          <Controller
+            control={control}
+            name="isCompany"
+            render={({ field }) => (
+              <div className="ring-stroke-soft-200 flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 ring-1">
+                <Label.Root htmlFor="client-is-company">{dict.clients.fields.isCompany}</Label.Root>
+                <Switch.Root
+                  id="client-is-company"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </div>
+            )}
+          />
+        </form>
+      </EntityDrawer>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title={dict.clients.delete}
+        description={dict.clients.deleteConfirm}
+        confirmLabel={dict.common.delete}
+        cancelLabel={dict.common.cancel}
+        onConfirm={handleDelete}
+        isPending={isDeleting}
+      />
     </>
   );
 };
