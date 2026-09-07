@@ -1,3 +1,4 @@
+import { Badge } from '@dasuma/pradma-ui';
 import { RiCheckDoubleLine, RiErrorWarningLine, RiSubtractLine } from '@dasuma/pradma-ui/icons';
 import { cn } from '@/utils/cn';
 import type { MigrationResult } from '../../models/migration.interface';
@@ -10,11 +11,13 @@ interface StepConfig {
 
 interface MigrationSummaryProps {
   results: (MigrationResult | null)[];
+  /** Pasos por los que el usuario avanzó sin ejecutar la migración. */
+  skipped?: boolean[];
   steps: readonly StepConfig[];
   dict: PradmaDictionary;
 }
 
-export const MigrationSummary = ({ results, steps, dict }: MigrationSummaryProps) => {
+export const MigrationSummary = ({ results, skipped, steps, dict }: MigrationSummaryProps) => {
   const wizardDict = dict.migrations.wizard;
   const summaryDict = wizardDict.summary;
 
@@ -104,10 +107,16 @@ export const MigrationSummary = ({ results, steps, dict }: MigrationSummaryProps
                     </>
                   ) : (
                     <td colSpan={3} className="text-text-disabled-300 px-4 py-2.5 text-right">
-                      <span className="inline-flex items-center gap-1">
-                        <RiSubtractLine className="size-4" />
-                        {summaryDict.notRun}
-                      </span>
+                      {skipped?.[i] ? (
+                        <Badge.Root variant="light" color="orange" size="small">
+                          {summaryDict.skipped}
+                        </Badge.Root>
+                      ) : (
+                        <span className="inline-flex items-center gap-1">
+                          <RiSubtractLine className="size-4" />
+                          {summaryDict.notRun}
+                        </span>
+                      )}
                     </td>
                   )}
                 </tr>
