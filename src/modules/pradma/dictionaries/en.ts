@@ -441,6 +441,26 @@ export const pradmaDictEn: PradmaDictionary = {
     yes: 'Yes',
     no: 'No',
     page: 'Page',
-    of: 'of'
+    of: 'of',
+    close: 'Close',
+    edit: 'Edit',
+    delete: 'Delete',
+    deleting: 'Deleting...',
+    actions: 'Actions',
+    clearSearch: 'Clear search',
+    searchByYear: 'Search by year',
+    noResultsTitle: 'No results',
+    noResultsDescription: 'Nothing matches "{query}". Try another term.',
+    emptyHint: 'Once you create the first one it will show up here.',
+    errorTitle: 'Could not load the data',
+    rangeLabel: '{from}–{to} of {total}',
+    prevPage: 'Previous page',
+    nextPage: 'Next page',
+    selectPlaceholder: 'Select...',
+    deleteTitle: 'Delete this record?',
+    deleteDescription: 'This action cannot be undone.',
+    deleteError: 'Could not delete. Try again.',
+    optional: 'Optional',
+    notAvailable: '—'
   }
 };

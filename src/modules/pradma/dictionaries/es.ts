@@ -439,7 +439,27 @@ export const pradmaDictEs = {
     yes: 'Sí',
     no: 'No',
     page: 'Página',
-    of: 'de'
+    of: 'de',
+    close: 'Cerrar',
+    edit: 'Editar',
+    delete: 'Eliminar',
+    deleting: 'Eliminando...',
+    actions: 'Acciones',
+    clearSearch: 'Limpiar búsqueda',
+    searchByYear: 'Buscar por año',
+    noResultsTitle: 'Sin resultados',
+    noResultsDescription: 'No encontramos nada para "{query}". Probá con otro término.',
+    emptyHint: 'Cuando crees el primero va a aparecer acá.',
+    errorTitle: 'No se pudo cargar la información',
+    rangeLabel: '{from}–{to} de {total}',
+    prevPage: 'Página anterior',
+    nextPage: 'Página siguiente',
+    selectPlaceholder: 'Seleccionar...',
+    deleteTitle: '¿Eliminar este registro?',
+    deleteDescription: 'Esta acción no se puede deshacer.',
+    deleteError: 'No se pudo eliminar. Intentá de nuevo.',
+    optional: 'Opcional',
+    notAvailable: '—'
   }
 };
 

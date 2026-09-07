@@ -43,3 +43,19 @@ export const formatNumericDate = (
   value: Date | string | null | undefined,
   locale = 'es-CO'
 ): string => formatDate(value, locale, NUMERIC_DATE_OPTIONS);
+
+export const formatPercent = (
+  value: number | null | undefined,
+  locale = 'es-CO',
+  maximumFractionDigits = 2
+): string => {
+  if (value === null || value === undefined || Number.isNaN(value)) return '-';
+  return `${new Intl.NumberFormat(locale, { maximumFractionDigits }).format(value)} %`;
+};
+
+/** Reemplaza `{key}` por su valor en un string de diccionario. */
+export const interpolate = (template: string, values: Record<string, string | number>): string =>
+  Object.entries(values).reduce(
+    (acc, [key, value]) => acc.replaceAll(`{${key}}`, String(value)),
+    template
+  );
