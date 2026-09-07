@@ -1,6 +1,7 @@
 import type { IHttpClient } from './http_client';
 import type { ParamsFetch } from './params';
-import { env } from '@/config/env';
+import { getServerEnv } from '@/config/env';
+import { getPublicConfig } from '@/config/publicConfig';
 import { SESSION_TOKEN_COOKIE, SESSION_USER_ID_COOKIE } from '@/auth/sessionCookies';
 
 const isServer = typeof window === 'undefined';
@@ -50,11 +51,12 @@ export const buildHeaders = async (
   endpoint: IHttpClient,
   token?: string
 ): Promise<Record<string, string>> => {
+  const { appName, appVersion } = getPublicConfig();
   const headers: Record<string, string> = {
     'x-platform': 'web',
     'x-timezone': isServer ? 'UTC' : Intl.DateTimeFormat().resolvedOptions().timeZone,
-    'x-web-app-version': env.NEXT_PUBLIC_APP_VERSION ?? '',
-    'X-App-Name': env.NEXT_PUBLIC_APP_NAME,
+    'x-web-app-version': appVersion ?? '',
+    'X-App-Name': appName,
     'Accept-Language': await getActiveLocale()
   };
 
@@ -92,7 +94,7 @@ export const buildUrl = (endpoint: IHttpClient, value?: string, useBaseUrl = tru
   // permite que el server inyecte Authorization desde la cookie httpOnly
   // (el JS del cliente no tiene acceso al token). En server (SSR/RSC)
   // llamamos directo al backend con la URL real.
-  const base = !isServer ? '/api/proxy' : env.NEXT_PUBLIC_BACKEND_URL;
+  const base = !isServer ? '/api/proxy' : getServerEnv().BACKEND_URL;
   return `${base}${path}`;
 };
 

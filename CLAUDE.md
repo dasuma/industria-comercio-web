@@ -52,7 +52,7 @@ Si necesitas aplicar estos patrones manualmente, consulta los archivos en [.clau
 - Nunca `any`, `console.log`, código comentado, imports/variables sin usar, URLs hardcodeadas.
 - Siempre `===`, `const`/`let`, tipos explícitos.
 - `// @ts-ignore` y `// @ts-expect-error` prohibidos sin justificación.
-- **Env vars**: usá `import { env } from '@/config/env'`. **Nunca** `process.env.X` directo (perderías la validación Zod del arranque).
+- **Env vars**: se leen en **runtime**, sin prefijo `NEXT_PUBLIC_` (misma imagen Docker para toda ciudad; Azure inyecta app settings). Server: `getServerEnv()` de `@/config/env`. Código que corre en cliente o en ambos: `getPublicConfig()` de `@/config/publicConfig`. **Nunca** `process.env.X` directo ni `NEXT_PUBLIC_*` nuevas.
 
 ### Componentes
 

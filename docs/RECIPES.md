@@ -426,25 +426,20 @@ Correr solo este test: `npm test SiteCard`.
 
 ## Agregar una variable de entorno
 
-Las env vars se validan con Zod al arranque en [`src/config/env.ts`](../src/config/env.ts). Si una var requerida falta, el build falla con un mensaje claro.
+Las env vars se leen **en runtime** (no en build) y se validan con Zod en [`src/config/env.ts`](../src/config/env.ts) la primera vez que se usan. Si una var requerida falta, el primer request falla con un mensaje claro. **Ninguna lleva prefijo `NEXT_PUBLIC_`**: Next.js inlinearía el valor en el bundle y obligaría a una imagen Docker por ciudad. Con lectura en runtime, la misma imagen sirve para todas y cada App Service define sus app settings.
 
-1. Súmala a `.env.local` (no se commitea) y a `.env.example` con valor vacío o de ejemplo.
-2. Si es **pública** (cliente puede leerla), prefijo `NEXT_PUBLIC_`. Si es **secreta** (solo server), sin prefijo.
-3. Agregala al schema en `src/config/env.ts`:
+1. Súmala a `.env.local` (no se commitea) y a `.env.example` con valor vacío o de ejemplo. En Azure, agregala como app setting en cada App Service.
+2. Agregala al schema y al `safeParse` en `src/config/env.ts`:
 
    ```ts
-   const clientSchema = z.object({
+   const serverEnvSchema = z.object({
      // ...
-     NEXT_PUBLIC_NUEVA_VAR: z.string().min(1) // o .url(), .optional(), etc.
-   });
-
-   const parsed = clientSchema.safeParse({
-     // ...
-     NEXT_PUBLIC_NUEVA_VAR: process.env.NEXT_PUBLIC_NUEVA_VAR
+     NUEVA_VAR: z.string().min(1) // o .url(), .optional(), etc.
    });
    ```
 
-4. Usá `import { env } from '@/config/env'` en el código. **Nunca** `process.env.X` directo.
+3. Si el **browser** la necesita, súmala también a `PublicConfig` y a `toPublicConfig()` en `src/config/publicConfig.ts`. Todo lo que va ahí es visible en el HTML: nunca secretos.
+4. En código **solo server** (route handlers, RSC): `getServerEnv().NUEVA_VAR`. En código que corre en cliente o en ambos: `getPublicConfig().nuevaVar`. **Nunca** `process.env.X` directo.
 5. Documenta en el README qué hace y dónde se obtiene.
 
 ---

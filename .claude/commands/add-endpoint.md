@@ -14,7 +14,7 @@ Si el usuario no incluyó argumentos completos, pregunta vía `AskUserQuestion`:
 2. **Nombre de la acción** (camelCase, ej. `getSites`, `createInvoice`, `updateProfile`).
 3. **Tipo**: `Query` (lectura, cacheable) o `Mutation` (escritura, side effects).
 4. **HTTP method**: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`.
-5. **URL del endpoint** (path relativo al `NEXT_PUBLIC_BACKEND_URL`, ej. `/ems-api/sites`).
+5. **URL del endpoint** (path relativo al `BACKEND_URL`, ej. `/ems-api/sites`).
 6. **¿Requiere auth?** (default: `true`).
 7. **Carpeta dentro de data/** (opcional, default es el nombre de la "feature": `list/`, `detail/`, `actions/`). Si no aplica, déjalo en `data/{action}.ts` directo.
 

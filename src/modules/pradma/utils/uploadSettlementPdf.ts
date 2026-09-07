@@ -2,12 +2,12 @@
  * uploadSettlementPdf
  *
  * Uploads a settlement PDF blob to the blitz-blob storage service.
- * Path format: {NEXT_PUBLIC_CITY_NAME}/{module}/{establishment_id}/{year}/{MM-DD-HH-mm-ss}.pdf
+ * Path format: {CITY_NAME}/{module}/{establishment_id}/{year}/{MM-DD-HH-mm-ss}.pdf
  *
  * Example: nocaima/ind-com/42/2025/06-24-14-30-00.pdf
  */
 
-import { env } from '@/config/env';
+import { getPublicConfig } from '@/config/publicConfig';
 import type { Establishment } from '../models/establishment.interface';
 
 /** Builds the blob storage path for a settlement PDF. */
@@ -21,7 +21,7 @@ export function buildSettlementPath(
   const HH = String(now.getHours()).padStart(2, '0');
   const mm = String(now.getMinutes()).padStart(2, '0');
   const ss = String(now.getSeconds()).padStart(2, '0');
-  return `${env.NEXT_PUBLIC_CITY_NAME}/ind-com/${establishmentId}/${year}/${MM}-${DD}-${HH}-${mm}-${ss}`;
+  return `${getPublicConfig().cityName}/ind-com/${establishmentId}/${year}/${MM}-${DD}-${HH}-${mm}-${ss}`;
 }
 
 /**

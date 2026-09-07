@@ -11,7 +11,7 @@
 
 import { jsPDF } from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
-import { env } from '@/config/env';
+import { getPublicConfig } from '@/config/publicConfig';
 import type { SettlementResponse } from '../types/settlement.types';
 import type { Establishment } from '../models/establishment.interface';
 import type { Client } from '../models/client.interface';
@@ -33,7 +33,7 @@ const MUNI = {
 
 export { MUNI };
 
-const CITY_BASE_URL = env.NEXT_PUBLIC_CITY_URL ?? 'https://blitz-city.azurewebsites.net';
+const DEFAULT_CITY_URL = 'https://blitz-city.azurewebsites.net';
 
 // ─── Layout constants ────────────────────────────────────────────────────────
 const M = 10; // page margin mm
@@ -110,9 +110,8 @@ interface CityConfig {
 async function fetchCityConfig(): Promise<CityConfig> {
   if (typeof window === 'undefined') return { shieldDataUrl: null, gln: null };
   try {
-    const res = await fetch(
-      `${CITY_BASE_URL}/ms-city/city/${env.NEXT_PUBLIC_CITY_NAME}/${env.NEXT_PUBLIC_APP_NAME}`
-    );
+    const { cityUrl, cityName, appName } = getPublicConfig();
+    const res = await fetch(`${cityUrl ?? DEFAULT_CITY_URL}/ms-city/city/${cityName}/${appName}`);
     if (!res.ok) return { shieldDataUrl: null, gln: null };
     const data = await res.json();
 
