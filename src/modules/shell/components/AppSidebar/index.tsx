@@ -12,7 +12,6 @@ import {
   selectSidebarCollapsed,
   useShellUiStore
 } from '../../store/ui.store';
-import { SearchButton } from '../SearchButton';
 import { SidebarBrand } from '../SidebarBrand';
 import { SidebarNav } from '../SidebarNav';
 import { UserMenu } from '../UserMenu';
@@ -119,7 +118,6 @@ export const AppSidebar = ({ workspace, activeHref, dict }: AppSidebarProps) => 
         )}
 
         <SidebarBrand />
-        <SearchButton dict={dict.search} />
         <SidebarNav workspace={workspace} activeHref={activeHref} dict={dict} />
         <UserMenu dict={dict.user} />
       </aside>

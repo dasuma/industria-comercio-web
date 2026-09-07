@@ -260,7 +260,7 @@ export const TabsStrip = ({ dict }: TabsStripProps) => {
       />
       <div
         ref={scrollerRef}
-        className="-m-2 flex min-w-0 [scrollbar-width:none] items-center gap-2 overflow-x-auto p-2 [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        className="-m-2 flex min-w-0 items-center gap-2 overflow-x-auto p-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         onWheel={event => {
           const target = event.currentTarget;
           if (target.scrollWidth <= target.clientWidth) return;

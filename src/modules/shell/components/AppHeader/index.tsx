@@ -4,7 +4,6 @@ import { cn } from '@/utils/cn';
 import type { ShellDictionary } from '../../dictionaries';
 import type { Workspace } from '../../models/nav.interface';
 import { selectSidebarCollapsed, useShellUiStore } from '../../store/ui.store';
-import { HeaderActions } from '../HeaderActions';
 import { HeaderControls } from '../HeaderControls';
 import { TabsStrip } from '../TabsStrip';
 import { WorkspaceSwitcher } from '../WorkspaceSwitcher';
@@ -41,8 +40,6 @@ export const AppHeader = ({ workspace, dict }: AppHeaderProps) => {
           <ActiveIcon className="size-4" />
         </span>
       </div>
-
-      <HeaderActions dict={dict.actions} />
     </header>
   );
 };

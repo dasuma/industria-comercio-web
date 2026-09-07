@@ -1,6 +1,18 @@
 import type { NavItemKey, WorkspaceKey } from '../models/nav.types';
 
-const itemDescriptionsEs: Partial<Record<NavItemKey, string>> = {};
+const itemDescriptionsEs: Partial<Record<NavItemKey, string>> = {
+  clients: 'Personas y empresas responsables del impuesto.',
+  establishments: 'Locales y sedes asociados a cada contribuyente.',
+  invoices: 'Liquidaciones generadas y su estado de pago.',
+  parameters: 'Valores de referencia que alimentan el cálculo del impuesto.',
+  activityCategories: 'Códigos de actividad económica y su vigencia.',
+  discounts: 'Descuentos por pronto pago por año gravable.',
+  interestRates: 'Tasas de interés de mora por período.',
+  sanctions: 'Sanciones mínimas y porcentajes por año.',
+  administration: 'Usuarios del sistema e importación de datos.',
+  users: 'Acceso al sistema y roles.',
+  migrations: 'Importación de datos históricos desde archivos DBF.'
+};
 
 export const shellDictEs = {
   workspaces: {
@@ -18,7 +30,9 @@ export const shellDictEs = {
     invoices: 'Liquidaciones',
     sanctions: 'Sanciones',
     interestRates: 'Tasas de interés',
-    discounts: 'Descuentos'
+    discounts: 'Descuentos',
+    parameters: 'Parámetros',
+    administration: 'Administración'
   } satisfies Record<NavItemKey, string>,
   itemDescriptions: itemDescriptionsEs,
   subTabs: {} satisfies Record<never, string>,
@@ -37,16 +51,8 @@ export const shellDictEs = {
       'el futuro empieza acá'
     ]
   },
-  search: {
-    placeholder: 'Buscar…',
-    shortcut: '⌘K',
-    label: 'Buscar'
-  },
   user: {
     fallbackName: 'Mi cuenta',
-    companySettings: 'Settings de empresa',
-    myAccount: 'Mi cuenta',
-    preferences: 'Preferencias',
     logout: 'Cerrar sesión',
     signingOut: 'Cerrando sesión...',
     themeLight: 'Cambiar a modo claro',
@@ -57,10 +63,6 @@ export const shellDictEs = {
     sidebarExpand: 'Expandir navegación',
     openNav: 'Abrir navegación',
     closeNav: 'Cerrar navegación',
-    back: 'Atrás',
-    forward: 'Adelante',
-    history: 'Historial',
-    aiAssistant: 'Asistente AI',
     newTab: 'Nueva pestaña',
     closeTab: 'Cerrar pestaña'
   }

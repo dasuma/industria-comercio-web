@@ -4,13 +4,10 @@ import { useState } from 'react';
 import { useTheme } from 'next-themes';
 import { Avatar, Dropdown } from '@dasuma/pradma-ui';
 import {
-  RiBuilding4Line,
   RiExpandUpDownLine,
   RiLogoutBoxRLine,
   RiMoonLine,
-  RiSettings3Line,
-  RiSunLine,
-  RiUserLine
+  RiSunLine
 } from '@dasuma/pradma-ui/icons';
 import { useAuth } from '@/auth/useAuth';
 import { selectUser, useAuthStore, useLogout } from '@modules/auth';
@@ -162,21 +159,6 @@ export const UserMenu = ({ dict }: UserMenuProps) => {
               </span>
             </button>
           </div>
-
-          <Dropdown.Separator />
-
-          <Dropdown.Item disabled>
-            <Dropdown.ItemIcon as={RiBuilding4Line} />
-            {dict.companySettings}
-          </Dropdown.Item>
-          <Dropdown.Item disabled>
-            <Dropdown.ItemIcon as={RiUserLine} />
-            {dict.myAccount}
-          </Dropdown.Item>
-          <Dropdown.Item disabled>
-            <Dropdown.ItemIcon as={RiSettings3Line} />
-            {dict.preferences}
-          </Dropdown.Item>
 
           <Dropdown.Separator />
 
