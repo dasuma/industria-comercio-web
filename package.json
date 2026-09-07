@@ -35,7 +35,7 @@
     }
   },
   "dependencies": {
-    "@dasuma/pradma-ui": "latest",
+    "@dasuma/pradma-ui": "^1.1.0",
     "@hookform/resolvers": "^4.1.0",
     "@tanstack/react-query": "^5.59.0",
     "@tanstack/react-query-devtools": "^5.59.0",
