@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button, Hint, Input, Label, toast } from '@dasuma/pradma-ui';
+import { FancyButton, Hint, Input, Label, toast } from '@dasuma/pradma-ui';
 import { useCreateExample } from '../../data/actions/createExample';
 import { getExampleDict } from '../../dictionaries';
 import type { Locale } from '@/i18n/config';
@@ -73,16 +73,16 @@ export const ExampleForm = ({ locale }: ExampleFormProps) => {
         {errors.body && <Hint.Root hasError>{errors.body.message}</Hint.Root>}
       </div>
 
-      <Button.Root
+      {/* [R7] FancyButton para la acción primaria; loader nativo del DS (P6) */}
+      <FancyButton.Root
         type="submit"
-        variant="primary"
-        mode="filled"
         size="medium"
+        state={isPending ? 'loading' : 'idle'}
         disabled={isPending}
         className="self-start"
       >
-        {isPending ? dict.form.actions.submitting : dict.form.actions.submit}
-      </Button.Root>
+        {dict.form.actions.submit}
+      </FancyButton.Root>
     </form>
   );
 };

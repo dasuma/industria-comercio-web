@@ -24,6 +24,8 @@ interface UseSearchPaginationReturn {
   setTotal: (total: number) => void;
   setFilters: (filters: SearchFilter[]) => void;
   pageNumbers: number[];
+  total: number;
+  pageSize: number;
 }
 
 function buildPageNumbers(current: number, total: number): number[] {
@@ -120,6 +122,8 @@ export function useSearchPagination(
     hasPrevPage,
     setTotal,
     setFilters,
-    pageNumbers
+    pageNumbers,
+    total,
+    pageSize: defaultLimit
   };
 }

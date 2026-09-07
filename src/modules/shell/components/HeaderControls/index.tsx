@@ -1,13 +1,7 @@
 'use client';
 
 import { CompactButton } from '@dasuma/pradma-ui';
-import {
-  RiArrowLeftSLine,
-  RiArrowRightSLine,
-  RiMenuLine,
-  RiSidebarFoldLine,
-  RiSidebarUnfoldLine
-} from '@dasuma/pradma-ui/icons';
+import { RiMenuLine, RiSidebarFoldLine, RiSidebarUnfoldLine } from '@dasuma/pradma-ui/icons';
 import type { ShellDictionary } from '../../dictionaries';
 import {
   selectSetMobileNavOpen,
@@ -47,24 +41,6 @@ export const HeaderControls = ({ dict }: HeaderControlsProps) => {
         className="!text-text-soft-400 hover:!text-text-sub-600"
       >
         <CompactButton.Icon as={ToggleIcon} />
-      </CompactButton.Root>
-      <CompactButton.Root
-        variant="ghost"
-        size="large"
-        aria-label={dict.back}
-        disabled
-        className="!text-text-soft-400 hover:!text-text-sub-600 !hidden sm:!inline-flex"
-      >
-        <CompactButton.Icon as={RiArrowLeftSLine} />
-      </CompactButton.Root>
-      <CompactButton.Root
-        variant="ghost"
-        size="large"
-        aria-label={dict.forward}
-        disabled
-        className="!text-text-soft-400 hover:!text-text-sub-600 !hidden sm:!inline-flex"
-      >
-        <CompactButton.Icon as={RiArrowRightSLine} />
       </CompactButton.Root>
     </div>
   );

@@ -1,25 +1,33 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   Alert,
   Button,
-  Checkbox,
   FancyButton,
   Input,
   Label,
-  TabMenuHorizontal
+  LinkButton,
+  TabMenuHorizontal,
+  toast
 } from '@dasuma/pradma-ui';
 import {
+  RiArrowRightLine,
+  RiCheckboxCircleFill,
   RiErrorWarningFill,
   RiEyeLine,
   RiEyeOffLine,
   RiGoogleFill,
-  RiShieldKeyholeLine
+  RiShieldKeyholeLine,
+  RiUserFollowLine
 } from '@dasuma/pradma-ui/icons';
-import { useGoogleSignIn, useEmailSignIn } from '@modules/auth';
+import { useAuth } from '@/auth/useAuth';
+import { useGoogleSignIn, useEmailSignIn, useLogout, usePasswordReset } from '@modules/auth';
 
 type Tab = 'login' | 'recover';
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const resolveError = (error: string): string => {
   if (error.includes('wrong-password') || error.includes('invalid-credential')) {
@@ -31,41 +39,99 @@ const resolveError = (error: string): string => {
   return 'Error al iniciar sesión. Intentá de nuevo.';
 };
 
+const PortalHeader = ({ title, subtitle }: { title: string; subtitle: string }) => (
+  <div className="border-stroke-soft-200 flex items-center gap-3 border-b px-5 py-5">
+    <div className="bg-bg-weak-50 text-text-sub-600 flex size-10 shrink-0 items-center justify-center rounded-xl">
+      <RiShieldKeyholeLine className="size-5" />
+    </div>
+    <div>
+      <p className="text-text-soft-400 text-subheading-2xs uppercase">{subtitle}</p>
+      <h2 className="text-text-strong-950 text-label-md">{title}</h2>
+    </div>
+  </div>
+);
+
+// Card que reemplaza al form cuando ya hay sesión. El portal no tiene área
+// privada todavía, así que el login no redirige a ningún lado: confirma la
+// sesión y ofrece el simulador y cerrar sesión.
+const SignedInCard = ({ email }: { email: string }) => {
+  const { logout, isLoading } = useLogout();
+  return (
+    <div className="bg-bg-white-0 ring-stroke-soft-200 overflow-hidden rounded-2xl ring-1">
+      <PortalHeader subtitle="Portal del contribuyente" title="Sesión iniciada" />
+      <div className="flex flex-col gap-4 px-5 pt-5 pb-6">
+        <Alert.Root status="success" size="small">
+          <Alert.Icon as={RiUserFollowLine} />
+          <span className="truncate">{email}</span>
+        </Alert.Root>
+        <LinkButton.Root variant="primary" asChild>
+          <Link href="/portal/simular">
+            Ir al simulador de liquidación
+            <RiArrowRightLine className="size-4" />
+          </Link>
+        </LinkButton.Root>
+        <Button.Root
+          variant="basic"
+          className="w-full"
+          onClick={() => void logout()}
+          disabled={isLoading}
+        >
+          {isLoading ? 'Cerrando sesión…' : 'Cerrar sesión'}
+        </Button.Root>
+      </div>
+    </div>
+  );
+};
+
 export const PortalLoginForm = () => {
+  const { user } = useAuth();
   const [tab, setTab] = useState<Tab>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [recoverEmail, setRecoverEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(false);
 
-  const { signIn: googleSignIn, isLoading: googleLoading, error: googleError } = useGoogleSignIn();
-  const { signIn: emailSignIn, isLoading: emailLoading, error: emailError } = useEmailSignIn();
+  // Sin redirect: el ciudadano se queda en el portal (antes caía en el admin).
+  const onSuccess = () => {
+    toast.success('Sesión iniciada correctamente.');
+  };
+  const {
+    signIn: googleSignIn,
+    isLoading: googleLoading,
+    error: googleError
+  } = useGoogleSignIn({ onSuccess });
+  const {
+    signIn: emailSignIn,
+    isLoading: emailLoading,
+    error: emailError
+  } = useEmailSignIn({ onSuccess });
+  const {
+    sendReset,
+    isLoading: resetLoading,
+    isSent: resetSent,
+    error: resetError
+  } = usePasswordReset();
 
   const isLoading = googleLoading || emailLoading;
   const error = googleError ?? emailError;
+  const recoverEmailValid = EMAIL_RE.test(recoverEmail.trim());
+
+  if (user?.email) return <SignedInCard email={user.email} />;
 
   const handleEmailLogin = () => {
     if (!email || !password) return;
     emailSignIn(email, password);
   };
 
+  const handleReset = () => {
+    if (!recoverEmailValid) return;
+    void sendReset(recoverEmail.trim());
+  };
+
   return (
     <div className="bg-bg-white-0 ring-stroke-soft-200 overflow-hidden rounded-2xl ring-1">
-      {/* ── Header ── */}
-      <div className="border-stroke-soft-200 flex items-center gap-3 border-b px-5 py-5">
-        <div className="bg-bg-weak-50 text-text-sub-600 flex size-10 shrink-0 items-center justify-center rounded-xl">
-          <RiShieldKeyholeLine className="size-5" />
-        </div>
-        <div>
-          <p className="text-text-soft-400 text-subheading-2xs uppercase">
-            Portal del contribuyente
-          </p>
-          <h2 className="text-text-strong-950 text-label-md">Acceso seguro</h2>
-        </div>
-      </div>
+      <PortalHeader subtitle="Portal del contribuyente" title="Acceso seguro" />
 
-      {/* ── Tabs + body ── */}
       <TabMenuHorizontal.Root value={tab} onValueChange={v => setTab(v as Tab)}>
         <div className="px-5 pt-4">
           <TabMenuHorizontal.List>
@@ -76,9 +142,17 @@ export const PortalLoginForm = () => {
 
         {/* ── Login ── */}
         <TabMenuHorizontal.Content value="login">
-          <div className="flex flex-col gap-4 px-5 pt-5 pb-6">
+          <form
+            className="flex flex-col gap-4 px-5 pt-5 pb-6"
+            noValidate
+            onSubmit={e => {
+              e.preventDefault();
+              handleEmailLogin();
+            }}
+          >
             <Button.Root
-              variant="neutral"
+              type="button"
+              variant="basic"
               mode="stroke"
               className="w-full"
               onClick={googleSignIn}
@@ -101,6 +175,7 @@ export const PortalLoginForm = () => {
                   <Input.Input
                     id="p-email"
                     type="email"
+                    autoComplete="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="nombre@correo.com"
@@ -116,9 +191,9 @@ export const PortalLoginForm = () => {
                   <Input.Input
                     id="p-password"
                     type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleEmailLogin()}
                     placeholder="••••••••"
                   />
                   <button
@@ -137,13 +212,6 @@ export const PortalLoginForm = () => {
               </Input.Root>
             </div>
 
-            <label className="flex cursor-pointer items-center gap-2.5">
-              <Checkbox.Root checked={remember} onCheckedChange={v => setRemember(v === true)} />
-              <span className="text-text-sub-600 text-paragraph-xs">
-                Recordarme en este dispositivo
-              </span>
-            </label>
-
             {error && (
               <Alert.Root status="error" size="small">
                 <Alert.Icon as={RiErrorWarningFill} />
@@ -151,20 +219,28 @@ export const PortalLoginForm = () => {
               </Alert.Root>
             )}
 
+            {/* [R7] única primary del card */}
             <FancyButton.Root
-              variant="primary"
+              type="submit"
               className="mt-1 w-full"
-              onClick={handleEmailLogin}
+              state={emailLoading ? 'loading' : 'idle'}
               disabled={isLoading || !email || !password}
             >
-              {emailLoading ? 'Ingresando…' : 'Ingresar'}
+              Ingresar
             </FancyButton.Root>
-          </div>
+          </form>
         </TabMenuHorizontal.Content>
 
         {/* ── Recover ── */}
         <TabMenuHorizontal.Content value="recover">
-          <div className="flex flex-col gap-4 px-5 pt-5 pb-6">
+          <form
+            className="flex flex-col gap-4 px-5 pt-5 pb-6"
+            noValidate
+            onSubmit={e => {
+              e.preventDefault();
+              handleReset();
+            }}
+          >
             <p className="text-text-sub-600 text-paragraph-xs leading-relaxed">
               Ingresá tu correo y te enviaremos un enlace para restablecer tu contraseña.
             </p>
@@ -175,6 +251,7 @@ export const PortalLoginForm = () => {
                   <Input.Input
                     id="p-recover-email"
                     type="email"
+                    autoComplete="email"
                     value={recoverEmail}
                     onChange={e => setRecoverEmail(e.target.value)}
                     placeholder="nombre@correo.com"
@@ -182,10 +259,29 @@ export const PortalLoginForm = () => {
                 </Input.Wrapper>
               </Input.Root>
             </div>
-            <FancyButton.Root variant="primary" className="w-full" disabled={!recoverEmail}>
+
+            {resetSent && (
+              <Alert.Root status="success" size="small">
+                <Alert.Icon as={RiCheckboxCircleFill} />
+                Te enviamos un enlace a tu correo. Revisá también la carpeta de spam.
+              </Alert.Root>
+            )}
+            {resetError && (
+              <Alert.Root status="error" size="small">
+                <Alert.Icon as={RiErrorWarningFill} />
+                No pudimos enviar el enlace. Verificá el correo e intentá de nuevo.
+              </Alert.Root>
+            )}
+
+            <FancyButton.Root
+              type="submit"
+              className="w-full"
+              state={resetLoading ? 'loading' : 'idle'}
+              disabled={!recoverEmailValid || resetLoading}
+            >
               Enviar enlace
             </FancyButton.Root>
-          </div>
+          </form>
         </TabMenuHorizontal.Content>
       </TabMenuHorizontal.Root>
     </div>

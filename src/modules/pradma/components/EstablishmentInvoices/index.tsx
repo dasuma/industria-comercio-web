@@ -1,26 +1,44 @@
 'use client';
 
 import { useState } from 'react';
-import { useGetInvoicesByEstablishment, useGetEstablishment } from '../../data';
+import { Skeleton } from '@dasuma/pradma-ui';
+import { EmptyState } from '@/components/ListState';
+import { useGetInvoicesByEstablishment } from '../../data';
+import type { Establishment } from '../../models/establishment.interface';
 import type { Invoice } from '../../models/invoice.interface';
 import type { PradmaDictionary } from '../../dictionaries';
-import { SettlementSheet, InvoiceRow } from '../SettlementSheet';
+import { SettlementSheet } from '../SettlementSheet';
+import { InvoiceRow } from '../InvoiceRow';
 
 interface EstablishmentInvoicesProps {
-  establishmentId: number;
+  establishment: Establishment;
   dict: PradmaDictionary;
 }
 
-export const EstablishmentInvoices = ({ establishmentId, dict }: EstablishmentInvoicesProps) => {
+export const EstablishmentInvoices = ({ establishment, dict }: EstablishmentInvoicesProps) => {
   const d = dict.invoices;
   const [selected, setSelected] = useState<Invoice | null>(null);
-  const { data: establishment } = useGetEstablishment(establishmentId);
-  const { data: invoices, isLoading, isError } = useGetInvoicesByEstablishment(establishmentId);
+  const { data: invoices, isLoading, isError } = useGetInvoicesByEstablishment(establishment.id);
 
-  if (isLoading) return <p className="text-text-sub-600 py-6 text-center text-sm">{d.loading}</p>;
-  if (isError) return <p className="text-error-dark py-6 text-center text-sm">{d.errorLoading}</p>;
-  if (!invoices?.length)
-    return <p className="text-text-sub-600 py-6 text-center text-sm">{d.empty}</p>;
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-2" role="status" aria-busy>
+        {Array.from({ length: 3 }, (_, i) => (
+          <Skeleton.Root key={i} className="h-14 w-full rounded-xl" />
+        ))}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <EmptyState variant="error" title={dict.common.errorTitle} description={d.errorLoading} />
+    );
+  }
+
+  if (!invoices?.length) {
+    return <EmptyState title={d.empty} />;
+  }
 
   return (
     <>
@@ -28,26 +46,22 @@ export const EstablishmentInvoices = ({ establishmentId, dict }: EstablishmentIn
         {invoices.map(invoice => (
           <InvoiceRow
             key={invoice.id}
-            year={invoice.year}
-            status={invoice.status}
-            total={invoice.total}
-            statusLabel={d.status[invoice.status as keyof typeof d.status] ?? invoice.status}
-            expirationDate={invoice.expirationDate}
-            expirationLabel={d.expirationDate}
+            invoice={invoice}
+            dict={d}
             onClick={() => setSelected(invoice)}
           />
         ))}
       </div>
 
-      {selected && establishment && (
+      {selected ? (
         <SettlementSheet
           mode="saved"
           invoice={selected}
           establishment={establishment}
-          statusLabels={d.status as Record<string, string>}
+          dict={dict}
           onClose={() => setSelected(null)}
         />
-      )}
+      ) : null}
     </>
   );
 };

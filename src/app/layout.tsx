@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import { cookies } from 'next/headers';
 import { Inter } from 'next/font/google';
@@ -23,7 +23,10 @@ export const metadata: Metadata = {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
     apple: '/pradma-logo.png'
-  },
+  }
+};
+
+export const viewport: Viewport = {
   themeColor: '#0a1628'
 };
 

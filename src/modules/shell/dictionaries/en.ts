@@ -16,9 +16,23 @@ export const shellDictEn: ShellDictionary = {
     invoices: 'Settlements',
     sanctions: 'Sanctions',
     interestRates: 'Interest Rates',
-    discounts: 'Discounts'
+    discounts: 'Discounts',
+    parameters: 'Parameters',
+    administration: 'Administration'
   },
-  itemDescriptions: {},
+  itemDescriptions: {
+    clients: 'People and companies liable for the tax.',
+    establishments: 'Premises and branches linked to each taxpayer.',
+    invoices: 'Generated settlements and their payment status.',
+    parameters: 'Reference values that feed the tax calculation.',
+    activityCategories: 'Economic activity codes and their validity.',
+    discounts: 'Early-payment discounts per tax year.',
+    interestRates: 'Late-payment interest rates per period.',
+    sanctions: 'Minimum sanctions and percentages per year.',
+    administration: 'System users and data imports.',
+    users: 'System access and roles.',
+    migrations: 'Historical data import from DBF files.'
+  },
   subTabs: {},
   switchSection: 'Change section',
   picker: {
@@ -35,16 +49,8 @@ export const shellDictEn: ShellDictionary = {
       "let's keep moving"
     ]
   },
-  search: {
-    placeholder: 'Search…',
-    shortcut: '⌘K',
-    label: 'Search'
-  },
   user: {
     fallbackName: 'My account',
-    companySettings: 'Company settings',
-    myAccount: 'My account',
-    preferences: 'Preferences',
     logout: 'Sign out',
     signingOut: 'Signing out...',
     themeLight: 'Switch to light mode',
@@ -55,10 +61,6 @@ export const shellDictEn: ShellDictionary = {
     sidebarExpand: 'Expand navigation',
     openNav: 'Open navigation',
     closeNav: 'Close navigation',
-    back: 'Back',
-    forward: 'Forward',
-    history: 'History',
-    aiAssistant: 'AI assistant',
     newTab: 'New tab',
     closeTab: 'Close tab'
   }

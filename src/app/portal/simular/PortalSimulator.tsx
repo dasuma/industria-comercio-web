@@ -253,12 +253,7 @@ export const PortalSimulator = () => {
               />
             ))}
 
-            <Button.Root
-              variant="neutral"
-              mode="stroke"
-              className="self-start"
-              onClick={addActivity}
-            >
+            <Button.Root variant="basic" mode="stroke" className="self-start" onClick={addActivity}>
               <Button.Icon as={RiAddLine} />
               Agregar actividad
             </Button.Root>
@@ -268,7 +263,7 @@ export const PortalSimulator = () => {
         {/* Navigation */}
         <div className="border-stroke-soft-200 mt-5 flex items-center justify-between border-t pt-4">
           {step > 0 ? (
-            <Button.Root variant="neutral" mode="ghost" onClick={() => setStep(s => s - 1)}>
+            <Button.Root variant="basic" mode="ghost" onClick={() => setStep(s => s - 1)}>
               <Button.Icon as={RiArrowLeftSLine} />
               Anterior
             </Button.Root>
@@ -535,7 +530,7 @@ const SimulatorResult = ({
 
       {/* Actions */}
       <div className="border-stroke-soft-200 flex justify-start border-t pt-4">
-        <Button.Root variant="neutral" mode="stroke" onClick={onReset}>
+        <Button.Root variant="basic" onClick={onReset}>
           <Button.Icon as={RiRefreshLine} />
           Nueva simulación
         </Button.Root>

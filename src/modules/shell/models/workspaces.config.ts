@@ -4,12 +4,8 @@ import {
   RiBuilding4Line,
   RiBuilding4Fill,
   RiGroupLine,
-  RiStackLine,
-  RiUploadCloud2Line,
-  RiUserLine,
-  RiAlertLine,
-  RiPercentLine,
-  RiCouponLine
+  RiSettings3Line,
+  RiShieldUserLine
 } from '@dasuma/pradma-ui/icons';
 import { APP_ROUTES, DEFAULT_AUTHED_ROUTE } from '@/config/routes';
 import type { NavItemKey, WorkspaceKey } from './nav.types';
@@ -34,36 +30,29 @@ export const workspaces: Workspace[] = [
         href: APP_ROUTES.invoices,
         icon: RiBillLine
       },
+      // Parámetros: valores de referencia del cálculo. Se agrupan para que
+      // la operación diaria (arriba) no compita con la configuración anual.
       {
-        kind: 'item',
-        key: 'activityCategories',
-        href: APP_ROUTES.activityCategories,
-        icon: RiStackLine
-      },
-      { kind: 'item', key: 'users', href: APP_ROUTES.users, icon: RiUserLine },
-      {
-        kind: 'item',
-        key: 'migrations',
-        href: APP_ROUTES.migrations,
-        icon: RiUploadCloud2Line
-      },
-      {
-        kind: 'item',
-        key: 'sanctions',
-        href: APP_ROUTES.sanctions,
-        icon: RiAlertLine
+        kind: 'group',
+        id: 'parameters',
+        labelKey: 'parameters',
+        icon: RiSettings3Line,
+        items: [
+          { key: 'activityCategories', href: APP_ROUTES.activityCategories },
+          { key: 'discounts', href: APP_ROUTES.discounts },
+          { key: 'interestRates', href: APP_ROUTES.interestRates },
+          { key: 'sanctions', href: APP_ROUTES.sanctions }
+        ]
       },
       {
-        kind: 'item',
-        key: 'interestRates',
-        href: APP_ROUTES.interestRates,
-        icon: RiPercentLine
-      },
-      {
-        kind: 'item',
-        key: 'discounts',
-        href: APP_ROUTES.discounts,
-        icon: RiCouponLine
+        kind: 'group',
+        id: 'administration',
+        labelKey: 'administration',
+        icon: RiShieldUserLine,
+        items: [
+          { key: 'users', href: APP_ROUTES.users },
+          { key: 'migrations', href: APP_ROUTES.migrations }
+        ]
       }
     ]
   }

@@ -8,5 +8,7 @@ export type NavItemKey =
   | 'migrations'
   | 'sanctions'
   | 'interestRates'
-  | 'discounts';
+  | 'discounts'
+  | 'parameters'
+  | 'administration';
 export type NavSubTabKey = never;

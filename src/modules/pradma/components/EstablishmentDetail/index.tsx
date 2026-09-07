@@ -1,21 +1,36 @@
 'use client';
 
-import { useForm, useWatch } from 'react-hook-form';
+import { useState } from 'react';
+import Link from 'next/link';
+import { useForm, useWatch, Controller } from 'react-hook-form';
 import { zodResolver } from '@/utils/zodResolver';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
-import { Button, FancyButton, Input, TabMenuHorizontal, toast } from '@dasuma/pradma-ui';
-import { RiArrowLeftSLine } from '@dasuma/pradma-ui/icons';
+import {
+  Breadcrumb,
+  Button,
+  FancyButton,
+  Input,
+  Select,
+  Skeleton,
+  TabMenuHorizontal,
+  toast
+} from '@dasuma/pradma-ui';
+import { RiArrowRightSLine } from '@dasuma/pradma-ui/icons';
 import type { Locale } from '@/i18n/config';
 import { APP_ROUTES } from '@/config/routes';
+import { FormField } from '@/components/FormField';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { getPradmaDict } from '../../dictionaries';
 import {
   useGetEstablishment,
   useCreateEstablishment,
   useUpdateEstablishment,
+  useDeleteEstablishment,
   useGetClient
 } from '../../data';
-import { FormField } from '@/components/FormField';
+import { DOCUMENT_TYPE } from '../../models/shared';
+import { ClientPicker } from '../ClientPicker';
 import { EstablishmentInvoices } from '../EstablishmentInvoices';
 import { EstablishmentSettle } from '../EstablishmentSettle';
 
@@ -24,38 +39,60 @@ interface EstablishmentDetailProps {
   establishmentId: number | null;
 }
 
+type DetailTab = 'client' | 'settlements' | 'settle';
+
+interface FormValues {
+  name: string;
+  address: string;
+  phone: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  clientId: number | null;
+  registrationNumber: string;
+  numberIdentification: string;
+  documentType: string;
+}
+
 export const EstablishmentDetail = ({ locale, establishmentId }: EstablishmentDetailProps) => {
   const dict = getPradmaDict(locale);
   const { fields, tabs, form } = dict.establishments;
   const router = useRouter();
   const isEditing = establishmentId !== null;
-  const { data: establishment } = useGetEstablishment(establishmentId);
+  const { data: establishment, isLoading } = useGetEstablishment(establishmentId);
   const { mutate: createEstablishment, isPending: isCreating } = useCreateEstablishment();
   const { mutate: updateEstablishment, isPending: isUpdating } = useUpdateEstablishment();
+  const { mutate: deleteEstablishment, isPending: isDeleting } = useDeleteEstablishment();
   const isPending = isCreating || isUpdating;
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [activeTab, setActiveTab] = useState<DetailTab>('client');
 
   const goBack = () => router.push(APP_ROUTES.establishments);
 
-  const schema = z.object({
+  const schema: z.ZodType<FormValues> = z.object({
     name: z.string().min(1, form.errors.nameRequired),
     address: z.string().min(1, form.errors.addressRequired),
     phone: z.string().refine(v => v === '' || /^\d+$/.test(v), form.errors.phoneOnlyNumbers),
     description: z.string(),
     startDate: z.string().min(1, form.errors.startDateRequired),
     endDate: z.string(),
-    clientId: z.string().min(1, form.errors.clientIdRequired)
+    clientId: z
+      .number()
+      .nullable()
+      .refine((v): v is number => v !== null, form.errors.clientIdRequired),
+    registrationNumber: z.string(),
+    numberIdentification: z.string(),
+    documentType: z.string()
   });
-
-  type FormValues = z.infer<typeof schema>;
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors },
     control
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    mode: 'onChange',
+    mode: 'onTouched',
     values: establishment
       ? {
           name: establishment.name,
@@ -64,7 +101,10 @@ export const EstablishmentDetail = ({ locale, establishmentId }: EstablishmentDe
           description: establishment.description,
           startDate: establishment.startDate.slice(0, 10),
           endDate: establishment.endDate?.slice(0, 10) ?? '',
-          clientId: String(establishment.clientId)
+          clientId: establishment.clientId,
+          registrationNumber: establishment.registrationNumber,
+          numberIdentification: establishment.numberIdentification,
+          documentType: establishment.documentType
         }
       : {
           name: '',
@@ -73,13 +113,15 @@ export const EstablishmentDetail = ({ locale, establishmentId }: EstablishmentDe
           description: '',
           startDate: '',
           endDate: '',
-          clientId: ''
+          clientId: null,
+          registrationNumber: '',
+          numberIdentification: '',
+          documentType: ''
         }
   });
 
   const watchClientId = useWatch({ control, name: 'clientId' });
-  const clientIdNum = watchClientId && /^\d+$/.test(watchClientId) ? Number(watchClientId) : null;
-  const { data: client } = useGetClient(clientIdNum);
+  const { data: client } = useGetClient(watchClientId);
 
   const onSubmit = handleSubmit(values => {
     const payload = {
@@ -89,76 +131,76 @@ export const EstablishmentDetail = ({ locale, establishmentId }: EstablishmentDe
       description: values.description,
       start_date: values.startDate,
       end_date: values.endDate || null,
-      client_id: Number(values.clientId),
-      registration_number: establishment?.registrationNumber ?? '',
-      number_identification: establishment?.numberIdentification ?? '',
-      document_type: establishment?.documentType ?? ''
+      client_id: values.clientId ?? 0,
+      registration_number: values.registrationNumber,
+      number_identification: values.numberIdentification,
+      document_type: values.documentType
     };
 
     if (isEditing && establishment) {
       updateEstablishment(
         { id: establishment.id, request: payload },
         {
-          onSuccess: () => {
-            toast.success(form.success.updated);
-            goBack();
-          },
+          // Nos quedamos en la página: el usuario puede seguir con las tabs.
+          onSuccess: () => toast.success(form.success.updated),
           onError: () => toast.error(form.errors.serverError)
         }
       );
     } else {
       createEstablishment(payload, {
-        onSuccess: () => {
+        onSuccess: created => {
           toast.success(form.success.created);
-          goBack();
+          if (created?.id) router.replace(`${APP_ROUTES.establishments}/${created.id}`);
+          else goBack();
         },
         onError: () => toast.error(form.errors.serverError)
       });
     }
   });
 
-  if (isEditing && !establishment) {
+  const handleDelete = () => {
+    if (!establishment) return;
+    deleteEstablishment(establishment.id, {
+      onSuccess: () => {
+        toast.success(form.success.deleted);
+        goBack();
+      },
+      onError: () => toast.error(form.errors.deleteError)
+    });
+  };
+
+  if (isEditing && (isLoading || !establishment)) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <p className="text-text-sub-600">{dict.establishments.loading}</p>
+      <div className="flex flex-col gap-4" role="status" aria-busy>
+        <Skeleton.Root className="h-4 w-56" />
+        <Skeleton.Root className="h-72 w-full rounded-xl" />
+        <Skeleton.Root className="h-40 w-full rounded-xl" />
       </div>
     );
   }
 
-  return (
-    <div className="space-y-2">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Button.Root variant="primary" size="xsmall" onClick={goBack}>
-            <Button.Icon as={RiArrowLeftSLine} />
-          </Button.Root>
-          <h1 className="text-text-strong-950 text-base font-semibold">
-            {isEditing ? dict.establishments.edit : dict.establishments.create}
-          </h1>
-        </div>
-        <div className="flex gap-2">
-          <Button.Root variant="basic" size="small" type="button" onClick={goBack}>
-            {dict.common.cancel}
-          </Button.Root>
-          <FancyButton.Root
-            variant="primary"
-            size="small"
-            onClick={onSubmit}
-            disabled={!isValid || isPending}
-          >
-            {isPending ? dict.common.saving : dict.common.save}
-          </FancyButton.Root>
-        </div>
-      </div>
+  const documentTypes = Object.values(DOCUMENT_TYPE);
+  const title = isEditing
+    ? (establishment?.name ?? dict.establishments.edit)
+    : dict.establishments.new;
 
-      {/* Establishment form — always visible */}
-      <div className="bg-bg-white-0 ring-stroke-soft-200 rounded-lg px-3 py-2.5 ring-1">
-        <form
-          onSubmit={onSubmit}
-          noValidate
-          className="grid grid-cols-2 gap-x-3 gap-y-2 lg:grid-cols-3"
-        >
+  return (
+    <div className="flex flex-col gap-5">
+      {/* El PageHeader del shell ya muestra "Establecimientos": acá solo el camino */}
+      <Breadcrumb.Root aria-label={dict.establishments.title}>
+        <Breadcrumb.Item asChild>
+          <Link href={APP_ROUTES.establishments}>{dict.establishments.title}</Link>
+        </Breadcrumb.Item>
+        <Breadcrumb.ArrowIcon as={RiArrowRightSLine} />
+        <Breadcrumb.Item active>{title}</Breadcrumb.Item>
+      </Breadcrumb.Root>
+
+      <form
+        onSubmit={onSubmit}
+        noValidate
+        className="bg-bg-white-0 ring-stroke-soft-200 flex flex-col overflow-hidden rounded-xl ring-1"
+      >
+        <div className="grid grid-cols-1 gap-x-4 gap-y-4 p-5 sm:grid-cols-2 lg:grid-cols-3">
           <FormField id="est-name" label={fields.name} required error={errors.name?.message}>
             <Input.Root hasError={Boolean(errors.name)}>
               <Input.Wrapper>
@@ -168,23 +210,27 @@ export const EstablishmentDetail = ({ locale, establishmentId }: EstablishmentDe
           </FormField>
 
           <FormField
-            id="est-client-id"
+            id="est-client"
             label={fields.clientId}
             required
             error={errors.clientId?.message}
-            hint={
-              clientIdNum && !errors.clientId
-                ? client
-                  ? client.name
-                  : dict.clients.empty
-                : undefined
-            }
+            hint={client ? `${client.documentType} ${client.id}` : undefined}
           >
-            <Input.Root hasError={Boolean(errors.clientId)}>
-              <Input.Wrapper>
-                <Input.Input id="est-client-id" inputMode="numeric" {...register('clientId')} />
-              </Input.Wrapper>
-            </Input.Root>
+            <Controller
+              control={control}
+              name="clientId"
+              render={({ field }) => (
+                <ClientPicker
+                  id="est-client"
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder={fields.clientPlaceholder}
+                  searchPlaceholder={fields.clientPlaceholder}
+                  noResultsLabel={fields.clientNoResults}
+                  hasError={Boolean(errors.clientId)}
+                />
+              )}
+            />
           </FormField>
 
           <FormField
@@ -203,22 +249,7 @@ export const EstablishmentDetail = ({ locale, establishmentId }: EstablishmentDe
           <FormField id="est-phone" label={fields.phone} error={errors.phone?.message}>
             <Input.Root hasError={Boolean(errors.phone)}>
               <Input.Wrapper>
-                <Input.Input
-                  id="est-phone"
-                  inputMode="numeric"
-                  onKeyDown={e => {
-                    if (e.key.length === 1 && !/\d/.test(e.key)) e.preventDefault();
-                  }}
-                  {...register('phone')}
-                />
-              </Input.Wrapper>
-            </Input.Root>
-          </FormField>
-
-          <FormField id="est-description" label={fields.description}>
-            <Input.Root>
-              <Input.Wrapper>
-                <Input.Input id="est-description" {...register('description')} />
+                <Input.Input id="est-phone" inputMode="numeric" {...register('phone')} />
               </Input.Wrapper>
             </Input.Root>
           </FormField>
@@ -243,70 +274,165 @@ export const EstablishmentDetail = ({ locale, establishmentId }: EstablishmentDe
               </Input.Wrapper>
             </Input.Root>
           </FormField>
-        </form>
-      </div>
 
-      {/* Tabs below */}
-      <TabMenuHorizontal.Root defaultValue="client">
-        <TabMenuHorizontal.List>
-          <TabMenuHorizontal.Trigger value="client">{tabs.client}</TabMenuHorizontal.Trigger>
-          <TabMenuHorizontal.Trigger value="payments">{tabs.payments}</TabMenuHorizontal.Trigger>
-          <TabMenuHorizontal.Trigger value="settlements">
-            {tabs.settlements}
-          </TabMenuHorizontal.Trigger>
-          <TabMenuHorizontal.Trigger value="settle">{tabs.settle}</TabMenuHorizontal.Trigger>
-        </TabMenuHorizontal.List>
+          <FormField id="est-registration" label={fields.registrationNumber}>
+            <Input.Root>
+              <Input.Wrapper>
+                <Input.Input id="est-registration" {...register('registrationNumber')} />
+              </Input.Wrapper>
+            </Input.Root>
+          </FormField>
 
-        <TabMenuHorizontal.Content value="client" className="pt-2">
-          {client ? (
-            <div className="bg-bg-white-0 ring-stroke-soft-200 grid grid-cols-2 gap-x-3 gap-y-1.5 rounded-lg px-3 py-2.5 ring-1 lg:grid-cols-3">
-              <InfoRow label={fields.clientId} value={String(client.id)} />
-              <InfoRow label={dict.clients.fields.name} value={client.name} />
-              <InfoRow label={dict.clients.fields.documentType} value={client.documentType} />
-              <InfoRow label={dict.clients.fields.address} value={client.address} />
-              <InfoRow label={dict.clients.fields.phone} value={client.phone} />
-              <InfoRow label={dict.clients.fields.email} value={client.email} />
-            </div>
-          ) : (
-            <p className="text-text-sub-600 py-4 text-center text-sm">
-              {clientIdNum ? dict.clients.loading : '—'}
-            </p>
-          )}
-        </TabMenuHorizontal.Content>
+          <FormField id="est-document-type" label={fields.documentType}>
+            <Controller
+              control={control}
+              name="documentType"
+              render={({ field }) => (
+                <Select.Root value={field.value} onValueChange={field.onChange}>
+                  <Select.Trigger id="est-document-type">
+                    <Select.Value placeholder={dict.common.selectPlaceholder} />
+                  </Select.Trigger>
+                  <Select.Content>
+                    {documentTypes.map(dt => (
+                      <Select.Item key={dt} value={dt}>
+                        {dt}
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Root>
+              )}
+            />
+          </FormField>
 
-        <TabMenuHorizontal.Content value="payments" className="pt-2">
-          <p className="text-text-sub-600 py-4 text-center text-sm">
-            {dict.establishments.comingSoon}
-          </p>
-        </TabMenuHorizontal.Content>
+          <FormField id="est-number-identification" label={fields.numberIdentification}>
+            <Input.Root>
+              <Input.Wrapper>
+                <Input.Input
+                  id="est-number-identification"
+                  inputMode="numeric"
+                  {...register('numberIdentification')}
+                />
+              </Input.Wrapper>
+            </Input.Root>
+          </FormField>
 
-        <TabMenuHorizontal.Content value="settlements" className="pt-2">
-          {isEditing ? (
-            <EstablishmentInvoices establishmentId={establishmentId} dict={dict} />
-          ) : (
-            <p className="text-text-sub-600 py-4 text-center text-sm">
-              {dict.establishments.comingSoon}
-            </p>
-          )}
-        </TabMenuHorizontal.Content>
+          <div className="lg:col-span-3">
+            <FormField id="est-description" label={fields.description}>
+              <Input.Root>
+                <Input.Wrapper>
+                  <Input.Input id="est-description" {...register('description')} />
+                </Input.Wrapper>
+              </Input.Root>
+            </FormField>
+          </div>
+        </div>
 
-        <TabMenuHorizontal.Content value="settle" className="pt-2">
-          {isEditing && establishment ? (
-            <EstablishmentSettle establishment={establishment} dict={dict} />
-          ) : (
-            <p className="text-text-sub-600 py-4 text-center text-sm">
-              {dict.establishments.comingSoon}
-            </p>
-          )}
-        </TabMenuHorizontal.Content>
-      </TabMenuHorizontal.Root>
+        <div className="border-stroke-soft-200 bg-bg-weak-25 flex items-center justify-between gap-3 border-t px-5 py-3">
+          <div>
+            {isEditing ? (
+              // [R7] destructivo no protagonista → error stroke
+              <Button.Root
+                type="button"
+                variant="error"
+                mode="stroke"
+                size="small"
+                onClick={() => setConfirmDelete(true)}
+                disabled={isPending}
+              >
+                {dict.establishments.delete}
+              </Button.Root>
+            ) : null}
+          </div>
+          <div className="flex items-center gap-3">
+            <Button.Root type="button" variant="basic" onClick={goBack} disabled={isPending}>
+              {dict.common.cancel}
+            </Button.Root>
+            <FancyButton.Root
+              type="submit"
+              state={isPending ? 'loading' : 'idle'}
+              disabled={isPending}
+            >
+              {dict.common.save}
+            </FancyButton.Root>
+          </div>
+        </div>
+      </form>
+
+      {isEditing && establishment ? (
+        <TabMenuHorizontal.Root value={activeTab} onValueChange={v => setActiveTab(v as DetailTab)}>
+          <TabMenuHorizontal.List>
+            <TabMenuHorizontal.Trigger value="client">{tabs.client}</TabMenuHorizontal.Trigger>
+            <TabMenuHorizontal.Trigger value="settlements">
+              {tabs.settlements}
+            </TabMenuHorizontal.Trigger>
+            <TabMenuHorizontal.Trigger value="settle">{tabs.settle}</TabMenuHorizontal.Trigger>
+          </TabMenuHorizontal.List>
+
+          <TabMenuHorizontal.Content value="client" className="pt-4">
+            {client ? (
+              <div className="bg-bg-white-0 ring-stroke-soft-200 grid grid-cols-1 gap-4 rounded-xl p-5 ring-1 sm:grid-cols-2 lg:grid-cols-3">
+                {(
+                  [
+                    [dict.clients.fields.id, String(client.id)],
+                    [dict.clients.fields.name, client.name],
+                    [dict.clients.fields.documentType, client.documentType],
+                    [dict.clients.fields.address, client.address],
+                    [dict.clients.fields.phone, client.phone],
+                    [dict.clients.fields.email, client.email]
+                  ] as const
+                ).map(([label, value]) => (
+                  <InfoRow
+                    key={label}
+                    label={label}
+                    value={value}
+                    fallback={dict.common.notAvailable}
+                  />
+                ))}
+              </div>
+            ) : (
+              <Skeleton.Root className="h-28 w-full rounded-xl" />
+            )}
+          </TabMenuHorizontal.Content>
+
+          <TabMenuHorizontal.Content value="settlements" className="pt-4">
+            <EstablishmentInvoices establishment={establishment} dict={dict} />
+          </TabMenuHorizontal.Content>
+
+          <TabMenuHorizontal.Content value="settle" className="pt-4">
+            <EstablishmentSettle
+              establishment={establishment}
+              dict={dict}
+              onSaved={() => setActiveTab('settlements')}
+            />
+          </TabMenuHorizontal.Content>
+        </TabMenuHorizontal.Root>
+      ) : null}
+
+      <ConfirmDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title={dict.establishments.delete}
+        description={dict.establishments.deleteConfirm}
+        confirmLabel={dict.common.delete}
+        cancelLabel={dict.common.cancel}
+        onConfirm={handleDelete}
+        isPending={isDeleting}
+      />
     </div>
   );
 };
 
-const InfoRow = ({ label, value }: { label: string; value: string }) => (
+const InfoRow = ({
+  label,
+  value,
+  fallback
+}: {
+  label: string;
+  value: string;
+  fallback: string;
+}) => (
   <div className="flex flex-col gap-0.5">
-    <span className="text-text-sub-600 text-xs">{label}</span>
-    <span className="text-text-strong-950 text-sm">{value || '—'}</span>
+    <span className="text-paragraph-xs text-text-sub-600">{label}</span>
+    <span className="text-label-sm text-text-strong-950">{value || fallback}</span>
   </div>
 );

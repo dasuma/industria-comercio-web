@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { FancyButton, Table, Pagination, Button, Input } from '@dasuma/pradma-ui';
-import {
-  RiAddLine,
-  RiArrowLeftSLine,
-  RiArrowRightSLine,
-  RiSearchLine
-} from '@dasuma/pradma-ui/icons';
+import { Badge, CompactButton, FancyButton, Table } from '@dasuma/pradma-ui';
+import { RiAddLine, RiPencilLine } from '@dasuma/pradma-ui/icons';
 import type { Locale } from '@/i18n/config';
+import { SearchInput } from '@/components/SearchInput';
+import { EmptyState, ListSkeleton, RetryButton } from '@/components/ListState';
+import { DataPagination } from '@/components/DataPagination';
+import { clickableRowProps } from '@/utils/a11y';
+import { interpolate } from '@/utils/format';
 import { getPradmaDict } from '../../dictionaries';
 import { useSearchClients } from '../../data';
 import { useSearchPagination } from '../../hooks/useSearchPagination';
@@ -18,6 +18,17 @@ import type { SearchFilter } from '../../types/search.types';
 interface ClientListProps {
   locale: Locale;
 }
+
+const buildFilters = (query: string): SearchFilter[] => {
+  const trimmed = query.trim();
+  if (!trimmed) return [];
+  return [
+    { field: 'name', value: trimmed, operation: 'ilike', option: 'OR' },
+    ...(Number.isNaN(Number(trimmed))
+      ? []
+      : [{ field: 'id', value: Number(trimmed), operation: 'eq' as const, option: 'OR' as const }])
+  ];
+};
 
 export const ClientList = ({ locale }: ClientListProps) => {
   const dict = getPradmaDict(locale);
@@ -52,31 +63,15 @@ export const ClientList = ({ locale }: ClientListProps) => {
     hasPrevPage,
     setTotal,
     setFilters,
-    pageNumbers
+    pageNumbers,
+    total,
+    pageSize
   } = useSearchPagination({ defaultSort: 'id' });
 
   const handleSearch = useCallback(
     (value: string) => {
       setSearch(value);
-      if (value.trim()) {
-        const trimmed = value.trim();
-        const f: SearchFilter[] = [
-          { field: 'name', value: trimmed, operation: 'ilike', option: 'OR' },
-          ...(isNaN(Number(trimmed))
-            ? []
-            : [
-                {
-                  field: 'id',
-                  value: Number(trimmed),
-                  operation: 'eq' as const,
-                  option: 'OR' as const
-                }
-              ])
-        ];
-        setFilters(f);
-      } else {
-        setFilters([]);
-      }
+      setFilters(buildFilters(value));
     },
     [setFilters]
   );
@@ -87,41 +82,55 @@ export const ClientList = ({ locale }: ClientListProps) => {
     if (data) setTotal(data.total);
   }, [data, setTotal]);
 
+  const isEmpty = !isLoading && !isError && (!data || data.data.length === 0);
+  const hasQuery = search.trim().length > 0;
+
+  const createButton = (
+    // [R7] acción protagonista del listado → FancyButton default
+    <FancyButton.Root onClick={openCreate}>
+      <FancyButton.Icon as={RiAddLine} />
+      {dict.clients.create}
+    </FancyButton.Root>
+  );
+
   return (
     <>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="max-w-sm flex-1">
-            <Input.Root>
-              <Input.Wrapper>
-                <Input.Icon as={RiSearchLine} />
-                <Input.Input
-                  placeholder={dict.common.search}
-                  value={search}
-                  onChange={e => handleSearch(e.target.value)}
-                />
-              </Input.Wrapper>
-            </Input.Root>
-          </div>
-          <FancyButton.Root variant="primary" onClick={openCreate}>
-            <FancyButton.Icon as={RiAddLine} />
-            {dict.clients.create}
-          </FancyButton.Root>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <SearchInput
+            value={search}
+            onChange={handleSearch}
+            placeholder={dict.clients.searchPlaceholder}
+            clearLabel={dict.common.clearSearch}
+          />
+          {createButton}
         </div>
 
-        {isLoading && <p className="text-text-sub-600 py-8 text-center">{dict.clients.loading}</p>}
+        {isLoading && <ListSkeleton columns={7} />}
 
         {isError && (
-          <div className="flex flex-col items-center gap-3 py-8">
-            <p className="text-text-sub-600">{dict.clients.errorLoading}</p>
-            <Button.Root variant="neutral" onClick={() => refetch()}>
-              {dict.common.retry}
-            </Button.Root>
-          </div>
+          <EmptyState
+            variant="error"
+            title={dict.common.errorTitle}
+            description={dict.clients.errorLoading}
+            action={<RetryButton label={dict.common.retry} onClick={() => void refetch()} />}
+          />
         )}
 
-        {!isLoading && !isError && (!data || data.data.length === 0) && (
-          <p className="text-text-sub-600 py-8 text-center">{dict.clients.empty}</p>
+        {isEmpty && hasQuery && (
+          <EmptyState
+            variant="no-results"
+            title={dict.common.noResultsTitle}
+            description={interpolate(dict.common.noResultsDescription, { query: search.trim() })}
+          />
+        )}
+
+        {isEmpty && !hasQuery && (
+          <EmptyState
+            title={dict.clients.empty}
+            description={dict.common.emptyHint}
+            action={createButton}
+          />
         )}
 
         {!isLoading && !isError && data && data.data.length > 0 && (
@@ -129,60 +138,67 @@ export const ClientList = ({ locale }: ClientListProps) => {
             <Table.Root>
               <Table.Header>
                 <Table.Row>
-                  <Table.Head>{columns.id}</Table.Head>
+                  <Table.Head className="text-right">{columns.id}</Table.Head>
                   <Table.Head>{columns.name}</Table.Head>
                   <Table.Head>{columns.documentType}</Table.Head>
                   <Table.Head>{columns.email}</Table.Head>
                   <Table.Head>{columns.phone}</Table.Head>
                   <Table.Head>{columns.isCompany}</Table.Head>
+                  <Table.Head className="text-right">{dict.common.actions}</Table.Head>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
                 {data.data.map(client => (
-                  <Table.Row
-                    key={client.id}
-                    onClick={() => openEdit(client.id)}
-                    className="cursor-pointer"
-                  >
-                    <Table.Cell>{client.id}</Table.Cell>
-                    <Table.Cell>{client.name}</Table.Cell>
+                  <Table.Row key={client.id} {...clickableRowProps(() => openEdit(client.id))}>
+                    <Table.Cell className="text-text-sub-600 text-right tabular-nums">
+                      {client.id}
+                    </Table.Cell>
+                    <Table.Cell className="text-text-strong-950 font-medium">
+                      {client.name}
+                    </Table.Cell>
                     <Table.Cell>{client.documentType}</Table.Cell>
-                    <Table.Cell>{client.email}</Table.Cell>
-                    <Table.Cell>{client.phone}</Table.Cell>
-                    <Table.Cell>{client.isCompany ? dict.common.yes : dict.common.no}</Table.Cell>
+                    <Table.Cell>{client.email || dict.common.notAvailable}</Table.Cell>
+                    <Table.Cell className="tabular-nums">
+                      {client.phone || dict.common.notAvailable}
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Badge.Root variant="light" color={client.isCompany ? 'blue' : 'gray'}>
+                        {client.isCompany ? dict.common.yes : dict.common.no}
+                      </Badge.Root>
+                    </Table.Cell>
+                    <Table.Cell className="text-right">
+                      <CompactButton.Root
+                        variant="ghost"
+                        size="medium"
+                        aria-label={dict.common.edit}
+                        onClick={event => {
+                          event.stopPropagation();
+                          openEdit(client.id);
+                        }}
+                      >
+                        <CompactButton.Icon as={RiPencilLine} />
+                      </CompactButton.Root>
+                    </Table.Cell>
                   </Table.Row>
                 ))}
               </Table.Body>
             </Table.Root>
 
-            <div className="flex items-center justify-between">
-              <p className="text-text-sub-600 text-sm">
-                {dict.common.page} {currentPage} {dict.common.of} {totalPages}
-              </p>
-              <Pagination.Root>
-                <Pagination.NavButton disabled={!hasPrevPage} onClick={prevPage}>
-                  <Pagination.NavIcon as={RiArrowLeftSLine} />
-                </Pagination.NavButton>
-                {pageNumbers.map((page, i) =>
-                  page === -1 ? (
-                    <span key={`ellipsis-${i}`} className="text-text-sub-600 px-2">
-                      &hellip;
-                    </span>
-                  ) : (
-                    <Pagination.Item
-                      key={page}
-                      current={page === currentPage}
-                      onClick={() => goToPage(page)}
-                    >
-                      {page}
-                    </Pagination.Item>
-                  )
-                )}
-                <Pagination.NavButton disabled={!hasNextPage} onClick={nextPage}>
-                  <Pagination.NavIcon as={RiArrowRightSLine} />
-                </Pagination.NavButton>
-              </Pagination.Root>
-            </div>
+            <DataPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageNumbers={pageNumbers}
+              total={total}
+              pageSize={pageSize}
+              hasPrevPage={hasPrevPage}
+              hasNextPage={hasNextPage}
+              onPrev={prevPage}
+              onNext={nextPage}
+              onPage={goToPage}
+              rangeLabel={dict.common.rangeLabel}
+              prevLabel={dict.common.prevPage}
+              nextLabel={dict.common.nextPage}
+            />
           </>
         )}
       </div>

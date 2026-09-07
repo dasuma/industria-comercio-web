@@ -5,7 +5,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FancyButton, Hint, Input, Label } from '@dasuma/pradma-ui';
-import { RiEyeLine, RiEyeOffLine, RiLockLine, RiMailLine } from '@dasuma/pradma-ui/icons';
+import {
+  RiErrorWarningFill,
+  RiEyeLine,
+  RiEyeOffLine,
+  RiLockLine,
+  RiMailLine
+} from '@dasuma/pradma-ui/icons';
 import { useEmailSignIn } from '../../hooks/useEmailSignIn';
 import { getAuthDict, type AuthDictionary } from '../../dictionaries';
 import type { Locale } from '@/i18n/config';
@@ -77,7 +83,12 @@ export const LoginEmailForm = ({ locale, onSuccess }: LoginEmailFormProps) => {
           </Input.Wrapper>
         </Input.Root>
         {/* [R9] el error va en pareja Input(hasError) + Hint, nunca rojo flotante */}
-        {errors.email && <Hint.Root hasError>{errors.email.message}</Hint.Root>}
+        {errors.email && (
+          <Hint.Root hasError>
+            <Hint.Icon as={RiErrorWarningFill} />
+            {errors.email.message}
+          </Hint.Root>
+        )}
       </div>
 
       <div className="flex flex-col gap-1">
@@ -107,15 +118,24 @@ export const LoginEmailForm = ({ locale, onSuccess }: LoginEmailFormProps) => {
             </button>
           </Input.Wrapper>
         </Input.Root>
-        {errors.password && <Hint.Root hasError>{errors.password.message}</Hint.Root>}
+        {errors.password && (
+          <Hint.Root hasError>
+            <Hint.Icon as={RiErrorWarningFill} />
+            {errors.password.message}
+          </Hint.Root>
+        )}
       </div>
 
-      {error && <Hint.Root hasError>{resolveErrorMessage(error, dict)}</Hint.Root>}
+      {error && (
+        <Hint.Root hasError>
+          <Hint.Icon as={RiErrorWarningFill} />
+          {resolveErrorMessage(error, dict)}
+        </Hint.Root>
+      )}
 
       {/* [R7] el submit es la acción protagonista de la pantalla → FancyButton */}
       <FancyButton.Root
         type="submit"
-        variant="primary"
         size="medium"
         // Loader nativo del DS: bloquea el ancho y oculta el contenido, así no
         // hace falta un texto "Ingresando…".

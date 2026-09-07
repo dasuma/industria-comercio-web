@@ -3,6 +3,8 @@
 import { useCallback, useState } from 'react';
 import { Button, FancyButton, HorizontalStepper } from '@dasuma/pradma-ui';
 import { RiArrowLeftSLine, RiArrowRightSLine, RiRestartLine } from '@dasuma/pradma-ui/icons';
+import { cn } from '@/utils/cn';
+import { interpolate } from '@/utils/format';
 import type { MigrationResult } from '../../models/migration.interface';
 import type { PradmaDictionary } from '../../dictionaries';
 import {
@@ -19,6 +21,8 @@ import {
 import { MigrationCard } from '../MigrationCard';
 import { MigrationSummary } from '../MigrationSummary';
 
+// El orden importa: cada paso depende de los anteriores (establecimientos
+// necesitan contribuyentes, facturas necesitan establecimientos, etc.).
 const STEPS = [
   { key: 'clients', labelKey: 'clients', descriptionKey: 'clients', hook: useMigrateClients },
   {
@@ -67,6 +71,9 @@ const STEPS = [
 ] as const;
 
 const TOTAL_STEPS = STEPS.length + 1; // +1 for summary
+const emptyResults = (): (MigrationResult | null)[] =>
+  Array.from({ length: STEPS.length }, () => null);
+const emptySkipped = (): boolean[] => Array.from({ length: STEPS.length }, () => false);
 
 interface MigrationsWizardProps {
   dict: PradmaDictionary;
@@ -74,9 +81,11 @@ interface MigrationsWizardProps {
 
 export const MigrationsWizard = ({ dict }: MigrationsWizardProps) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [results, setResults] = useState<(MigrationResult | null)[]>(() =>
-    Array.from({ length: STEPS.length }, () => null)
-  );
+  // Hasta dónde llegó el usuario: el stepper solo permite volver a pasos ya
+  // visitados (completados u omitidos), nunca saltar hacia adelante.
+  const [maxVisitedStep, setMaxVisitedStep] = useState(0);
+  const [results, setResults] = useState<(MigrationResult | null)[]>(emptyResults);
+  const [skipped, setSkipped] = useState<boolean[]>(emptySkipped);
 
   const wizardDict = dict.migrations.wizard;
   const isSummary = currentStep === STEPS.length;
@@ -87,11 +96,35 @@ export const MigrationsWizard = ({ dict }: MigrationsWizardProps) => {
       next[index] = result;
       return next;
     });
+    setSkipped(prev => {
+      const next = [...prev];
+      next[index] = false;
+      return next;
+    });
   }, []);
+
+  const goTo = useCallback((step: number) => {
+    setCurrentStep(step);
+    setMaxVisitedStep(prev => Math.max(prev, step));
+  }, []);
+
+  const handleNext = useCallback(() => {
+    // Avanzar sin correr el paso lo marca como omitido para el resumen.
+    if (results[currentStep] === null) {
+      setSkipped(prev => {
+        const next = [...prev];
+        next[currentStep] = true;
+        return next;
+      });
+    }
+    goTo(currentStep + 1);
+  }, [currentStep, results, goTo]);
 
   const handleRestart = useCallback(() => {
     setCurrentStep(0);
-    setResults(Array.from({ length: STEPS.length }, () => null));
+    setMaxVisitedStep(0);
+    setResults(emptyResults());
+    setSkipped(emptySkipped());
   }, []);
 
   const getStepState = (index: number): 'completed' | 'active' | 'default' => {
@@ -111,7 +144,8 @@ export const MigrationsWizard = ({ dict }: MigrationsWizardProps) => {
             label={wizardDict.steps[step.labelKey as keyof typeof wizardDict.steps]}
             state={getStepState(i)}
             isLast={false}
-            onClick={() => setCurrentStep(i)}
+            disabled={i > maxVisitedStep}
+            onClick={() => goTo(i)}
           />
         ))}
         <StepperItem
@@ -119,21 +153,20 @@ export const MigrationsWizard = ({ dict }: MigrationsWizardProps) => {
           label={wizardDict.steps.summary}
           state={getStepState(STEPS.length)}
           isLast
-          onClick={() => setCurrentStep(STEPS.length)}
+          disabled={STEPS.length > maxVisitedStep}
+          onClick={() => goTo(STEPS.length)}
         />
       </HorizontalStepper.Root>
 
       {/* Step indicator */}
       <p className="text-text-sub-600 text-paragraph-sm">
-        {wizardDict.stepOf
-          .replace('{current}', String(currentStep + 1))
-          .replace('{total}', String(TOTAL_STEPS))}
+        {interpolate(wizardDict.stepOf, { current: currentStep + 1, total: TOTAL_STEPS })}
       </p>
 
       {/* Content */}
       <div className="mx-auto w-full max-w-lg">
         {isSummary ? (
-          <MigrationSummary results={results} steps={STEPS} dict={dict} />
+          <MigrationSummary results={results} skipped={skipped} steps={STEPS} dict={dict} />
         ) : (
           <MigrationCard
             key={STEPS[currentStep].key}
@@ -156,8 +189,9 @@ export const MigrationsWizard = ({ dict }: MigrationsWizardProps) => {
 
       {/* Navigation footer */}
       <div className="border-stroke-soft-200 flex items-center justify-between border-t pt-4">
+        {/* [R7] Atrás es terciario (ghost) junto a la primary "Siguiente" */}
         <Button.Root
-          variant="neutral"
+          variant="basic"
           mode="ghost"
           onClick={() => setCurrentStep(s => s - 1)}
           disabled={currentStep === 0}
@@ -167,13 +201,13 @@ export const MigrationsWizard = ({ dict }: MigrationsWizardProps) => {
         </Button.Root>
 
         {isSummary ? (
-          <Button.Root variant="neutral" onClick={handleRestart}>
+          <Button.Root variant="basic" onClick={handleRestart}>
             <Button.Icon as={RiRestartLine} />
             {wizardDict.restart}
           </Button.Root>
         ) : (
           // [R7] FancyButton for primary "Next" action
-          <FancyButton.Root onClick={() => setCurrentStep(s => s + 1)} size="medium">
+          <FancyButton.Root onClick={handleNext} size="medium">
             {wizardDict.next}
             <FancyButton.Icon as={RiArrowRightSLine} />
           </FancyButton.Root>
@@ -190,17 +224,25 @@ interface StepperItemProps {
   label: string;
   state: 'completed' | 'active' | 'default';
   isLast: boolean;
+  disabled: boolean;
   onClick: () => void;
 }
 
-const StepperItem = ({ index, label, state, isLast, onClick }: StepperItemProps) => (
+// HorizontalStepper.Item ya renderiza un <button>: no lo envolvemos en otro.
+const StepperItem = ({ index, label, state, isLast, disabled, onClick }: StepperItemProps) => (
   <>
-    <button type="button" onClick={onClick} className="cursor-pointer">
-      <HorizontalStepper.Item state={state}>
-        <HorizontalStepper.ItemIndicator>{index + 1}</HorizontalStepper.ItemIndicator>
-        <span className="hidden sm:inline">{label}</span>
-      </HorizontalStepper.Item>
-    </button>
+    <HorizontalStepper.Item
+      state={state}
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-disabled={disabled}
+      aria-current={state === 'active' ? 'step' : undefined}
+      className={cn(disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer')}
+    >
+      <HorizontalStepper.ItemIndicator state={state}>{index + 1}</HorizontalStepper.ItemIndicator>
+      <span className="hidden sm:inline">{label}</span>
+    </HorizontalStepper.Item>
     {!isLast && <HorizontalStepper.SeparatorIcon />}
   </>
 );
