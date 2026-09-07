@@ -1,5 +1,6 @@
 export { LoginGoogleButton } from './components/LoginGoogleButton';
 export { LoginCard } from './components/LoginCard';
+export { LoginEmailForm } from './components/LoginEmailForm';
 export { LogoutButton } from './components/LogoutButton';
 export { useGoogleSignIn } from './hooks/useGoogleSignIn';
 export { useEmailSignIn } from './hooks/useEmailSignIn';

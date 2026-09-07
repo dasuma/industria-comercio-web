@@ -39,7 +39,11 @@ export const useEmailSignIn = (options?: UseEmailSignInOptions) => {
           router.replace(DEFAULT_AUTHED_ROUTE);
         }
       } catch (err) {
-        setError((err as Error).message);
+        // Firebase pone el motivo en `code` (`auth/invalid-credential`, …).
+        // Exponemos el code —no el message— para que la UI traduzca el error
+        // sin parsear texto del proveedor; el message queda como fallback.
+        const code = (err as { code?: string }).code;
+        setError(code ?? (err as Error).message);
       } finally {
         setIsLoading(false);
       }

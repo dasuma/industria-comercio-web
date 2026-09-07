@@ -12,6 +12,8 @@ import type { WorkspaceKey } from '@modules/shell';
 import type { Locale } from '@/i18n/config';
 import { cn } from '@/utils/cn';
 import { LoginGoogleButton } from '../LoginGoogleButton';
+import { LoginEmailForm } from '../LoginEmailForm';
+import { getAuthDict } from '../../dictionaries';
 
 interface LoginCardProps {
   locale: Locale;
@@ -25,13 +27,19 @@ type Phase = 'login' | 'fading' | 'expanding' | 'picker';
 
 const POST_AUTH_HOLD_MS = 2000;
 const LOGIN_FADE_OUT_MS = 220;
-const CARD_EXPAND_MS = 760;
+// Desde que el login es email+password, el bloque de credenciales mide casi lo
+// mismo que el picker: el card ya no crece al morphear, así que la fase de
+// expansión es un beat corto de crossfade y no una animación de altura larga
+// (con los 760ms originales quedaba un card vacío en pantalla).
+const CARD_EXPAND_MS = 320;
 
 // Solid white card — login content + picker live at the same horizontal width.
 // Min-heights tuned to natural content sizes at p-10 (padding: 40px):
-//   Login: logo(52) + gap(16) + wordmark(16) + title(28) + subtitle(20) + gap-5(20) + button(40) + padding-y(80) ≈ 272px → 17rem
-//   Picker: title(28) + sub(20) + gap-5(20) + 1 card × 52px + padding-y(80) → flexible. 34rem allows comfortable content.
-const LOGIN_MIN_HEIGHT_REM = '17rem';
+//   Login: brand(148) + divider + form(2 campos × 64 + submit 40 + gaps) +
+//   divider "o"(17) + Google(40) + padding-y(80) ≈ 580px → 36rem
+//   Picker: title(28) + sub(20) + gap-5(20) + 1 card × 52px + padding-y(80) → flexible. 36rem allows comfortable content.
+// Ambos comparten altura para que el card quede estable durante el morph.
+const LOGIN_MIN_HEIGHT_REM = '36rem';
 const PICKER_MIN_HEIGHT_REM = '36rem';
 
 const SWIFT_OUT = 'cubic-bezier(0.32, 0.72, 0, 1)';
@@ -41,6 +49,7 @@ const wait = (ms: number): Promise<void> => new Promise(resolve => window.setTim
 export const LoginCard = ({ locale, homeTitle, homeSubtitle }: LoginCardProps) => {
   const router = useRouter();
   const shellDict = getShellDict(locale);
+  const authDict = getAuthDict(locale);
 
   const [phase, setPhase] = useState<Phase>('login');
 
@@ -176,7 +185,18 @@ export const LoginCard = ({ locale, homeTitle, homeSubtitle }: LoginCardProps) =
           {/* ── Divider ── */}
           <div className="w-full border-t" style={{ borderColor: 'rgba(0,0,0,0.07)' }} />
 
-          {/* ── Action ── */}
+          {/* ── Actions ── */}
+          <LoginEmailForm locale={locale} onSuccess={handleLoginSuccess} />
+
+          {/* ── "o" divider entre credenciales y proveedor externo ── */}
+          <div className="flex w-full items-center gap-3">
+            <div className="h-px flex-1" style={{ background: 'rgba(0,0,0,0.07)' }} />
+            <span className="text-[11px] uppercase" style={{ color: '#94a3b8' }}>
+              {authDict.googleDivider}
+            </span>
+            <div className="h-px flex-1" style={{ background: 'rgba(0,0,0,0.07)' }} />
+          </div>
+
           <LoginGoogleButton locale={locale} onSuccess={handleLoginSuccess} />
         </div>
       )}

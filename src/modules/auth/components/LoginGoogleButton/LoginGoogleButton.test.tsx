@@ -6,7 +6,7 @@ jest.mock('../../hooks/useGoogleSignIn', () => ({
 }));
 
 jest.mock('@dasuma/pradma-ui', () => ({
-  FancyButton: {
+  Button: {
     Root: ({
       children,
       onClick,
