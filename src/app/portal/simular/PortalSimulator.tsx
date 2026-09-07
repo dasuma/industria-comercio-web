@@ -1,6 +1,29 @@
 'use client';
 
 import { Fragment, useCallback, useMemo, useState } from 'react';
+import {
+  Alert,
+  Badge,
+  Button,
+  CompactButton,
+  FancyButton,
+  HorizontalStepper,
+  Input,
+  Label,
+  Select,
+  Switch,
+  Table
+} from '@dasuma/pradma-ui';
+import {
+  RiAddLine,
+  RiArrowLeftSLine,
+  RiArrowRightSLine,
+  RiCalculatorLine,
+  RiCalendarLine,
+  RiDeleteBinLine,
+  RiErrorWarningFill,
+  RiRefreshLine
+} from '@dasuma/pradma-ui/icons';
 import { useSimulateSettlement, useGetPublicActivitiesByYear } from '@modules/pradma';
 import type { SettlementResponse, EstablishmentActivity } from '@modules/pradma';
 
@@ -16,6 +39,8 @@ for (let y = MAX_YEAR; y >= MIN_YEAR; y--) AVAILABLE_YEARS.push(y);
 const TOTAL_KINDS = new Set(['gross_total', 'balance_due', 'amount_payable', 'total_payable']);
 const SUBTOTAL_KINDS = new Set(['subtotal_tax']);
 
+const STEPS = ['Período', 'Actividades'];
+
 /* ─── Helpers ─── */
 
 const formatCop = (v: number) =>
@@ -29,28 +54,6 @@ const toInt = (v: string): number => {
   const n = parseInt(v.replace(/\D/g, '') || '0', 10);
   return isNaN(n) ? 0 : n;
 };
-
-const inputStyle = {
-  borderColor: '#e2e8f0',
-  background: '#f8fafc'
-};
-
-const inputClass =
-  'w-full rounded-xl border px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all';
-
-const useInputFocus = () => ({
-  onFocus: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
-    e.target.style.borderColor = '#1e4799';
-    (e.target.style as CSSStyleDeclaration & { boxShadow: string }).boxShadow =
-      '0 0 0 3px rgba(30,71,153,0.1)';
-    e.target.style.background = '#fff';
-  },
-  onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
-    e.target.style.borderColor = '#e2e8f0';
-    (e.target.style as CSSStyleDeclaration & { boxShadow: string }).boxShadow = 'none';
-    e.target.style.background = '#f8fafc';
-  }
-});
 
 /* ─── Activity row type ─── */
 
@@ -69,7 +72,6 @@ export const PortalSimulator = () => {
   const [signsBillboardsTax, setSignsBillboardsTax] = useState(true);
   const [fireBrigadeSurcharge, setFireBrigadeSurcharge] = useState(true);
   const [activities, setActivities] = useState<ActivityRow[]>([]);
-  const inputFocus = useInputFocus();
 
   const { data: allActivitiesRaw = [] } = useGetPublicActivitiesByYear(year);
 
@@ -139,56 +141,37 @@ export const PortalSimulator = () => {
     return <SimulatorResult result={result} onReset={handleReset} />;
   }
 
-  const STEPS = ['Período', 'Actividades'];
+  const getStepState = (i: number): 'completed' | 'active' | 'default' =>
+    i < step ? 'completed' : i === step ? 'active' : 'default';
 
   return (
-    <div
-      className="w-full overflow-hidden rounded-2xl"
-      style={{
-        background: '#ffffff',
-        boxShadow:
-          '0 0 0 1px rgba(0,0,0,0.06), 0 4px 6px -1px rgba(0,0,0,0.07), 0 16px 32px -4px rgba(0,0,0,0.12)'
-      }}
-    >
-      {/* ── Brand strip ── */}
-      <div
-        className="relative overflow-hidden px-7 pt-7 pb-6"
-        style={{ background: 'linear-gradient(135deg, #0f2952 0%, #1e4799 100%)' }}
-      >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-8 -right-8 h-32 w-32 rounded-full"
-          style={{ background: 'rgba(255,255,255,0.06)' }}
-        />
-        <div className="relative flex items-center gap-3">
-          <div
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-            style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)' }}
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="12" y1="1" x2="12" y2="23" />
-              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
-          </div>
-          <div>
-            <p className="text-xs font-medium text-blue-300">Simulador de impuesto</p>
-            <h2 className="text-base font-bold text-white">Industria y Comercio (I.C.A)</h2>
-          </div>
+    <div className="bg-bg-white-0 ring-stroke-soft-200 overflow-hidden rounded-2xl ring-1">
+      {/* ── Header ── */}
+      <div className="border-stroke-soft-200 flex items-center gap-3 border-b px-6 py-5">
+        <div className="bg-bg-weak-50 text-text-sub-600 flex size-10 shrink-0 items-center justify-center rounded-xl">
+          <RiCalculatorLine className="size-5" />
+        </div>
+        <div>
+          <p className="text-text-soft-400 text-subheading-2xs uppercase">Simulador de impuesto</p>
+          <h2 className="text-text-strong-950 text-label-md">Industria y Comercio (I.C.A)</h2>
         </div>
       </div>
 
       {/* ── Stepper ── */}
       <div className="px-6 pt-5">
-        <SimulatorStepper steps={STEPS} current={step} />
+        <HorizontalStepper.Root>
+          {STEPS.map((label, i) => (
+            <Fragment key={label}>
+              <button type="button" onClick={() => setStep(i)} className="cursor-pointer">
+                <HorizontalStepper.Item state={getStepState(i)}>
+                  <HorizontalStepper.ItemIndicator>{i + 1}</HorizontalStepper.ItemIndicator>
+                  <span className="hidden sm:inline">{label}</span>
+                </HorizontalStepper.Item>
+              </button>
+              {i < STEPS.length - 1 && <HorizontalStepper.SeparatorIcon />}
+            </Fragment>
+          ))}
+        </HorizontalStepper.Root>
       </div>
 
       {/* ── Body ── */}
@@ -196,59 +179,37 @@ export const PortalSimulator = () => {
         {/* Step 0: Período */}
         {step === 0 && (
           <div className="flex flex-col gap-4">
-            {/* Year selector */}
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="sim-year" className="text-xs font-semibold text-slate-600">
-                Año gravable
-              </label>
-              <select
-                id="sim-year"
-                value={year}
-                onChange={e => {
-                  setYear(Number(e.target.value));
+            <div className="flex flex-col gap-1">
+              <Label.Root htmlFor="sim-year">Año gravable</Label.Root>
+              <Select.Root
+                value={String(year)}
+                onValueChange={v => {
+                  setYear(Number(v));
                   setActivities([]);
                 }}
-                className={inputClass}
-                style={inputStyle}
-                {...inputFocus}
               >
-                {AVAILABLE_YEARS.map(y => (
-                  <option key={y} value={y}>
-                    {y}
-                  </option>
-                ))}
-              </select>
+                <Select.Trigger id="sim-year">
+                  <Select.Value />
+                </Select.Trigger>
+                <Select.Content>
+                  {AVAILABLE_YEARS.map(y => (
+                    <Select.Item key={y} value={String(y)}>
+                      {y}
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Root>
             </div>
 
-            {/* Period chip */}
-            <div
-              className="flex items-center gap-2 rounded-xl px-4 py-3 text-xs text-blue-700"
-              style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-              <span className="font-medium">
-                Período: 01 enero {year} — 31 diciembre {year} (12 meses)
-              </span>
-            </div>
+            <Alert.Root status="information" size="small">
+              <Alert.Icon as={RiCalendarLine} />
+              Período: 01 enero {year} — 31 diciembre {year} (12 meses)
+            </Alert.Root>
 
             {/* Optional taxes */}
-            <div className="overflow-hidden rounded-xl" style={{ border: '1px solid #e2e8f0' }}>
-              <div style={{ background: '#f8fafc' }} className="px-4 py-2.5">
-                <p className="text-[11px] font-semibold tracking-wider text-slate-500 uppercase">
+            <div className="ring-stroke-soft-200 overflow-hidden rounded-xl ring-1">
+              <div className="bg-bg-weak-50 px-4 py-2.5">
+                <p className="text-text-sub-600 text-subheading-2xs uppercase">
                   Sobretasas opcionales
                 </p>
               </div>
@@ -257,7 +218,7 @@ export const PortalSimulator = () => {
                 checked={signsBillboardsTax}
                 onChange={setSignsBillboardsTax}
               />
-              <div style={{ borderTop: '1px solid #f1f5f9' }}>
+              <div className="border-stroke-soft-200 border-t">
                 <SwitchRow
                   label="Sobretasa bomberil"
                   checked={fireBrigadeSurcharge}
@@ -272,10 +233,7 @@ export const PortalSimulator = () => {
         {step === 1 && (
           <div className="flex flex-col gap-3">
             {activities.length === 0 && (
-              <div
-                className="rounded-xl px-4 py-8 text-center text-sm text-slate-400"
-                style={{ border: '1px dashed #cbd5e1' }}
-              >
+              <div className="border-stroke-soft-200 text-text-soft-400 text-paragraph-sm rounded-xl border border-dashed px-4 py-8 text-center">
                 Agregá al menos una actividad económica para calcular el impuesto.
               </div>
             )}
@@ -295,78 +253,50 @@ export const PortalSimulator = () => {
               />
             ))}
 
-            <button
-              type="button"
+            <Button.Root
+              variant="neutral"
+              mode="stroke"
+              className="self-start"
               onClick={addActivity}
-              className="flex items-center gap-2 self-start rounded-xl border px-4 py-2 text-xs font-semibold text-slate-600 transition-all hover:bg-slate-50"
-              style={{ borderColor: '#e2e8f0' }}
             >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
+              <Button.Icon as={RiAddLine} />
               Agregar actividad
-            </button>
+            </Button.Root>
           </div>
         )}
 
         {/* Navigation */}
-        <div
-          className="mt-5 flex items-center justify-between border-t pt-4"
-          style={{ borderColor: '#f1f5f9' }}
-        >
+        <div className="border-stroke-soft-200 mt-5 flex items-center justify-between border-t pt-4">
           {step > 0 ? (
-            <button
-              type="button"
-              onClick={() => setStep(s => s - 1)}
-              className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold text-slate-600 transition-all hover:bg-slate-50"
-            >
-              ← Anterior
-            </button>
+            <Button.Root variant="neutral" mode="ghost" onClick={() => setStep(s => s - 1)}>
+              <Button.Icon as={RiArrowLeftSLine} />
+              Anterior
+            </Button.Root>
           ) : (
             <div />
           )}
 
           {step < STEPS.length - 1 ? (
-            <button
-              type="button"
-              onClick={() => setStep(s => s + 1)}
-              className="rounded-xl px-5 py-2.5 text-xs font-bold text-white transition-all hover:brightness-110 active:scale-[0.98]"
-              style={{
-                background: 'linear-gradient(135deg, #0f2952 0%, #1e4799 100%)',
-                boxShadow: '0 4px 14px rgba(30,71,153,0.3)'
-              }}
-            >
-              Actividades →
-            </button>
+            <FancyButton.Root variant="primary" onClick={() => setStep(s => s + 1)}>
+              Actividades
+              <FancyButton.Icon as={RiArrowRightSLine} />
+            </FancyButton.Root>
           ) : (
             <div className="flex flex-col items-end gap-2">
               {isError && (
-                <p className="text-right text-xs text-red-600">
+                <Alert.Root status="error" size="small">
+                  <Alert.Icon as={RiErrorWarningFill} />
                   {error instanceof Error ? error.message : 'Error al calcular. Intentá de nuevo.'}
-                </p>
+                </Alert.Root>
               )}
-              <button
-                type="button"
+              <FancyButton.Root
+                variant="primary"
                 onClick={handleCalculate}
                 disabled={isPending || !canCalculate}
-                className="rounded-xl px-5 py-2.5 text-xs font-bold text-white transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
-                style={{
-                  background: 'linear-gradient(135deg, #0f2952 0%, #1e4799 100%)',
-                  boxShadow: '0 4px 14px rgba(30,71,153,0.3)'
-                }}
               >
-                {isPending ? 'Calculando…' : 'Calcular →'}
-              </button>
+                {isPending ? 'Calculando…' : 'Calcular'}
+                <FancyButton.Icon as={RiArrowRightSLine} />
+              </FancyButton.Root>
             </div>
           )}
         </div>
@@ -395,90 +325,73 @@ const ActivityCard = ({
   onRemove
 }: ActivityCardProps) => {
   const salesVal = toInt(activity.annualSales);
-  const inputFocus = useInputFocus();
 
   return (
-    <div className="overflow-hidden rounded-xl" style={{ border: '1px solid #e2e8f0' }}>
+    <div className="ring-stroke-soft-200 overflow-hidden rounded-xl ring-1">
       {/* Header */}
-      <div
-        className="flex items-center justify-between px-4 py-2.5"
-        style={{ background: '#eff6ff' }}
-      >
+      <div className="bg-bg-weak-50 flex items-center justify-between gap-2 px-4 py-2.5">
         <div className="flex items-center gap-2">
-          <span
-            className="rounded-md px-2 py-0.5 text-[11px] font-bold text-white"
-            style={{ background: '#1e4799' }}
-          >
+          <Badge.Root variant="light" color="blue">
             Actividad {index + 1}
-          </span>
+          </Badge.Root>
           {activity.activityCode && (
-            <span className="text-xs font-medium text-slate-500">
+            <span className="text-text-sub-600 text-paragraph-xs">
               {activity.activityCode}
               {activity.activityName ? ` — ${activity.activityName}` : ''}
             </span>
           )}
         </div>
-        <button
-          type="button"
+        <CompactButton.Root
+          variant="ghost"
+          size="medium"
           onClick={onRemove}
-          className="text-slate-400 transition hover:text-red-500"
           aria-label="Eliminar actividad"
         >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="3 6 5 6 21 6" />
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-          </svg>
-        </button>
+          <CompactButton.Icon as={RiDeleteBinLine} />
+        </CompactButton.Root>
       </div>
 
       {/* Activity selector */}
-      <div className="px-4 py-3" style={{ borderBottom: '1px solid #f1f5f9' }}>
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-slate-600">
-            Actividad económica <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={activity.activityCode}
-            onChange={e => {
-              const found = allActivities.find(a => a.activityCode === e.target.value);
-              onActivitySelect(e.target.value, found?.activityName ?? '');
-            }}
-            className={inputClass}
-            style={inputStyle}
-            {...inputFocus}
-          >
-            <option value="">Seleccioná una actividad…</option>
+      <div className="border-stroke-soft-200 flex flex-col gap-1 border-b px-4 py-3">
+        <Label.Root>
+          Actividad económica
+          <Label.Asterisk />
+        </Label.Root>
+        <Select.Root
+          value={activity.activityCode}
+          onValueChange={v => {
+            const found = allActivities.find(a => a.activityCode === v);
+            onActivitySelect(v, found?.activityName ?? '');
+          }}
+        >
+          <Select.Trigger>
+            <Select.Value placeholder="Seleccioná una actividad…" />
+          </Select.Trigger>
+          <Select.Content>
             {allActivities.map(a => (
-              <option key={a.id} value={a.activityCode}>
+              <Select.Item key={a.id} value={a.activityCode}>
                 {a.activityCode} — {a.activityName}
-              </option>
+              </Select.Item>
             ))}
-          </select>
-        </div>
+          </Select.Content>
+        </Select.Root>
       </div>
 
       {/* Annual sales */}
       <div className="flex items-center gap-3 px-4 py-2.5">
-        <span className="flex-1 text-xs text-slate-500">Ventas anuales (COP)</span>
-        <div className="w-36 shrink-0">
-          <input
-            type="text"
-            value={formatCop(salesVal).replace(/\s/g, '').replace('$', '')}
-            onChange={onSalesChange}
-            inputMode="numeric"
-            className="w-full rounded-xl border px-3 py-2 text-right text-xs text-slate-800 transition-all outline-none"
-            style={inputStyle}
-            {...inputFocus}
-          />
+        <span className="text-text-sub-600 text-paragraph-xs flex-1">Ventas anuales (COP)</span>
+        <div className="w-40 shrink-0">
+          <Input.Root>
+            <Input.Wrapper>
+              <Input.Input
+                type="text"
+                value={formatCop(salesVal).replace(/\s/g, '').replace('$', '')}
+                onChange={onSalesChange}
+                inputMode="numeric"
+                className="text-right"
+              />
+            </Input.Wrapper>
+          </Input.Root>
         </div>
       </div>
     </div>
@@ -497,57 +410,8 @@ const SwitchRow = ({
   onChange: (v: boolean) => void;
 }) => (
   <div className="flex items-center justify-between gap-3 px-4 py-3">
-    <span className="text-xs text-slate-600">{label}</span>
-    <button
-      type="button"
-      onClick={() => onChange(!checked)}
-      role="switch"
-      aria-checked={checked}
-      className="relative h-5 w-9 shrink-0 rounded-full transition-all duration-200"
-      style={{ background: checked ? '#1e4799' : '#cbd5e1' }}
-    >
-      <span
-        className="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200"
-        style={{ transform: checked ? 'translateX(16px)' : 'translateX(0)' }}
-      />
-    </button>
-  </div>
-);
-
-/* ─── SimulatorStepper ─── */
-
-const SimulatorStepper = ({ steps, current }: { steps: string[]; current: number }) => (
-  <div className="flex items-start">
-    {steps.map((label, i) => (
-      <Fragment key={i}>
-        <div className="flex shrink-0 flex-col items-center gap-1">
-          <div
-            className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all"
-            style={
-              i === current
-                ? { background: '#1e4799', color: '#fff' }
-                : i < current
-                  ? { background: '#16a34a', color: '#fff' }
-                  : { background: '#f1f5f9', color: '#94a3b8', border: '1px solid #e2e8f0' }
-            }
-          >
-            {i < current ? '✓' : i + 1}
-          </div>
-          <span
-            className="text-center text-[11px] leading-tight font-medium"
-            style={{ color: i === current ? '#0f172a' : '#94a3b8' }}
-          >
-            {label}
-          </span>
-        </div>
-        {i < steps.length - 1 && (
-          <div
-            className="mx-2 mt-3.5 h-px flex-1"
-            style={{ background: i < current ? '#16a34a' : '#e2e8f0' }}
-          />
-        )}
-      </Fragment>
-    ))}
+    <span className="text-text-sub-600 text-paragraph-sm">{label}</span>
+    <Switch.Root checked={checked} onCheckedChange={onChange} />
   </div>
 );
 
@@ -560,66 +424,58 @@ const SimulatorResult = ({
   result: SettlementResponse;
   onReset: () => void;
 }) => (
-  <div
-    className="w-full overflow-hidden rounded-2xl"
-    style={{
-      background: '#ffffff',
-      boxShadow:
-        '0 0 0 1px rgba(0,0,0,0.06), 0 4px 6px -1px rgba(0,0,0,0.07), 0 16px 32px -4px rgba(0,0,0,0.12)'
-    }}
-  >
+  <div className="bg-bg-white-0 ring-stroke-soft-200 overflow-hidden rounded-2xl ring-1">
     {/* Header */}
-    <div
-      className="relative overflow-hidden px-7 pt-6 pb-5"
-      style={{ background: 'linear-gradient(135deg, #0f2952 0%, #1e4799 100%)' }}
-    >
-      <div className="relative flex items-center justify-between">
+    <div className="border-stroke-soft-200 flex items-center justify-between gap-3 border-b px-6 py-5">
+      <div className="flex items-center gap-3">
+        <div className="bg-bg-weak-50 text-text-sub-600 flex size-10 shrink-0 items-center justify-center rounded-xl">
+          <RiCalculatorLine className="size-5" />
+        </div>
         <div>
-          <p className="text-xs font-medium text-blue-300">Resultado de simulación</p>
-          <h2 className="text-base font-bold text-white">
+          <p className="text-text-soft-400 text-subheading-2xs uppercase">
+            Resultado de simulación
+          </p>
+          <h2 className="text-text-strong-950 text-label-md">
             {result.start_date.slice(0, 4)} — Estimación ICA
           </h2>
         </div>
-        <span
-          className="rounded-full px-3 py-1 text-[11px] font-bold"
-          style={{ background: 'rgba(255,255,255,0.15)', color: '#bfdbfe' }}
-        >
-          Borrador
-        </span>
       </div>
+      <Badge.Root variant="light" color="gray">
+        Borrador
+      </Badge.Root>
     </div>
 
     <div className="flex flex-col gap-5 p-5">
       {/* Activities summary */}
       {result.activities.length > 0 && (
         <section>
-          <p className="mb-2 text-[11px] font-bold tracking-wider text-slate-500 uppercase">
-            Actividades
-          </p>
-          <div className="overflow-hidden rounded-xl" style={{ border: '1px solid #e2e8f0' }}>
-            <table className="w-full text-xs">
-              <thead>
-                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                  <th className="px-3 py-2.5 text-left font-semibold text-slate-500">Actividad</th>
-                  <th className="px-3 py-2.5 text-right font-semibold text-slate-500">Tarifa ‰</th>
-                  <th className="px-3 py-2.5 text-right font-semibold text-slate-500">ICA</th>
-                </tr>
-              </thead>
-              <tbody>
+          <p className="text-text-sub-600 text-subheading-2xs mb-2 uppercase">Actividades</p>
+          <div className="ring-stroke-soft-200 overflow-hidden rounded-xl ring-1">
+            <Table.Root>
+              <Table.Header>
+                <Table.Row>
+                  <Table.Head>Actividad</Table.Head>
+                  <Table.Head className="text-right">Tarifa ‰</Table.Head>
+                  <Table.Head className="text-right">ICA</Table.Head>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
                 {result.activities.map(a => (
-                  <tr key={a.activity_code} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td className="px-3 py-2.5">
-                      <span className="font-semibold text-slate-800">{a.activity_code}</span>
-                      <span className="ml-1 text-slate-400">{a.activity_name}</span>
-                    </td>
-                    <td className="px-3 py-2.5 text-right text-slate-500">{a.tariff_rate}</td>
-                    <td className="px-3 py-2.5 text-right font-semibold text-slate-800">
+                  <Table.Row key={a.activity_code}>
+                    <Table.Cell>
+                      <span className="text-text-strong-950 font-medium">{a.activity_code}</span>
+                      <span className="text-text-soft-400 ml-1">{a.activity_name}</span>
+                    </Table.Cell>
+                    <Table.Cell className="text-text-sub-600 text-right">
+                      {a.tariff_rate}
+                    </Table.Cell>
+                    <Table.Cell className="text-text-strong-950 text-right font-medium">
                       {formatCop(a.tax)}
-                    </td>
-                  </tr>
+                    </Table.Cell>
+                  </Table.Row>
                 ))}
-              </tbody>
-            </table>
+              </Table.Body>
+            </Table.Root>
           </div>
         </section>
       )}
@@ -627,41 +483,41 @@ const SimulatorResult = ({
       {/* Settlement rows */}
       <section>
         {result.activities.length > 0 && (
-          <p className="mb-2 text-[11px] font-bold tracking-wider text-slate-500 uppercase">
-            Liquidación
-          </p>
+          <p className="text-text-sub-600 text-subheading-2xs mb-2 uppercase">Liquidación</p>
         )}
-        <div className="overflow-hidden rounded-xl" style={{ border: '1px solid #e2e8f0' }}>
+        <div className="ring-stroke-soft-200 divide-stroke-soft-200 divide-y overflow-hidden rounded-xl ring-1">
           {result.rows.map(row => {
             const isTotal = TOTAL_KINDS.has(row.kind);
             const isSubtotal = SUBTOTAL_KINDS.has(row.kind);
             return (
               <div
                 key={row.number}
-                className="flex items-center gap-3 px-4 py-2.5"
-                style={{
-                  borderBottom: '1px solid #f1f5f9',
-                  background: isTotal ? '#f0fdf4' : isSubtotal ? '#f8fafc' : '#fff'
-                }}
+                className={`flex items-center gap-3 px-4 py-2.5 ${
+                  isTotal || isSubtotal ? 'bg-bg-weak-50' : 'bg-bg-white-0'
+                }`}
               >
                 <span
-                  className="w-5 shrink-0 text-center text-[11px] font-bold"
-                  style={{ color: isTotal ? '#16a34a' : '#cbd5e1' }}
+                  className={`text-paragraph-xs w-5 shrink-0 text-center font-medium ${
+                    isTotal ? 'text-success-base' : 'text-text-disabled-300'
+                  }`}
                 >
                   {row.number}
                 </span>
                 <span
-                  className="flex-1 text-xs leading-snug"
-                  style={{ color: isTotal ? '#15803d' : '#64748b' }}
+                  className={`text-paragraph-xs flex-1 leading-snug ${
+                    isTotal ? 'text-success-base font-medium' : 'text-text-sub-600'
+                  }`}
                 >
                   {row.name}
                 </span>
                 <span
-                  className="shrink-0 text-right text-xs font-semibold tabular-nums"
-                  style={{
-                    color: isTotal ? '#15803d' : row.value === 0 ? '#cbd5e1' : '#0f172a',
-                    fontSize: isTotal ? '0.875rem' : '0.75rem'
-                  }}
+                  className={`shrink-0 text-right font-semibold tabular-nums ${
+                    isTotal
+                      ? 'text-success-base text-label-sm'
+                      : row.value === 0
+                        ? 'text-text-disabled-300 text-paragraph-xs'
+                        : 'text-text-strong-950 text-paragraph-xs'
+                  }`}
                 >
                   {row.value === 0 ? '—' : formatCop(row.value)}
                 </span>
@@ -672,21 +528,17 @@ const SimulatorResult = ({
       </section>
 
       {/* Disclaimer */}
-      <p className="text-[11px] leading-relaxed text-slate-400">
+      <p className="text-text-soft-400 text-paragraph-xs leading-relaxed">
         * Esta es una estimación orientativa. El valor definitivo puede variar según los descuentos
         por pronto pago vigentes y la verificación de la información declarada.
       </p>
 
       {/* Actions */}
-      <div className="flex justify-start border-t pt-4" style={{ borderColor: '#f1f5f9' }}>
-        <button
-          type="button"
-          onClick={onReset}
-          className="flex items-center gap-2 rounded-xl border px-4 py-2 text-xs font-semibold text-slate-600 transition-all hover:bg-slate-50"
-          style={{ borderColor: '#e2e8f0' }}
-        >
-          ↺ Nueva simulación
-        </button>
+      <div className="border-stroke-soft-200 flex justify-start border-t pt-4">
+        <Button.Root variant="neutral" mode="stroke" onClick={onReset}>
+          <Button.Icon as={RiRefreshLine} />
+          Nueva simulación
+        </Button.Root>
       </div>
     </div>
   </div>
