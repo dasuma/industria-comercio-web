@@ -1,7 +1,7 @@
 'use client';
 
-import { Button } from '@dasuma/pradma-ui';
-import { RiGoogleFill } from '@dasuma/pradma-ui/icons';
+import { Button, Hint } from '@dasuma/pradma-ui';
+import { RiErrorWarningFill, RiGoogleFill } from '@dasuma/pradma-ui/icons';
 import { useGoogleSignIn } from '../../hooks/useGoogleSignIn';
 import { getAuthDict } from '../../dictionaries';
 import type { Locale } from '@/i18n/config';
@@ -24,7 +24,7 @@ export const LoginGoogleButton = ({ locale, onSuccess, disabled }: LoginGoogleBu
       {/* [R7] el protagonista del login ahora es el submit email+password
           (FancyButton); Google pasa a acción secundaria → Button stroke. */}
       <Button.Root
-        variant="neutral"
+        variant="basic"
         mode="stroke"
         size="medium"
         onClick={signIn}
@@ -34,7 +34,13 @@ export const LoginGoogleButton = ({ locale, onSuccess, disabled }: LoginGoogleBu
         <Button.Icon as={RiGoogleFill} />
         {dict.loginWithGoogle}
       </Button.Root>
-      {error && <p className="text-error-base text-paragraph-sm">{dict.loginError}</p>}
+      {/* [R9] error en pareja con Hint, nunca rojo flotante */}
+      {error && (
+        <Hint.Root hasError>
+          <Hint.Icon as={RiErrorWarningFill} />
+          {dict.loginError}
+        </Hint.Root>
+      )}
     </div>
   );
 };

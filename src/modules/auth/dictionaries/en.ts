@@ -13,6 +13,11 @@ export const authDictEn: AuthDictionary = {
   showPassword: 'Show password',
   hidePassword: 'Hide password',
   googleDivider: 'or',
+  resetTitle: 'Reset password',
+  resetDescription: "Enter your email and we'll send you a link to reset your password.",
+  resetSubmit: 'Send link',
+  resetSuccess: 'We sent a link to your email. Check your spam folder too.',
+  resetError: "We couldn't send the link. Check the email and try again.",
   errors: {
     emailRequired: 'Enter your email address',
     emailInvalid: 'Enter a valid email address',

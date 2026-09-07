@@ -5,6 +5,7 @@ export { LogoutButton } from './components/LogoutButton';
 export { useGoogleSignIn } from './hooks/useGoogleSignIn';
 export { useEmailSignIn } from './hooks/useEmailSignIn';
 export { useLogout } from './hooks/useLogout';
+export { usePasswordReset } from './hooks/usePasswordReset';
 export {
   useAuthStore,
   selectUser,

@@ -6,6 +6,7 @@ import {
   firstHrefInWorkspace,
   getShellDict,
   getWorkspaceById,
+  workspaces,
   WorkspacePicker
 } from '@modules/shell';
 import type { WorkspaceKey } from '@modules/shell';
@@ -27,6 +28,9 @@ interface LoginCardProps {
 type Phase = 'login' | 'fading' | 'expanding' | 'picker';
 
 const POST_AUTH_HOLD_MS = 2000;
+// Con un solo workspace el picker no aporta nada: navegamos directo. El hold
+// corto deja ver el estado success del botón antes de que cambie la pantalla.
+const SINGLE_WORKSPACE_HOLD_MS = 400;
 const LOGIN_FADE_OUT_MS = 220;
 // Desde que el login es email+password, el bloque de credenciales mide casi lo
 // mismo que el picker: el card ya no crece al morphear, así que la fase de
@@ -55,13 +59,19 @@ export const LoginCard = ({ locale, homeTitle, homeSubtitle }: LoginCardProps) =
   const [phase, setPhase] = useState<Phase>('login');
 
   const handleLoginSuccess = useCallback(async () => {
+    const [onlyWorkspace] = workspaces;
+    if (workspaces.length === 1 && onlyWorkspace) {
+      await wait(SINGLE_WORKSPACE_HOLD_MS);
+      router.replace(firstHrefInWorkspace(onlyWorkspace));
+      return;
+    }
     await wait(POST_AUTH_HOLD_MS);
     setPhase('fading');
     await wait(LOGIN_FADE_OUT_MS);
     setPhase('expanding');
     await wait(CARD_EXPAND_MS);
     setPhase('picker');
-  }, []);
+  }, [router]);
 
   const handleSelectWorkspace = useCallback(
     (workspaceId: WorkspaceKey) => {
@@ -118,9 +128,7 @@ export const LoginCard = ({ locale, homeTitle, homeSubtitle }: LoginCardProps) =
 
             {/* Title + subtitle */}
             <div className="flex flex-col gap-1">
-              <h1 className="text-text-strong-950 text-[22px] leading-tight font-bold tracking-tight">
-                {homeTitle}
-              </h1>
+              <h1 className="text-text-strong-950 text-title-h5">{homeTitle}</h1>
               <p className="text-text-sub-600 text-[13px] leading-relaxed">{homeSubtitle}</p>
             </div>
           </header>

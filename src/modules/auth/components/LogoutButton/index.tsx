@@ -15,7 +15,7 @@ export const LogoutButton = ({ locale }: LogoutButtonProps) => {
   const { logout, isLoading } = useLogout();
 
   return (
-    <Button.Root variant="neutral" mode="stroke" size="small" onClick={logout} disabled={isLoading}>
+    <Button.Root variant="basic" size="small" onClick={logout} disabled={isLoading}>
       <Button.Icon as={RiLogoutBoxRLine} />
       {isLoading ? dict.signingOut : dict.logout}
     </Button.Root>

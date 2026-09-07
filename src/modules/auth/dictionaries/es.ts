@@ -11,6 +11,11 @@ export const authDictEs = {
   showPassword: 'Mostrar contraseña',
   hidePassword: 'Ocultar contraseña',
   googleDivider: 'o',
+  resetTitle: 'Recuperar contraseña',
+  resetDescription: 'Ingresá tu correo y te enviaremos un enlace para restablecer tu contraseña.',
+  resetSubmit: 'Enviar enlace',
+  resetSuccess: 'Te enviamos un enlace a tu correo. Revisá también la carpeta de spam.',
+  resetError: 'No pudimos enviar el enlace. Verificá el correo e intentá de nuevo.',
   errors: {
     emailRequired: 'Ingresá tu correo electrónico',
     emailInvalid: 'Ingresá un correo válido',

@@ -44,11 +44,13 @@ jest.mock('@dasuma/pradma-ui', () => ({
     )
   },
   Hint: {
-    Root: ({ children }: { children: React.ReactNode }) => <p role="alert">{children}</p>
+    Root: ({ children }: { children: React.ReactNode }) => <p role="alert">{children}</p>,
+    Icon: () => <span />
   }
 }));
 
 jest.mock('@dasuma/pradma-ui/icons', () => ({
+  RiErrorWarningFill: () => <span />,
   RiEyeLine: () => <span />,
   RiEyeOffLine: () => <span />,
   RiLockLine: () => <span />,

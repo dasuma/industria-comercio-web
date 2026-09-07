@@ -31,7 +31,7 @@ export const ExampleList = ({ locale }: ExampleListProps) => {
         className="border-stroke-soft-200 flex flex-col items-start gap-2 rounded-lg border p-4"
       >
         <p className="text-text-strong-950">{dict.list.errorLoading}</p>
-        <Button.Root variant="neutral" mode="stroke" size="small" onClick={() => refetch()}>
+        <Button.Root variant="basic" size="small" onClick={() => refetch()}>
           {dict.list.retry}
         </Button.Root>
       </div>
