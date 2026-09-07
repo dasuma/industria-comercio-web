@@ -64,7 +64,7 @@ export const AppShell = ({ children, dict }: AppShellProps) => {
           <AppSidebar workspace={workspace} activeHref={activeHref} dict={dict} />
 
           <main className="flex min-w-0 flex-1 flex-col sm:ml-2">
-            <div className="bg-bg-white-0 ring-stroke-soft-200 relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl ring-1">
+            <div className="bg-bg-white-0 ring-stroke-soft-200 pradma-card-lift relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl ring-1">
               <div className="min-h-0 flex-1 overflow-auto pb-6">
                 <PageHeader workspace={workspace} activeHref={activeHref} dict={dict} />
                 <div className="px-6 pt-8">{children}</div>

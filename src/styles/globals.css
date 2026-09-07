@@ -189,6 +189,43 @@
   --pradma-chrome-lift: #0d2140;
 }
 
+/* ── Dark "Midnight" ─────────────────────────────────────────────────────
+   El DS resuelve los neutros de dark a grises puros (bg-white-0 → #171717):
+   al lado del chrome navy quedaban dos familias de color que no se hablan
+   (azul + negro neutro). Teñimos los neutros hacia el navy para que el card,
+   sus filas, strokes y textos secundarios compartan el hue del frame. El
+   chrome se hunde un poco más para que el card se lea como la superficie
+   elevada. Los tokens de texto fuerte y semánticos (error/success/warning)
+   no se tocan. Contrastes: text-sub-600 sobre el card 8.5:1, text-soft-400
+   4.6:1 (AA para texto secundario). */
+.dark {
+  --pradma-chrome-deep: #03070f;
+  --pradma-chrome-base: #060e1c;
+  --pradma-chrome-lift: #0a1a33;
+
+  --color-bg-white-0: #0d1526;
+  --color-bg-weak-25: #101a2e;
+  --color-bg-weak-50: #142139;
+  --color-bg-soft-200: #1d2d4a;
+  --color-bg-sub-300: #2b3f63;
+  --color-bg-titled-frame: #12203a;
+
+  --color-stroke-soft-200: #1c2b47;
+  --color-stroke-sub-300: #2e4166;
+
+  --color-text-sub-600: #a3b1cc;
+  --color-text-soft-400: #6f7f9f;
+  --color-text-disabled-300: #475677;
+}
+
+/* Card del shell en dark: filete de luz arriba + sombra profunda hacia el
+   frame, para separar el card del chrome sin subir su luminancia. */
+.dark .pradma-card-lift {
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.05),
+    0 24px 48px -24px rgb(0 0 0 / 0.7);
+}
+
 /* Frame de la app: gradient navy + tres glows (mismo lenguaje que el layout
    público del login). Los glows van en un ::before para no crear un stacking
    context nuevo en el frame ni interferir con el ring del card. */
