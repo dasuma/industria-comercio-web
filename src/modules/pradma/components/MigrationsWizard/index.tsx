@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { Button, FancyButton, HorizontalStepper } from '@biaenergy/ui';
-import { RiArrowLeftSLine, RiArrowRightSLine, RiRestartLine } from '@biaenergy/ui/icons';
+import { Button, FancyButton, HorizontalStepper } from '@dasuma/pradma-ui';
+import { RiArrowLeftSLine, RiArrowRightSLine, RiRestartLine } from '@dasuma/pradma-ui/icons';
 import type { MigrationResult } from '../../models/migration.interface';
 import type { PradmaDictionary } from '../../dictionaries';
 import {

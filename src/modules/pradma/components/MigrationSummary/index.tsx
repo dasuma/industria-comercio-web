@@ -1,4 +1,4 @@
-import { RiCheckDoubleLine, RiErrorWarningLine, RiSubtractLine } from '@biaenergy/ui/icons';
+import { RiCheckDoubleLine, RiErrorWarningLine, RiSubtractLine } from '@dasuma/pradma-ui/icons';
 import { cn } from '@/utils/cn';
 import type { MigrationResult } from '../../models/migration.interface';
 import type { PradmaDictionary } from '../../dictionaries';

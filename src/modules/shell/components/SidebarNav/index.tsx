@@ -1,10 +1,16 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import * as AccordionPrimitive from '@radix-ui/react-accordion';
-import * as TabsPrimitive from '@radix-ui/react-tabs';
-import { TabMenuVertical, Tooltip } from '@biaenergy/ui';
+import {
+  AccordionRoot,
+  AccordionHeader,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+  TabMenuVertical,
+  Tooltip
+} from '@dasuma/pradma-ui';
 import { cn } from '@/utils/cn';
 import type { ShellDictionary } from '../../dictionaries';
 import type { Workspace } from '../../models/nav.interface';
@@ -25,7 +31,7 @@ interface SidebarNavProps {
 
 const workspaceIndex = new Map<WorkspaceKey, number>(workspaces.map((w, i) => [w.id, i]));
 
-// Replicado del estilo de @biaenergy/ui TabMenuVertical group primitives.
+// Replicado del estilo de @dasuma/pradma-ui TabMenuVertical group primitives.
 // Necesitamos un AccordionPrimitive.Root controlado por activeHref — el
 // wrapper TabMenuVertical.List maneja el estado internamente vía useEffect,
 // que en SSR/hydration deja el group cerrado hasta que el client corre el
@@ -53,7 +59,7 @@ const groupContentClass = cn(
   'data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down'
 );
 const groupContentInnerClass = cn(
-  'bia-accordion-stagger relative ml-4 mt-0.5 space-y-0.5 pl-3 transition-[padding] duration-300 ease-out',
+  'pradma-accordion-stagger relative ml-4 mt-0.5 space-y-0.5 pl-3 transition-[padding] duration-300 ease-out',
   'before:absolute before:inset-y-0 before:left-[2px] before:w-px before:bg-stroke-soft-200',
   'has-[>[data-state=active]:last-child]:pb-2',
   '[&>*]:[will-change:transform,filter,opacity]'
@@ -93,8 +99,8 @@ const MenuTree = ({ workspace, activeHref, collapsed, dict, onSelect }: MenuTree
 
   return (
     <TabMenuVertical.Root value={activeHref} onValueChange={onSelect}>
-      <TabsPrimitive.List className="w-full space-y-0.5">
-        <AccordionPrimitive.Root
+      <TabMenuVertical.List className="w-full space-y-0.5">
+        <AccordionRoot
           type="single"
           collapsible
           value={openGroupId}
@@ -135,7 +141,7 @@ const MenuTree = ({ workspace, activeHref, collapsed, dict, onSelect }: MenuTree
             const groupHasActive = entry.items.some(c => c.href === activeHref);
 
             return (
-              <AccordionPrimitive.Item
+              <AccordionItem
                 key={entry.id}
                 value={entry.id}
                 className={cn(
@@ -145,13 +151,13 @@ const MenuTree = ({ workspace, activeHref, collapsed, dict, onSelect }: MenuTree
                     'bg-bg-soft-200/40 dark:bg-bg-soft-200/50 rounded-lg py-0.5'
                 )}
               >
-                <AccordionPrimitive.Header className="flex">
-                  <AccordionPrimitive.Trigger
+                <AccordionHeader className="flex">
+                  <AccordionTrigger
                     className={cn(
                       groupTriggerClass,
                       collapsed && '!min-h-8 !grid-cols-1 [&>span:last-child]:!hidden'
                     )}
-                    onClick={event => {
+                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
                       // groupHasActive → ya abierto, no se puede colapsar.
                       if (groupHasActive) {
                         event.preventDefault();
@@ -185,9 +191,9 @@ const MenuTree = ({ workspace, activeHref, collapsed, dict, onSelect }: MenuTree
                     >
                       {dict.items[entry.labelKey]}
                     </span>
-                  </AccordionPrimitive.Trigger>
-                </AccordionPrimitive.Header>
-                <AccordionPrimitive.Content
+                  </AccordionTrigger>
+                </AccordionHeader>
+                <AccordionContent
                   className={cn(
                     groupContentClass,
                     collapsed && '[&>div]:!ml-0 [&>div]:!pl-0 [&>div]:before:!hidden'
@@ -223,12 +229,12 @@ const MenuTree = ({ workspace, activeHref, collapsed, dict, onSelect }: MenuTree
                       </TabMenuVertical.SubItem>
                     ))}
                   </div>
-                </AccordionPrimitive.Content>
-              </AccordionPrimitive.Item>
+                </AccordionContent>
+              </AccordionItem>
             );
           })}
-        </AccordionPrimitive.Root>
-      </TabsPrimitive.List>
+        </AccordionRoot>
+      </TabMenuVertical.List>
     </TabMenuVertical.Root>
   );
 };
@@ -289,7 +295,7 @@ export const SidebarNav = ({ workspace, activeHref, dict }: SidebarNavProps) => 
   );
 
   // Side-by-side cross-fade entre workspaces. Cuando cambia el workspace, el
-  // menú entrante reemplaza al saliente con bia-page-slide (override slide y
+  // menú entrante reemplaza al saliente con pradma-page-slide (override slide y
   // blur a 0 — solo fade rápido; el slide se siente excesivo en el sidebar).
   const sectionIndex = workspaceIndex.get(workspace.id) ?? 0;
   const prevSectionIndexRef = useRef(sectionIndex);
@@ -316,13 +322,13 @@ export const SidebarNav = ({ workspace, activeHref, dict }: SidebarNavProps) => 
 
   return (
     <div
-      className="bia-page-slide relative min-h-0 flex-1"
+      className="pradma-page-slide relative min-h-0 flex-1"
       data-page={slot}
       style={{
-        ['--bia-page-slide-distance' as string]: '0px',
-        ['--bia-page-blur' as string]: '0px',
-        ['--bia-page-slide-dur' as string]: '120ms',
-        ['--bia-page-fade-dur' as string]: '120ms'
+        ['--pradma-page-slide-distance' as string]: '0px',
+        ['--pradma-page-blur' as string]: '0px',
+        ['--pradma-page-slide-dur' as string]: '120ms',
+        ['--pradma-page-fade-dur' as string]: '120ms'
       }}
     >
       {([1, 2] as const).map(slotId => {
@@ -331,7 +337,7 @@ export const SidebarNav = ({ workspace, activeHref, dict }: SidebarNavProps) => 
         return (
           <div
             key={slotId}
-            className="bia-page overflow-x-hidden overflow-y-auto px-2 pt-3"
+            className="pradma-page overflow-x-hidden overflow-y-auto px-2 pt-3"
             data-page-id={slotId}
             aria-hidden={!isActiveSlot}
           >

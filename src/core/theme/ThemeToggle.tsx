@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
-import { RiMoonLine, RiSunLine } from '@biaenergy/ui/icons';
+import { RiMoonLine, RiSunLine } from '@dasuma/pradma-ui/icons';
 import { cn } from '@/utils/cn';
 
 interface ThemeToggleProps {
@@ -13,7 +13,7 @@ interface ThemeToggleProps {
   ariaLabelToDark?: string;
 }
 
-// Toggle dark↔light usando next-themes. Animación bia-icon-swap del DS:
+// Toggle dark↔light usando next-themes. Animación pradma-icon-swap del DS:
 // fade + blur + scale al cruzar de Moon ↔ Sun. Hasta que monta el cliente
 // renderizamos el botón visualmente neutral (data-state="a") para evitar
 // hydration mismatch — next-themes resuelve resolvedTheme tras el primer
@@ -47,11 +47,11 @@ export const ThemeToggle = ({
         className
       )}
     >
-      <span className="bia-icon-swap" data-state={isDark ? 'b' : 'a'}>
-        <span className="bia-icon-swap-item" data-icon="a">
+      <span className="pradma-icon-swap" data-state={isDark ? 'b' : 'a'}>
+        <span className="pradma-icon-swap-item" data-icon="a">
           <RiMoonLine className="size-[18px]" />
         </span>
-        <span className="bia-icon-swap-item" data-icon="b">
+        <span className="pradma-icon-swap-item" data-icon="b">
           <RiSunLine className="size-[18px]" />
         </span>
       </span>

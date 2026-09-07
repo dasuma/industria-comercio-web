@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { cookies } from 'next/headers';
 import { Inter } from 'next/font/google';
-import { Toaster } from '@biaenergy/ui';
+import { Toaster } from '@dasuma/pradma-ui';
 import { defaultLocale, isLocale, type Locale } from '@/i18n/config';
 import { DataAccessProvider } from '@/data/core';
 import { SessionProvider } from '@/auth/SessionProvider';

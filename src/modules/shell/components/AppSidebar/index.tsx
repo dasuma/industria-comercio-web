@@ -101,7 +101,7 @@ export const AppSidebar = ({ workspace, activeHref, dict }: AppSidebarProps) => 
                 mobileNavOpen ? 'translate-x-0' : '-translate-x-full'
               )
             : cn(
-                'bia-resize flex shrink-0 flex-col overflow-hidden rounded-2xl bg-[#0a1628]',
+                'pradma-resize flex shrink-0 flex-col overflow-hidden rounded-2xl bg-[#0a1628]',
                 collapsed ? 'w-[52px]' : 'w-60'
               )
         )}

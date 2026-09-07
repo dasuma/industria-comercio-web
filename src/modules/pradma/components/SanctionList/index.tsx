@@ -4,14 +4,22 @@ import { useEffect, useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@/utils/zodResolver';
 import { z } from 'zod';
-import { Button, CompactButton, FancyButton, Input, Pagination, Table, toast } from '@biaenergy/ui';
+import {
+  Button,
+  CompactButton,
+  FancyButton,
+  Input,
+  Pagination,
+  Table,
+  toast
+} from '@dasuma/pradma-ui';
 import {
   RiAddLine,
   RiArrowLeftSLine,
   RiArrowRightSLine,
   RiCloseLine,
   RiSearchLine
-} from '@biaenergy/ui/icons';
+} from '@dasuma/pradma-ui/icons';
 import type { Locale } from '@/i18n/config';
 import { getPradmaDict } from '../../dictionaries';
 import {

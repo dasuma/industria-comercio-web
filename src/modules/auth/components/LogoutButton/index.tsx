@@ -1,7 +1,7 @@
 'use client';
 
-import { Button } from '@biaenergy/ui';
-import { RiLogoutBoxRLine } from '@biaenergy/ui/icons';
+import { Button } from '@dasuma/pradma-ui';
+import { RiLogoutBoxRLine } from '@dasuma/pradma-ui/icons';
 import { useLogout } from '../../hooks/useLogout';
 import { getAuthDict } from '../../dictionaries';
 import type { Locale } from '@/i18n/config';

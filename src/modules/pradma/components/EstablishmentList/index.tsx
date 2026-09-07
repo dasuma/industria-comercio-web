@@ -2,8 +2,13 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { FancyButton, Table, Pagination, Button, Input } from '@biaenergy/ui';
-import { RiAddLine, RiArrowLeftSLine, RiArrowRightSLine, RiSearchLine } from '@biaenergy/ui/icons';
+import { FancyButton, Table, Pagination, Button, Input } from '@dasuma/pradma-ui';
+import {
+  RiAddLine,
+  RiArrowLeftSLine,
+  RiArrowRightSLine,
+  RiSearchLine
+} from '@dasuma/pradma-ui/icons';
 import type { Locale } from '@/i18n/config';
 import { APP_ROUTES } from '@/config/routes';
 import { getPradmaDict } from '../../dictionaries';

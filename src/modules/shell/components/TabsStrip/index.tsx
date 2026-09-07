@@ -10,8 +10,8 @@ import {
   useState
 } from 'react';
 import { useRouter } from 'next/navigation';
-import { CompactButton } from '@biaenergy/ui';
-import { RiAddLine, RiCloseLine } from '@biaenergy/ui/icons';
+import { CompactButton } from '@dasuma/pradma-ui';
+import { RiAddLine, RiCloseLine } from '@dasuma/pradma-ui/icons';
 import { cn } from '@/utils/cn';
 import {
   defaultRoute,
@@ -146,7 +146,7 @@ const TabPill = memo(function TabPill({
             <span className="block max-w-full truncate text-left" dir="rtl">
               <bdi>
                 {labels.section} <span className="text-text-soft-400">›</span>{' '}
-                <span ref={itemRef} className="bia-text-swap">
+                <span ref={itemRef} className="pradma-text-swap">
                   {displayedItem}
                 </span>
               </bdi>
@@ -166,7 +166,7 @@ const TabPill = memo(function TabPill({
         <span className="inline-flex h-full min-w-0 flex-1 items-center justify-center gap-1 truncate whitespace-nowrap">
           <span className="truncate">{labels.section}</span>
           <span className="text-text-soft-400">›</span>
-          <span ref={itemRef} className="bia-text-swap">
+          <span ref={itemRef} className="pradma-text-swap">
             {displayedItem}
           </span>
         </span>
@@ -260,7 +260,7 @@ export const TabsStrip = ({ dict }: TabsStripProps) => {
       />
       <div
         ref={scrollerRef}
-        className="-m-2 flex min-w-0 items-center gap-2 overflow-x-auto p-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="-m-2 flex min-w-0 [scrollbar-width:none] items-center gap-2 overflow-x-auto p-2 [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         onWheel={event => {
           const target = event.currentTarget;
           if (target.scrollWidth <= target.clientWidth) return;

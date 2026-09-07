@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button, Hint, Input, Label, toast } from '@biaenergy/ui';
+import { Button, Hint, Input, Label, toast } from '@dasuma/pradma-ui';
 import { useCreateExample } from '../../data/actions/createExample';
 import { getExampleDict } from '../../dictionaries';
 import type { Locale } from '@/i18n/config';

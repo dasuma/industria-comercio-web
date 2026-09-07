@@ -1,14 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, CompactButton, FancyButton, Tooltip } from '@biaenergy/ui';
+import { Button, CompactButton, FancyButton, Tooltip } from '@dasuma/pradma-ui';
 import {
   RiArrowRightSLine,
   RiCloseLine,
   RiDownloadLine,
   RiInformationLine,
   RiRefreshLine
-} from '@biaenergy/ui/icons';
+} from '@dasuma/pradma-ui/icons';
 import { cn } from '@/utils/cn';
 import type { Establishment } from '../../models/establishment.interface';
 import type { Invoice } from '../../models/invoice.interface';

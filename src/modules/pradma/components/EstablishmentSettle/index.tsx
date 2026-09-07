@@ -13,13 +13,13 @@ import {
   Select,
   Switch,
   toast
-} from '@biaenergy/ui';
+} from '@dasuma/pradma-ui';
 import {
   RiAddLine,
   RiArrowLeftSLine,
   RiArrowRightSLine,
   RiDeleteBinLine
-} from '@biaenergy/ui/icons';
+} from '@dasuma/pradma-ui/icons';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/utils/cn';
 import { APP_ROUTES } from '@/config/routes';

@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertToast, toast } from '@biaenergy/ui';
+import { AlertToast, toast } from '@dasuma/pradma-ui';
 
 export type ToastStatus = 'information' | 'success' | 'warning' | 'error' | 'feature';
 

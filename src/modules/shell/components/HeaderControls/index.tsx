@@ -1,13 +1,13 @@
 'use client';
 
-import { CompactButton } from '@biaenergy/ui';
+import { CompactButton } from '@dasuma/pradma-ui';
 import {
   RiArrowLeftSLine,
   RiArrowRightSLine,
   RiMenuLine,
   RiSidebarFoldLine,
   RiSidebarUnfoldLine
-} from '@biaenergy/ui/icons';
+} from '@dasuma/pradma-ui/icons';
 import type { ShellDictionary } from '../../dictionaries';
 import {
   selectSetMobileNavOpen,

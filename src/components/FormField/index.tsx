@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Hint, Label } from '@biaenergy/ui';
+import { Hint, Label } from '@dasuma/pradma-ui';
 
 interface FormFieldProps {
   id?: string;

@@ -1,8 +1,8 @@
 @import 'tailwindcss';
-@import '@biaenergy/ui/styles.css';
+@import '@dasuma/pradma-ui/styles.css';
 
-/* Permite que Tailwind v4 escanee las clases usadas por @biaenergy/ui */
-@source '../../node_modules/@biaenergy/ui/dist';
+/* Permite que Tailwind v4 escanee las clases usadas por @dasuma/pradma-ui */
+@source '../../node_modules/@dasuma/pradma-ui/dist';
 
 /* Activa la variante dark basada en clase (lo controla next-themes) */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -40,6 +40,39 @@
       transform: translate3d(3px, 0, 0);
     }
   }
+
+}
+
+/* ── Sidebar workspace cross-fade slot system ─────────────────────────────
+   .pradma-page-slide contiene dos slots (.pradma-page[data-page-id="1|2"]).
+   El slot activo (data-page-id == data-page del padre) fluye normalmente;
+   el slot inactivo se pone absoluto + opacity:0 para no duplicar el menú. */
+.pradma-page-slide {
+  position: relative;
+}
+
+.pradma-page-slide > .pradma-page {
+  transition-property: opacity;
+  transition-timing-function: ease-out;
+  transition-duration: var(--pradma-page-fade-dur, 120ms);
+}
+
+/* Slot activo */
+.pradma-page-slide[data-page='1'] > .pradma-page[data-page-id='1'],
+.pradma-page-slide[data-page='2'] > .pradma-page[data-page-id='2'] {
+  opacity: 1;
+  pointer-events: auto;
+  position: relative;
+}
+
+/* Slot inactivo — fuera del flujo, invisible */
+.pradma-page-slide[data-page='1'] > .pradma-page[data-page-id='2'],
+.pradma-page-slide[data-page='2'] > .pradma-page[data-page-id='1'] {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
 }
 
 /* ── Pradma brand palette ──────────────────────────────────────────────────
@@ -117,7 +150,7 @@
   box-sizing: border-box;
 }
 
-/* Override de Pradma sobre @biaenergy/ui: headers de tabla más sutiles
+/* Override de Pradma sobre @dasuma/pradma-ui: headers de tabla más sutiles
    (12px + color soft) hasta que el cambio aterrice en el DS. */
 thead th {
   font-size: var(--text-label-xs) !important;

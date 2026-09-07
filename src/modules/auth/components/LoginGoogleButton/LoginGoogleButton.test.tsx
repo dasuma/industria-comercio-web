@@ -5,7 +5,7 @@ jest.mock('../../hooks/useGoogleSignIn', () => ({
   useGoogleSignIn: () => ({ signIn: jest.fn(), isLoading: false, error: null })
 }));
 
-jest.mock('@biaenergy/ui', () => ({
+jest.mock('@dasuma/pradma-ui', () => ({
   FancyButton: {
     Root: ({
       children,
@@ -26,7 +26,7 @@ jest.mock('@biaenergy/ui', () => ({
   }
 }));
 
-jest.mock('@biaenergy/ui/icons', () => ({
+jest.mock('@dasuma/pradma-ui/icons', () => ({
   RiGoogleFill: () => <span data-testid="google-icon" />
 }));
 

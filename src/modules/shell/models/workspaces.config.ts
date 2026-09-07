@@ -10,7 +10,7 @@ import {
   RiAlertLine,
   RiPercentLine,
   RiCouponLine
-} from '@biaenergy/ui/icons';
+} from '@dasuma/pradma-ui/icons';
 import { APP_ROUTES, DEFAULT_AUTHED_ROUTE } from '@/config/routes';
 import type { NavItemKey, WorkspaceKey } from './nav.types';
 import type { NavSidebarItem, Workspace } from './nav.interface';
