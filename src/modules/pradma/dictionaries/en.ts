@@ -98,8 +98,17 @@ export const pradmaDictEn: PradmaDictionary = {
       data: 'Data',
       client: 'Taxpayer',
       payments: 'Payments',
-      settlements: 'Settlements',
-      settle: 'Settle'
+      settlements: 'Settlements'
+    },
+    header: {
+      editData: 'Edit details',
+      active: 'Active',
+      inactive: 'Inactive',
+      since: 'Since {date}',
+      client: 'Taxpayer',
+      registration: 'Registration number',
+      document: 'Document',
+      lastPaid: 'Last paid settlement'
     },
     form: {
       errors: {
@@ -217,9 +226,42 @@ export const pradmaDictEn: PradmaDictionary = {
     calculate: 'Calculate',
     month: 'month',
     monthsPlural: 'months',
-    steps: {
-      period: 'Period',
-      activities: 'Activities'
+    title: 'New settlement',
+    subtitle: 'Pick the year, confirm the sales for each activity and calculate.',
+    back: 'Back to settlements',
+    calculateFull: 'Calculate settlement',
+    pending: {
+      one: '1 year pending settlement',
+      many: '{count} years pending settlement',
+      description: '{years} · One year is settled at a time, starting with the oldest.',
+      cta: 'Settle {year}'
+    },
+    period: {
+      title: 'Period',
+      derived: 'based on the establishment start and end dates'
+    },
+    activitiesSection: {
+      title: 'Activities and income',
+      hint: 'The annual sales of each activity determine the ICA tax.',
+      columnActivity: 'Activity',
+      columnSales: 'Annual sales',
+      registered: 'Registered',
+      additional: 'Additional',
+      noName: 'No description',
+      searchPlaceholder: 'Search activity by code or name…',
+      noResults: 'No activities found',
+      total: 'Total declared sales',
+      empty: 'This establishment has no registered activities for the year. Add at least one.'
+    },
+    taxesTitle: 'Additional taxes',
+    dates: {
+      title: 'Document dates',
+      today: 'Presentation and settlement: today, {date}',
+      custom: 'Presentation {presentation} · Settlement {settlement}'
+    },
+    summary: {
+      activity: '1 activity',
+      activities: '{count} activities'
     },
     activities: {
       add: 'Add activity',

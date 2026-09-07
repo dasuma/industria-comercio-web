@@ -96,8 +96,17 @@ export const pradmaDictEs = {
       data: 'Datos',
       client: 'Contribuyente',
       payments: 'Pagos',
-      settlements: 'Liquidaciones',
-      settle: 'Liquidar'
+      settlements: 'Liquidaciones'
+    },
+    header: {
+      editData: 'Editar datos',
+      active: 'Activo',
+      inactive: 'Inactivo',
+      since: 'Desde el {date}',
+      client: 'Contribuyente',
+      registration: 'Número de registro',
+      document: 'Documento',
+      lastPaid: 'Última liquidación pagada'
     },
     form: {
       errors: {
@@ -215,9 +224,43 @@ export const pradmaDictEs = {
     calculate: 'Calcular',
     month: 'mes',
     monthsPlural: 'meses',
-    steps: {
-      period: 'Período',
-      activities: 'Actividades'
+    title: 'Nueva liquidación',
+    subtitle: 'Elegí el año, confirmá las ventas de cada actividad y calculá.',
+    back: 'Volver a liquidaciones',
+    calculateFull: 'Calcular liquidación',
+    pending: {
+      one: '1 año pendiente por liquidar',
+      many: '{count} años pendientes por liquidar',
+      description: '{years} · Se liquida de a un año, empezando por el más antiguo.',
+      cta: 'Liquidar {year}'
+    },
+    period: {
+      title: 'Período',
+      derived: 'según fecha de inicio y fin del establecimiento'
+    },
+    activitiesSection: {
+      title: 'Actividades e ingresos',
+      hint: 'Las ventas anuales de cada actividad determinan el ICA.',
+      columnActivity: 'Actividad',
+      columnSales: 'Ventas anuales',
+      registered: 'Registrada',
+      additional: 'Adicional',
+      noName: 'Sin descripción',
+      searchPlaceholder: 'Buscar actividad por código o nombre…',
+      noResults: 'No se encontraron actividades',
+      total: 'Total ventas declaradas',
+      empty:
+        'Este establecimiento no tiene actividades registradas para el año. Agregá al menos una.'
+    },
+    taxesTitle: 'Impuestos adicionales',
+    dates: {
+      title: 'Fechas del documento',
+      today: 'Presentación y liquidación: hoy, {date}',
+      custom: 'Presentación {presentation} · Liquidación {settlement}'
+    },
+    summary: {
+      activity: '1 actividad',
+      activities: '{count} actividades'
     },
     activities: {
       add: 'Agregar actividad',
