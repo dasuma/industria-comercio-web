@@ -2,23 +2,26 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { FancyButton, Table, Pagination, Button, Input } from '@dasuma/pradma-ui';
-import {
-  RiAddLine,
-  RiArrowLeftSLine,
-  RiArrowRightSLine,
-  RiSearchLine
-} from '@dasuma/pradma-ui/icons';
+import { CompactButton, FancyButton, Table } from '@dasuma/pradma-ui';
+import { RiAddLine, RiPencilLine } from '@dasuma/pradma-ui/icons';
 import type { Locale } from '@/i18n/config';
 import { APP_ROUTES } from '@/config/routes';
+import { SearchInput } from '@/components/SearchInput';
+import { EmptyState, ListSkeleton, RetryButton } from '@/components/ListState';
+import { DataPagination } from '@/components/DataPagination';
+import { clickableRowProps } from '@/utils/a11y';
+import { formatNumericDate, interpolate } from '@/utils/format';
 import { getPradmaDict } from '../../dictionaries';
 import { useSearchEstablishments } from '../../data';
 import { useSearchPagination } from '../../hooks/useSearchPagination';
 import type { SearchFilter } from '../../types/search.types';
+import { ClientName } from '../ClientName';
 
 interface EstablishmentListProps {
   locale: Locale;
 }
+
+const COLUMNS = 8;
 
 export const EstablishmentList = ({ locale }: EstablishmentListProps) => {
   const dict = getPradmaDict(locale);
@@ -37,31 +40,33 @@ export const EstablishmentList = ({ locale }: EstablishmentListProps) => {
     hasPrevPage,
     setTotal,
     setFilters,
-    pageNumbers
+    pageNumbers,
+    total,
+    pageSize
   } = useSearchPagination({ defaultSort: 'id' });
 
   const handleSearch = useCallback(
     (value: string) => {
       setSearch(value);
-      if (value.trim()) {
-        const trimmed = value.trim();
-        const f: SearchFilter[] = [
-          { field: 'name', value: trimmed, operation: 'ilike', option: 'OR' },
-          ...(isNaN(Number(trimmed))
-            ? []
-            : [
-                {
-                  field: 'id',
-                  value: Number(trimmed),
-                  operation: 'eq' as const,
-                  option: 'OR' as const
-                }
-              ])
-        ];
-        setFilters(f);
-      } else {
+      const trimmed = value.trim();
+      if (!trimmed) {
         setFilters([]);
+        return;
       }
+      const f: SearchFilter[] = [
+        { field: 'name', value: trimmed, operation: 'ilike', option: 'OR' },
+        ...(isNaN(Number(trimmed))
+          ? []
+          : [
+              {
+                field: 'id',
+                value: Number(trimmed),
+                operation: 'eq' as const,
+                option: 'OR' as const
+              }
+            ])
+      ];
+      setFilters(f);
     },
     [setFilters]
   );
@@ -72,110 +77,120 @@ export const EstablishmentList = ({ locale }: EstablishmentListProps) => {
     if (data) setTotal(data.total);
   }, [data, setTotal]);
 
+  const openDetail = (id: number) => router.push(`${APP_ROUTES.establishments}/${id}`);
+  const isEmpty = !isLoading && !isError && (!data || data.data.length === 0);
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="max-w-sm flex-1">
-          <Input.Root>
-            <Input.Wrapper>
-              <Input.Icon as={RiSearchLine} />
-              <Input.Input
-                placeholder={dict.common.search}
-                value={search}
-                onChange={e => handleSearch(e.target.value)}
-              />
-            </Input.Wrapper>
-          </Input.Root>
-        </div>
-        <FancyButton.Root
-          variant="primary"
-          onClick={() => router.push(`${APP_ROUTES.establishments}/new`)}
-        >
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <SearchInput
+          value={search}
+          onChange={handleSearch}
+          placeholder={dict.establishments.searchPlaceholder}
+          clearLabel={dict.common.clearSearch}
+        />
+        {/* [R7] única acción protagonista de la pantalla */}
+        <FancyButton.Root onClick={() => router.push(`${APP_ROUTES.establishments}/new`)}>
           <FancyButton.Icon as={RiAddLine} />
           {dict.establishments.create}
         </FancyButton.Root>
       </div>
 
-      {isLoading && (
-        <p className="text-text-sub-600 py-8 text-center">{dict.establishments.loading}</p>
-      )}
+      {isLoading ? <ListSkeleton columns={COLUMNS} /> : null}
 
-      {isError && (
-        <div className="flex flex-col items-center gap-3 py-8">
-          <p className="text-text-sub-600">{dict.establishments.errorLoading}</p>
-          <Button.Root variant="neutral" onClick={() => refetch()}>
-            {dict.common.retry}
-          </Button.Root>
-        </div>
-      )}
+      {isError ? (
+        <EmptyState
+          variant="error"
+          title={dict.common.errorTitle}
+          description={dict.establishments.errorLoading}
+          action={<RetryButton label={dict.common.retry} onClick={() => void refetch()} />}
+        />
+      ) : null}
 
-      {!isLoading && !isError && (!data || data.data.length === 0) && (
-        <p className="text-text-sub-600 py-8 text-center">{dict.establishments.empty}</p>
-      )}
+      {isEmpty ? (
+        search ? (
+          <EmptyState
+            variant="no-results"
+            title={dict.common.noResultsTitle}
+            description={interpolate(dict.common.noResultsDescription, { query: search })}
+          />
+        ) : (
+          <EmptyState title={dict.establishments.empty} description={dict.common.emptyHint} />
+        )
+      ) : null}
 
-      {!isLoading && !isError && data && data.data.length > 0 && (
+      {!isLoading && !isError && data && data.data.length > 0 ? (
         <>
-          <Table.Root>
-            <Table.Header>
-              <Table.Row>
-                <Table.Head>{columns.id}</Table.Head>
-                <Table.Head>{columns.registrationNumber}</Table.Head>
-                <Table.Head>{columns.name}</Table.Head>
-                <Table.Head>{columns.clientId}</Table.Head>
-                <Table.Head>{columns.address}</Table.Head>
-                <Table.Head>{columns.phone}</Table.Head>
-                <Table.Head>{columns.startDate}</Table.Head>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {data.data.map(est => (
-                <Table.Row
-                  key={est.id}
-                  onClick={() => router.push(`${APP_ROUTES.establishments}/${est.id}`)}
-                  className="cursor-pointer"
-                >
-                  <Table.Cell>{est.id}</Table.Cell>
-                  <Table.Cell>{est.registrationNumber}</Table.Cell>
-                  <Table.Cell>{est.name}</Table.Cell>
-                  <Table.Cell>{est.clientId}</Table.Cell>
-                  <Table.Cell>{est.address}</Table.Cell>
-                  <Table.Cell>{est.phone}</Table.Cell>
-                  <Table.Cell>{est.startDate}</Table.Cell>
+          <div className="ring-stroke-soft-200 overflow-x-auto rounded-xl ring-1">
+            <Table.Root>
+              <Table.Header>
+                <Table.Row>
+                  <Table.Head>{columns.id}</Table.Head>
+                  <Table.Head>{columns.registrationNumber}</Table.Head>
+                  <Table.Head>{columns.name}</Table.Head>
+                  <Table.Head>{columns.clientId}</Table.Head>
+                  <Table.Head>{columns.address}</Table.Head>
+                  <Table.Head>{columns.phone}</Table.Head>
+                  <Table.Head>{columns.startDate}</Table.Head>
+                  <Table.Head className="w-12">
+                    <span className="sr-only">{dict.common.actions}</span>
+                  </Table.Head>
                 </Table.Row>
-              ))}
-            </Table.Body>
-          </Table.Root>
-
-          <div className="flex items-center justify-between">
-            <p className="text-text-sub-600 text-sm">
-              {dict.common.page} {currentPage} {dict.common.of} {totalPages}
-            </p>
-            <Pagination.Root>
-              <Pagination.NavButton disabled={!hasPrevPage} onClick={prevPage}>
-                <Pagination.NavIcon as={RiArrowLeftSLine} />
-              </Pagination.NavButton>
-              {pageNumbers.map((page, i) =>
-                page === -1 ? (
-                  <span key={`ellipsis-${i}`} className="text-text-sub-600 px-2">
-                    &hellip;
-                  </span>
-                ) : (
-                  <Pagination.Item
-                    key={page}
-                    current={page === currentPage}
-                    onClick={() => goToPage(page)}
-                  >
-                    {page}
-                  </Pagination.Item>
-                )
-              )}
-              <Pagination.NavButton disabled={!hasNextPage} onClick={nextPage}>
-                <Pagination.NavIcon as={RiArrowRightSLine} />
-              </Pagination.NavButton>
-            </Pagination.Root>
+              </Table.Header>
+              <Table.Body>
+                {data.data.map(est => (
+                  <Table.Row key={est.id} {...clickableRowProps(() => openDetail(est.id))}>
+                    <Table.Cell className="text-text-soft-400 tabular-nums">{est.id}</Table.Cell>
+                    <Table.Cell className="tabular-nums">
+                      {est.registrationNumber || dict.common.notAvailable}
+                    </Table.Cell>
+                    <Table.Cell className="text-text-strong-950 font-medium">{est.name}</Table.Cell>
+                    <Table.Cell>
+                      <ClientName clientId={est.clientId} />
+                    </Table.Cell>
+                    <Table.Cell className="text-text-sub-600">{est.address}</Table.Cell>
+                    <Table.Cell className="text-text-sub-600 tabular-nums">
+                      {est.phone || dict.common.notAvailable}
+                    </Table.Cell>
+                    <Table.Cell className="text-text-sub-600 tabular-nums">
+                      {formatNumericDate(est.startDate)}
+                    </Table.Cell>
+                    <Table.Cell className="text-right">
+                      <CompactButton.Root
+                        variant="ghost"
+                        size="medium"
+                        aria-label={dict.common.edit}
+                        onClick={e => {
+                          e.stopPropagation();
+                          openDetail(est.id);
+                        }}
+                      >
+                        <CompactButton.Icon as={RiPencilLine} />
+                      </CompactButton.Root>
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table.Root>
           </div>
+
+          <DataPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            pageNumbers={pageNumbers}
+            total={total}
+            pageSize={pageSize}
+            hasPrevPage={hasPrevPage}
+            hasNextPage={hasNextPage}
+            onPrev={prevPage}
+            onNext={nextPage}
+            onPage={goToPage}
+            rangeLabel={dict.common.rangeLabel}
+            prevLabel={dict.common.prevPage}
+            nextLabel={dict.common.nextPage}
+          />
         </>
-      )}
+      ) : null}
     </div>
   );
 };

@@ -1,13 +1,15 @@
 'use client';
 
-import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useForm, useWatch, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@/utils/zodResolver';
 import { z } from 'zod';
 import {
+  Alert,
   Button,
   CompactButton,
   FancyButton,
+  HorizontalStepper,
   Input,
   Label,
   Select,
@@ -18,11 +20,11 @@ import {
   RiAddLine,
   RiArrowLeftSLine,
   RiArrowRightSLine,
-  RiDeleteBinLine
+  RiDeleteBinLine,
+  RiErrorWarningFill
 } from '@dasuma/pradma-ui/icons';
-import { useRouter } from 'next/navigation';
 import { cn } from '@/utils/cn';
-import { APP_ROUTES } from '@/config/routes';
+import { formatLongDate } from '@/utils/format';
 import { FormField } from '@/components/FormField';
 import {
   useGetEstablishmentActivitiesByYear,
@@ -34,19 +36,23 @@ import {
   useGetClient
 } from '../../data';
 import type { Establishment } from '../../models/establishment.interface';
+import type { EstablishmentActivity } from '../../models/establishment-activity.interface';
 import type { PradmaDictionary } from '../../dictionaries';
 import { SettlementSheet } from '../SettlementSheet';
+import { CurrencyInput } from '../CurrencyInput';
 
 interface EstablishmentSettleProps {
   establishment: Establishment;
   dict: PradmaDictionary;
+  /** Se llama tras guardar la liquidación; el padre decide a qué tab ir. */
+  onSaved?: () => void;
 }
 
 /* ─── Constants & helpers ─── */
 
 const TODAY = new Date().toISOString().slice(0, 10);
 const CURRENT_YEAR = new Date().getFullYear();
-// Can't settle the ongoing year — max is always the previous calendar year.
+// No se puede liquidar el año en curso — el máximo es siempre el anterior.
 const MAX_SETTLE_YEAR = CURRENT_YEAR - 1;
 
 const resolveStartDate = (e: Establishment, year: number): string =>
@@ -67,22 +73,6 @@ const diffMonths = (start: string, end: string): number => {
   );
 };
 
-const formatCop = (value: number): string =>
-  new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    maximumFractionDigits: 0
-  }).format(value);
-
-const formatDate = (iso: string): string => {
-  if (!iso) return '—';
-  return new Intl.DateTimeFormat('es-CO', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  }).format(new Date(iso + 'T12:00:00'));
-};
-
 const toInt = (v: string): number => {
   const n = parseInt(v.replace(/\D/g, '') || '0', 10);
   return isNaN(n) ? 0 : n;
@@ -91,36 +81,49 @@ const toInt = (v: string): number => {
 /* ─── Schema ─── */
 
 const activitySchema = z.object({
-  activityCode: z.string().min(1),
+  activityCode: z.string(),
   activityName: z.string(),
   isDefault: z.boolean(),
-  annualSales: z.string().regex(/^\d*$/).default('0')
+  annualSales: z.string()
 });
 
-const schema = z.object({
-  presentationDate: z
-    .string()
-    .min(1)
-    .refine(v => v >= TODAY),
-  settlementDate: z
-    .string()
-    .min(1)
-    .refine(v => v >= TODAY),
-  signsBillboardsTax: z.boolean(),
-  fireBrigadeSurcharge: z.boolean(),
-  activities: z.array(activitySchema)
-});
+type FormValues = {
+  presentationDate: string;
+  settlementDate: string;
+  signsBillboardsTax: boolean;
+  fireBrigadeSurcharge: boolean;
+  activities: z.infer<typeof activitySchema>[];
+};
 
-type FormValues = z.infer<typeof schema>;
 type SetValueFn = ReturnType<typeof useForm<FormValues>>['setValue'];
 
 /* ─── EstablishmentSettle ─── */
 
-export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettleProps) => {
+export const EstablishmentSettle = ({ establishment, dict, onSaved }: EstablishmentSettleProps) => {
   const [step, setStep] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [activitiesError, setActivitiesError] = useState<string | null>(null);
   const d = dict.settle;
-  const router = useRouter();
+
+  // Los mensajes salen del diccionario, por eso el schema vive dentro del
+  // componente. Antes se validaba sin mensajes y los Hints nunca aparecían.
+  const schema = useMemo(
+    () =>
+      z.object({
+        presentationDate: z
+          .string()
+          .min(1, d.errors.presentationDateRequired)
+          .refine(v => v >= TODAY, d.errors.presentationDateFuture),
+        settlementDate: z
+          .string()
+          .min(1, d.errors.settlementDateRequired)
+          .refine(v => v >= TODAY, d.errors.settlementDateFuture),
+        signsBillboardsTax: z.boolean(),
+        fireBrigadeSurcharge: z.boolean(),
+        activities: z.array(activitySchema)
+      }),
+    [d.errors]
+  );
 
   /* ── Client (needed for PDF) ── */
   const { data: client } = useGetClient(establishment.clientId);
@@ -128,13 +131,12 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
   const { mutateAsync: saveSettlement } = useSaveSettlement();
 
   /* ── Year selection ── */
-  const { data: invoices = [], isSuccess: invoicesReady } = useGetInvoicesByEstablishment(
-    establishment.id
-  );
+  const {
+    data: invoices = [],
+    isSuccess: invoicesReady,
+    refetch: refetchInvoices
+  } = useGetInvoicesByEstablishment(establishment.id);
 
-  // Compute which years are pending: from (lastPaidYear + 1) up to MAX_SETTLE_YEAR.
-  // Before invoices load (invoices=[]) defaults to [MAX_SETTLE_YEAR] so the UI
-  // is never empty while the query is in flight.
   const { availableYears, computedDefaultYear } = useMemo(() => {
     const paid = invoices.filter(inv => inv.status === 'paid');
     const lastPaid = paid.length > 0 ? Math.max(...paid.map(inv => inv.year)) : CURRENT_YEAR - 2;
@@ -144,11 +146,9 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
     return { availableYears: years, computedDefaultYear: years[0] ?? MAX_SETTLE_YEAR };
   }, [invoices]);
 
-  // yearOverride is null until the user explicitly picks a year.
   const [yearOverride, setYearOverride] = useState<number | null>(null);
   const year = yearOverride ?? computedDefaultYear;
 
-  // Dates derived from selected year + establishment bounds.
   const startDate = resolveStartDate(establishment, year);
   const endDate = resolveEndDate(establishment, year);
   const months = diffMonths(startDate, endDate);
@@ -180,10 +180,11 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
     handleSubmit,
     control,
     setValue,
-    reset: resetForm
+    reset: resetForm,
+    formState: { errors }
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    mode: 'onChange',
+    mode: 'onTouched',
     defaultValues: {
       presentationDate: TODAY,
       settlementDate: TODAY,
@@ -195,7 +196,6 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
 
   const { fields, append, remove, replace } = useFieldArray({ control, name: 'activities' });
 
-  // Reset activities whenever the year changes (activitiesData will be re-fetched).
   useEffect(() => {
     if (activitiesData) {
       replace(
@@ -203,31 +203,23 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
           activityCode: a.activityCode,
           activityName: a.activityName,
           isDefault: true,
-          annualSales: '0'
+          annualSales: ''
         }))
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activitiesData]);
 
-  const copChangeActivity = useCallback(
-    (index: number) => (e: React.ChangeEvent<HTMLInputElement>) =>
-      setValue(`activities.${index}.annualSales`, e.target.value.replace(/\D/g, '') || '0'),
-    [setValue]
-  );
-
-  const addActivity = () =>
-    append({
-      activityCode: '',
-      activityName: '',
-      isDefault: false,
-      annualSales: '0'
-    });
+  const addActivity = () => {
+    setActivitiesError(null);
+    append({ activityCode: '', activityName: '', isDefault: false, annualSales: '' });
+  };
 
   const handleNewSettlement = () => {
     resetMutation();
     setStep(0);
     setYearOverride(null);
+    setActivitiesError(null);
     resetForm();
   };
 
@@ -268,18 +260,26 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
 
       await saveSettlement({ ...result, invoice_id: invoiceId, pdf_url: blobUrl });
 
-      toast.success('Liquidación guardada correctamente.');
-      router.push(APP_ROUTES.invoices);
+      toast.success(d.result.saved);
+      // Nos quedamos en el establecimiento: refrescamos sus liquidaciones y
+      // dejamos que el padre cambie al tab correspondiente.
+      void refetchInvoices();
+      handleNewSettlement();
+      onSaved?.();
     } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : 'No se pudo guardar la liquidación. Intentá de nuevo.'
-      );
+      toast.error(err instanceof Error ? err.message : d.result.saveError);
     } finally {
       setIsGenerating(false);
     }
   };
 
   const onSubmit = handleSubmit(values => {
+    const invalid = values.activities.some(a => !a.activityCode || toInt(a.annualSales) <= 0);
+    if (invalid || values.activities.length === 0) {
+      setActivitiesError(d.errors.activitiesInvalid);
+      return;
+    }
+    setActivitiesError(null);
     createSettlement({
       establishment_id: establishment.id,
       start_date: startDate,
@@ -295,6 +295,10 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
     });
   });
 
+  // Antes de pasar a actividades validamos las fechas para que el error se
+  // vea donde está el campo, no en el paso siguiente.
+  const goToActivities = handleSubmit(() => setStep(1));
+
   /* ── Result view: overlay sheet ── */
   if (result) {
     return (
@@ -302,6 +306,7 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
         mode="draft"
         data={result}
         establishment={establishment}
+        dict={dict}
         isSaving={isGenerating}
         onSave={handleSavePdf}
         onClose={handleNewSettlement}
@@ -314,23 +319,33 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
   /* ── All caught up ── */
   if (invoicesReady && availableYears.length === 0) {
     return (
-      <div className="py-10 text-center">
-        <p className="text-text-sub-600 text-sm">{d.noYearAvailable}</p>
-      </div>
+      <Alert.Root status="success" size="small">
+        {d.noYearAvailable}
+      </Alert.Root>
     );
   }
 
   const STEPS = [d.steps.period, d.steps.activities];
+  const stepState = (i: number): 'completed' | 'active' | 'default' =>
+    i < step ? 'completed' : i === step ? 'active' : 'default';
 
   return (
     <div className="flex flex-col gap-5">
-      {/* ── Stepper ── */}
-      <Stepper steps={STEPS} current={step} />
+      <HorizontalStepper.Root>
+        {STEPS.map((label, i) => (
+          <Fragment key={label}>
+            <HorizontalStepper.Item state={stepState(i)}>
+              <HorizontalStepper.ItemIndicator>{i + 1}</HorizontalStepper.ItemIndicator>
+              {label}
+            </HorizontalStepper.Item>
+            {i < STEPS.length - 1 ? <HorizontalStepper.SeparatorIcon /> : null}
+          </Fragment>
+        ))}
+      </HorizontalStepper.Root>
 
       {/* ── Step 0: Período ── */}
-      {step === 0 && (
-        <div className="space-y-4">
-          {/* Year selector */}
+      {step === 0 ? (
+        <div className="flex flex-col gap-4">
           <FormField id="settle-year" label={d.year} required>
             <Select.Root
               value={String(year)}
@@ -339,7 +354,7 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
                 setStep(0);
               }}
             >
-              <Select.Trigger>
+              <Select.Trigger id="settle-year">
                 <Select.Value />
               </Select.Trigger>
               <Select.Content>
@@ -352,24 +367,27 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
             </Select.Root>
           </FormField>
 
-          {/* Date range — derived from selected year */}
-          <div className="bg-bg-weak-50 rounded-2xl p-4">
-            <div className="flex items-center gap-3">
-              <DateChip label={d.startDate} date={formatDate(startDate)} />
-              <div className="flex shrink-0 flex-col items-center gap-1.5">
-                <div className="bg-stroke-soft-200 h-px w-6" />
-                <span className="bg-information-lighter text-information-dark rounded-full px-2.5 py-1 text-[11px] font-bold whitespace-nowrap">
-                  {months}&nbsp;{months === 1 ? 'mes' : 'meses'}
-                </span>
-                <div className="bg-stroke-soft-200 h-px w-6" />
-              </div>
-              <DateChip label={d.endDate} date={formatDate(endDate)} />
+          {/* Rango derivado del año + fechas del establecimiento */}
+          <div className="bg-bg-weak-50 flex items-center gap-3 rounded-xl p-3">
+            <DateChip label={d.startDate} date={formatLongDate(startDate)} />
+            <div className="flex shrink-0 flex-col items-center gap-1.5">
+              <div className="bg-stroke-soft-200 h-px w-6" />
+              <span className="bg-information-lighter text-information-dark text-label-xs rounded-full px-2.5 py-1 whitespace-nowrap tabular-nums">
+                {months} {months === 1 ? d.month : d.monthsPlural}
+              </span>
+              <div className="bg-stroke-soft-200 h-px w-6" />
             </div>
+            <DateChip label={d.endDate} date={formatLongDate(endDate)} />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <FormField id="settle-presentation" label={d.presentationDate} required>
-              <Input.Root>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <FormField
+              id="settle-presentation"
+              label={d.presentationDate}
+              required
+              error={errors.presentationDate?.message}
+            >
+              <Input.Root hasError={Boolean(errors.presentationDate)}>
                 <Input.Wrapper>
                   <Input.Input
                     id="settle-presentation"
@@ -380,8 +398,13 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
                 </Input.Wrapper>
               </Input.Root>
             </FormField>
-            <FormField id="settle-settlement" label={d.settlementDate} required>
-              <Input.Root>
+            <FormField
+              id="settle-settlement"
+              label={d.settlementDate}
+              required
+              error={errors.settlementDate?.message}
+            >
+              <Input.Root hasError={Boolean(errors.settlementDate)}>
                 <Input.Wrapper>
                   <Input.Input
                     id="settle-settlement"
@@ -394,10 +417,10 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
             </FormField>
           </div>
 
-          {/* Optional taxes */}
+          {/* Impuestos opcionales */}
           <div className="ring-stroke-soft-200 overflow-hidden rounded-xl ring-1">
             <div className="bg-bg-weak-50 px-4 py-2.5">
-              <p className="text-text-sub-600 text-[11px] font-semibold tracking-wider uppercase">
+              <p className="text-subheading-2xs text-text-sub-600 uppercase">
                 {d.activities.optionalTaxes.title}
               </p>
             </div>
@@ -407,6 +430,7 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
                 name="signsBillboardsTax"
                 render={({ field }) => (
                   <SwitchRow
+                    id="settle-signs"
                     label={d.activities.optionalTaxes.avisosTableros}
                     checked={field.value}
                     onCheckedChange={field.onChange}
@@ -418,6 +442,7 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
                 name="fireBrigadeSurcharge"
                 render={({ field }) => (
                   <SwitchRow
+                    id="settle-fire"
                     label={d.activities.optionalTaxes.sobretasaBomberil}
                     checked={field.value}
                     onCheckedChange={field.onChange}
@@ -427,51 +452,43 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
             </div>
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* ── Step 1: Actividades ── */}
-      {step === 1 && (
-        <>
-          <div className="flex flex-col gap-3">
-            {fields.map((field, index) => (
-              <ActivityCard
-                key={field.id}
-                index={index}
-                field={field}
-                control={control}
-                setValue={setValue}
-                dict={d}
-                allActivities={allActivities}
-                onCopChange={copChangeActivity}
-                onRemove={field.isDefault ? undefined : () => remove(index)}
-              />
-            ))}
-          </div>
-          <Button.Root
-            variant="neutral"
-            mode="stroke"
-            size="small"
-            onClick={addActivity}
-            className="self-start"
-          >
+      {step === 1 ? (
+        <div className="flex flex-col gap-3">
+          {fields.map((field, index) => (
+            <ActivityCard
+              key={field.id}
+              index={index}
+              field={field}
+              control={control}
+              setValue={setValue}
+              dict={d}
+              deleteLabel={dict.common.delete}
+              allActivities={allActivities}
+              onRemove={field.isDefault ? undefined : () => remove(index)}
+            />
+          ))}
+          <Button.Root variant="basic" size="small" onClick={addActivity} className="self-start">
             <Button.Icon as={RiAddLine} />
             {d.activities.add}
           </Button.Root>
-        </>
-      )}
+        </div>
+      ) : null}
 
-      {/* ── Navigation ── */}
+      {/* ── Navegación ── */}
       <div className="border-stroke-soft-200 flex flex-col gap-3 border-t pt-4">
-        {isError && (
-          <div className="bg-error-lighter ring-error-base/20 rounded-lg px-3 py-2.5 ring-1">
-            <p className="text-error-dark text-xs font-semibold">
-              {error instanceof Error ? error.message : dict.common.serverError}
-            </p>
-          </div>
-        )}
+        {activitiesError || isError ? (
+          <Alert.Root status="error" size="small">
+            <Alert.Icon as={RiErrorWarningFill} />
+            {activitiesError ??
+              (error instanceof Error && error.message ? error.message : dict.common.serverError)}
+          </Alert.Root>
+        ) : null}
         <div className="flex items-center justify-between">
           {step > 0 ? (
-            <Button.Root variant="neutral" mode="ghost" onClick={() => setStep(s => s - 1)}>
+            <Button.Root variant="basic" mode="ghost" onClick={() => setStep(s => s - 1)}>
               <Button.Icon as={RiArrowLeftSLine} />
               {dict.common.back}
             </Button.Root>
@@ -479,14 +496,20 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
             <div />
           )}
 
+          {/* [R7] una sola primary por paso */}
           {step < STEPS.length - 1 ? (
-            <FancyButton.Root size="medium" onClick={() => setStep(s => s + 1)}>
+            <FancyButton.Root size="medium" onClick={goToActivities}>
               {STEPS[step + 1]}
               <FancyButton.Icon as={RiArrowRightSLine} />
             </FancyButton.Root>
           ) : (
-            <FancyButton.Root size="medium" onClick={onSubmit} disabled={isPending}>
-              {isPending ? dict.common.saving : d.calculate}
+            <FancyButton.Root
+              size="medium"
+              onClick={onSubmit}
+              state={isPending ? 'loading' : 'idle'}
+              disabled={isPending}
+            >
+              {d.calculate}
             </FancyButton.Root>
           )}
         </div>
@@ -499,12 +522,12 @@ export const EstablishmentSettle = ({ establishment, dict }: EstablishmentSettle
 
 interface ActivityCardProps {
   index: number;
-  field: FormValues['activities'][0] & { id: string };
+  field: FormValues['activities'][number] & { id: string };
   control: ReturnType<typeof useForm<FormValues>>['control'];
   setValue: SetValueFn;
   dict: PradmaDictionary['settle'];
-  allActivities: import('../../models/establishment-activity.interface').EstablishmentActivity[];
-  onCopChange: (index: number) => React.ChangeEventHandler<HTMLInputElement>;
+  deleteLabel: string;
+  allActivities: EstablishmentActivity[];
   onRemove?: () => void;
 }
 
@@ -514,59 +537,57 @@ const ActivityCard = ({
   control,
   setValue,
   dict: d,
+  deleteLabel,
   allActivities,
-  onCopChange,
   onRemove
 }: ActivityCardProps) => {
-  const annualSalesVal = toInt(useWatch({ control, name: `activities.${index}.annualSales` }));
   const watchCode = useWatch({ control, name: `activities.${index}.activityCode` });
   const watchName = useWatch({ control, name: `activities.${index}.activityName` });
 
   return (
     <div className="ring-stroke-soft-200 overflow-hidden rounded-xl ring-1">
-      {/* Header */}
       <div
         className={cn(
-          'flex items-center justify-between px-4 py-2.5',
-          field.isDefault ? 'bg-success-lighter' : 'bg-information-lighter'
+          'flex items-center justify-between gap-2 px-4 py-2.5',
+          field.isDefault ? 'bg-success-lighter' : 'bg-bg-weak-50'
         )}
       >
         <div className="flex min-w-0 items-center gap-2">
           <span
             className={cn(
-              'shrink-0 rounded-md px-2 py-0.5 text-[11px] font-bold',
+              'text-label-xs shrink-0 rounded-md px-2 py-0.5',
               field.isDefault
                 ? 'bg-success-base text-static-white'
-                : 'bg-information-base text-static-white'
+                : 'bg-bg-white-0 text-text-sub-600 ring-stroke-soft-200 ring-1'
             )}
           >
             {field.isDefault
               ? d.activities.defaultActivity
               : `${d.activities.activity} ${index + 1}`}
           </span>
-          {watchCode && (
-            <span className="text-text-sub-600 min-w-0 text-xs font-medium">
+          {watchCode ? (
+            <span className="text-paragraph-xs text-text-sub-600 min-w-0 truncate">
               {watchCode}
               {watchName ? ` — ${watchName}` : ''}
             </span>
-          )}
+          ) : null}
         </div>
-        {onRemove && (
+        {onRemove ? (
           <CompactButton.Root
             variant="ghost"
             size="medium"
             onClick={onRemove}
-            className="ml-2 shrink-0"
+            aria-label={deleteLabel}
+            className="shrink-0"
           >
             <CompactButton.Icon as={RiDeleteBinLine} />
           </CompactButton.Root>
-        )}
+        ) : null}
       </div>
 
-      {/* Activity selector (non-default only) */}
-      {!field.isDefault && (
+      {!field.isDefault ? (
         <div className="border-stroke-soft-200 border-b px-4 py-3">
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1">
             <Label.Root htmlFor={`act-code-${index}`}>
               {d.activities.activityCode}
               <Label.Asterisk />
@@ -579,7 +600,7 @@ const ActivityCard = ({
                 setValue(`activities.${index}.activityName`, found?.activityName ?? '');
               }}
             >
-              <Select.Trigger>
+              <Select.Trigger id={`act-code-${index}`}>
                 <Select.Value placeholder={d.activities.selectActivity} />
               </Select.Trigger>
               <Select.Content>
@@ -592,92 +613,59 @@ const ActivityCard = ({
             </Select.Root>
           </div>
         </div>
-      )}
+      ) : null}
 
-      {/* Annual sales */}
       <div className="flex items-center gap-3 px-4 py-2.5">
-        <span className="text-text-sub-600 min-w-0 flex-1 text-xs leading-snug">
+        <Label.Root
+          htmlFor={`annual-sales-${index}`}
+          className="text-paragraph-xs text-text-sub-600 min-w-0 flex-1"
+        >
           {d.activities.ventasAnuales}
-        </span>
-        <Input.Root className="w-36 shrink-0">
-          <Input.Wrapper>
-            <Input.Input
+          <Label.Asterisk />
+        </Label.Root>
+        <Controller
+          control={control}
+          name={`activities.${index}.annualSales`}
+          render={({ field: salesField }) => (
+            <CurrencyInput
               id={`annual-sales-${index}`}
-              value={formatCop(annualSalesVal).replace(/\s/g, '').replace('$', '')}
-              onChange={onCopChange(index)}
-              inputMode="numeric"
-              className="text-right text-xs"
+              value={salesField.value}
+              onChange={salesField.onChange}
+              className="w-44 shrink-0"
             />
-          </Input.Wrapper>
-        </Input.Root>
+          )}
+        />
       </div>
     </div>
   );
 };
 
-/* ─── Stepper ─── */
-
-const Stepper = ({ steps, current }: { steps: string[]; current: number }) => (
-  <div className="flex items-start">
-    {steps.map((label, i) => (
-      <Fragment key={i}>
-        <div className="flex shrink-0 flex-col items-center gap-1.5">
-          <div
-            className={cn(
-              'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold',
-              i === current && 'bg-text-strong-950 text-bg-white-0',
-              i < current && 'bg-success-base text-static-white',
-              i > current && 'bg-bg-white-0 text-text-sub-600 ring-stroke-soft-200 ring-1'
-            )}
-          >
-            {i + 1}
-          </div>
-          <span
-            className={cn(
-              'text-center text-[11px] leading-tight font-medium',
-              i === current ? 'text-text-strong-950' : 'text-text-sub-600'
-            )}
-          >
-            {label}
-          </span>
-        </div>
-        {i < steps.length - 1 && (
-          <div
-            className={cn(
-              'mx-2 mt-3.5 h-px flex-1',
-              i < current ? 'bg-success-base' : 'bg-stroke-soft-200'
-            )}
-          />
-        )}
-      </Fragment>
-    ))}
-  </div>
-);
-
 /* ─── DateChip ─── */
 
 const DateChip = ({ label, date }: { label: string; date: string }) => (
-  <div className="bg-bg-white-0 ring-stroke-soft-200 flex-1 rounded-xl px-4 py-3 ring-1">
-    <p className="text-text-soft-400 mb-1 text-[10px] font-semibold tracking-widest uppercase">
-      {label}
-    </p>
-    <p className="text-text-strong-950 text-sm font-semibold">{date}</p>
+  <div className="bg-bg-white-0 ring-stroke-soft-200 flex-1 rounded-lg px-3 py-2.5 ring-1">
+    <p className="text-subheading-2xs text-text-soft-400 mb-0.5 uppercase">{label}</p>
+    <p className="text-label-sm text-text-strong-950 tabular-nums">{date}</p>
   </div>
 );
 
 /* ─── SwitchRow ─── */
 
 const SwitchRow = ({
+  id,
   label,
   checked,
   onCheckedChange
 }: {
+  id: string;
   label: string;
   checked: boolean;
   onCheckedChange: (v: boolean) => void;
 }) => (
   <div className="flex items-center justify-between gap-3 px-4 py-2.5">
-    <span className="text-text-sub-600 min-w-0 flex-1 text-xs">{label}</span>
-    <Switch.Root checked={checked} onCheckedChange={onCheckedChange} />
+    <Label.Root htmlFor={id} className="text-paragraph-xs text-text-sub-600 min-w-0 flex-1">
+      {label}
+    </Label.Root>
+    <Switch.Root id={id} checked={checked} onCheckedChange={onCheckedChange} />
   </div>
 );
