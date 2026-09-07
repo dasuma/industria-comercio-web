@@ -14,8 +14,7 @@
    para que el body del DS (`font-family: var(--font-sans, Inter, ...)`) y la
    utility `font-sans` resuelvan a Inter. */
 @theme {
-  --font-sans:
-    'Inter', 'Inter Fallback', Arial, Helvetica, sans-serif;
+  --font-sans: 'Inter', 'Inter Fallback', Arial, Helvetica, sans-serif;
 
   /* Shake horizontal — feedback de "no podés hacer eso" en cards/buttons.
      Curva clásica de Chris Coyier; 400ms se siente firme sin marear. */
@@ -40,7 +39,6 @@
       transform: translate3d(3px, 0, 0);
     }
   }
-
 }
 
 /* ── Sidebar workspace cross-fade slot system ─────────────────────────────
@@ -90,19 +88,19 @@
   --color-brand-soft: #1d4ed8 !important;
 
   /* Primary → blue-600 scale (FancyButton, focus rings) */
-  --color-primary-darker: #1e40af;   /* blue-800 */
-  --color-primary-dark: #1d4ed8;     /* blue-700 */
-  --color-primary-base: #2563eb;     /* blue-600 */
-  --color-primary-light: #dbeafe;    /* blue-100 */
-  --color-primary-lighter: #eff6ff;  /* blue-50  */
+  --color-primary-darker: #1e40af; /* blue-800 */
+  --color-primary-dark: #1d4ed8; /* blue-700 */
+  --color-primary-base: #2563eb; /* blue-600 */
+  --color-primary-light: #dbeafe; /* blue-100 */
+  --color-primary-lighter: #eff6ff; /* blue-50  */
   --color-primary-alpha-24: #2563eb3d;
   --color-primary-alpha-16: #2563eb29;
   --color-primary-alpha-10: #2563eb1a;
 
   /* Information → blue scale (info alerts, calculated-row highlights) */
-  --color-information-dark: #1d4ed8;   /* blue-700 */
-  --color-information-base: #3b82f6;   /* blue-500 */
-  --color-information-light: #bfdbfe;  /* blue-200 */
+  --color-information-dark: #1d4ed8; /* blue-700 */
+  --color-information-base: #3b82f6; /* blue-500 */
+  --color-information-light: #bfdbfe; /* blue-200 */
   --color-information-lighter: #eff6ff; /* blue-50  */
 
   /* Fancy button drop shadow → blue-tinted */
@@ -117,18 +115,18 @@
   --color-brand-soft: #2563eb !important;
 
   /* Primary → blue-500 scale (lighter for dark surfaces) */
-  --color-primary-base: #3b82f6;       /* blue-500 */
-  --color-primary-dark: #2563eb;       /* blue-600 */
-  --color-primary-darker: #1d4ed8;     /* blue-700 */
-  --color-primary-light: #3b82f629;    /* blue-500/16 */
-  --color-primary-lighter: #3b82f61a;  /* blue-500/10 */
+  --color-primary-base: #3b82f6; /* blue-500 */
+  --color-primary-dark: #2563eb; /* blue-600 */
+  --color-primary-darker: #1d4ed8; /* blue-700 */
+  --color-primary-light: #3b82f629; /* blue-500/16 */
+  --color-primary-lighter: #3b82f61a; /* blue-500/10 */
   --color-primary-alpha-24: #3b82f63d;
   --color-primary-alpha-16: #3b82f629;
   --color-primary-alpha-10: #3b82f61a;
 
   /* Information → blue scale (dark mode) */
-  --color-information-dark: #93c5fd;   /* blue-300 */
-  --color-information-base: #3b82f6;   /* blue-500 */
+  --color-information-dark: #93c5fd; /* blue-300 */
+  --color-information-base: #3b82f6; /* blue-500 */
   --color-information-light: #2563eb29; /* blue-600/16 */
   --color-information-lighter: #1d4ed81a; /* blue-800/10 */
 }
@@ -140,10 +138,89 @@
   z-index: 50 !important;
 }
 
-/* Sidebar dark surface — remap bg-white-0 from near-black (dark mode default)
-   to a subtle white shimmer so hover/active states are lighter than the navy bg. */
-[data-sidebar] {
-  --color-bg-white-0: rgb(255 255 255 / 0.10);
+/* ── Chrome PRADMA ────────────────────────────────────────────────────────
+   El chrome (top bar + sidebar) es navy de marca y el card blanco es el
+   héroe. Desviación deliberada de R3 (chrome `bg-weak-25`): el navy es la
+   identidad PRADMA y ya la establece la pantalla de login, así que el shell
+   habla el mismo idioma. Los tokens del DS dentro del chrome se resuelven en
+   dark (`.dark` en el header y el aside) — el card queda fuera, en light. */
+:root {
+  --pradma-chrome-deep: #060d1c;
+  --pradma-chrome-base: #0a1628;
+  --pradma-chrome-lift: #0d2140;
+}
+
+/* Frame de la app: gradient navy + tres glows (mismo lenguaje que el layout
+   público del login). Los glows van en un ::before para no crear un stacking
+   context nuevo en el frame ni interferir con el ring del card. */
+@utility pradma-chrome {
+  position: relative;
+  background: linear-gradient(
+    145deg,
+    var(--pradma-chrome-deep) 0%,
+    var(--pradma-chrome-base) 45%,
+    var(--pradma-chrome-lift) 100%
+  );
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(
+        ellipse 55% 45% at 12% 0%,
+        rgb(37 99 235 / 0.16) 0%,
+        rgb(37 99 235 / 0.04) 55%,
+        transparent 75%
+      ),
+      radial-gradient(
+        ellipse 50% 55% at 100% 100%,
+        rgb(15 52 110 / 0.45) 0%,
+        rgb(10 30 70 / 0.16) 55%,
+        transparent 78%
+      );
+  }
+
+  /* El contenido se apila sobre los glows. */
+  & > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+/* Superficies del chrome — remapea bg-white-0, que en dark es casi negro, a un
+   shimmer blanco: así hovers, tab activo y glass-popup quedan MÁS claros que
+   el navy en vez de desaparecer contra él. */
+[data-chrome] {
+  --color-bg-white-0: rgb(255 255 255 / 0.1);
+}
+
+/* Item activo del sidebar. El DS sólo marca `data-state=active` con
+   `bg-transparent` + `text-primary-base` (el icono azul): sobre el navy el
+   item seleccionado queda casi sin señal. Le damos fill de marca translúcido
+   + barra de acento, ambos como inset box-shadow y background propios — el
+   DS no define ninguno de los dos, así que no pisamos nada suyo. */
+[data-chrome] [data-state='active'] {
+  background-color: rgb(59 130 246 / 0.14);
+}
+
+/* Barra de acento. Va en el ::before (el DS lo deja libre: `content: none`)
+   y no como inset box-shadow, que seguiría el border-radius del pill y se
+   leería como un filete curvo en vez de una barra. El item es
+   `relative isolate`, así que el z-index queda contenido. */
+[data-chrome] [data-state='active']::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  z-index: 1;
+  height: 16px;
+  width: 3px;
+  translate: 0 -50%;
+  border-radius: 0 3px 3px 0;
+  background-color: var(--color-brand-base);
 }
 
 * {

@@ -110,11 +110,13 @@ export const UserMenu = ({ dict }: UserMenuProps) => {
                 collapsed ? 'opacity-0' : 'opacity-100'
               )}
             >
-              <span className="text-label-sm text-text-strong-950 truncate font-medium">
+              <span className="text-label-sm text-text-strong-950 w-full truncate font-medium">
                 {displayName}
               </span>
               {organization && (
-                <span className="text-paragraph-xs text-text-sub-600 truncate">{organization}</span>
+                <span className="text-paragraph-xs text-text-sub-600 w-full truncate">
+                  {organization}
+                </span>
               )}
             </span>
             <span

@@ -13,6 +13,7 @@ import {
   useShellUiStore
 } from '../../store/ui.store';
 import { SearchButton } from '../SearchButton';
+import { SidebarBrand } from '../SidebarBrand';
 import { SidebarNav } from '../SidebarNav';
 import { UserMenu } from '../UserMenu';
 import { WorkspaceSwitcher } from '../WorkspaceSwitcher';
@@ -92,16 +93,21 @@ export const AppSidebar = ({ workspace, activeHref, dict }: AppSidebarProps) => 
 
       <aside
         data-sidebar
+        data-chrome
         className={cn(
           'dark',
           isMobile
             ? cn(
-                'fixed inset-y-0 left-0 z-40 flex w-60 flex-col overflow-hidden bg-[#0a1628] px-1.5 pt-1 ring-1 ring-white/10',
+                // Drawer: flota sobre el card, así que necesita fondo opaco
+                // propio — el mismo gradient navy del frame.
+                'pradma-chrome fixed inset-y-0 left-0 z-40 flex w-60 flex-col overflow-hidden px-1.5 pt-1 ring-1 ring-white/10',
                 drawerCanAnimate && 'transition-transform duration-300',
                 mobileNavOpen ? 'translate-x-0' : '-translate-x-full'
               )
             : cn(
-                'pradma-resize flex shrink-0 flex-col overflow-hidden rounded-2xl bg-[#0a1628]',
+                // Desktop: el frame ya es navy, así que el sidebar no repite
+                // el fill — se lee como un panel apenas elevado sobre él.
+                'pradma-resize flex shrink-0 flex-col overflow-hidden rounded-2xl bg-white/[0.03] ring-1 ring-white/[0.06] ring-inset',
                 collapsed ? 'w-[52px]' : 'w-60'
               )
         )}
@@ -112,6 +118,7 @@ export const AppSidebar = ({ workspace, activeHref, dict }: AppSidebarProps) => 
           </div>
         )}
 
+        <SidebarBrand />
         <SearchButton dict={dict.search} />
         <SidebarNav workspace={workspace} activeHref={activeHref} dict={dict} />
         <UserMenu dict={dict.user} />

@@ -57,7 +57,7 @@ export const AppShell = ({ children, dict }: AppShellProps) => {
 
   return (
     <Tooltip.Provider delayDuration={150}>
-      <div className="bg-bg-weak-25 text-text-strong-950 relative flex h-screen w-screen flex-col overflow-hidden px-2 pt-0.5 pb-2">
+      <div className="pradma-chrome text-text-strong-950 relative flex h-screen w-screen flex-col overflow-hidden px-2 pt-0.5 pb-2">
         <AppHeader workspace={workspace} dict={dict} />
 
         <div className="flex min-h-0 flex-1 pt-1">

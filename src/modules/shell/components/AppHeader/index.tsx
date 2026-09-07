@@ -18,8 +18,11 @@ export const AppHeader = ({ workspace, dict }: AppHeaderProps) => {
   const collapsed = useShellUiStore(selectSidebarCollapsed);
   const ActiveIcon = workspace.iconFill;
 
+  // `dark` + `data-chrome`: el header se apoya sobre el frame navy, así que
+  // sus tokens del DS resuelven en dark y bg-white-0 se remapea al shimmer
+  // blanco (ver globals.css). El card queda fuera, en light.
   return (
-    <header className="flex h-12 shrink-0 items-center gap-2">
+    <header data-chrome className="dark flex h-12 shrink-0 items-center gap-2">
       <div
         className={cn(
           'pradma-resize hidden shrink-0 items-center overflow-x-clip px-1.5 pt-1 sm:flex',
