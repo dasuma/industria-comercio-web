@@ -1,7 +1,8 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { getServerEnv } from '@/config/env';
 
-const BLOB_BASE_URL = process.env.NEXT_PUBLIC_BLOB_URL ?? 'https://blitz-blob.azurewebsites.net';
+const DEFAULT_BLOB_URL = 'https://blitz-blob.azurewebsites.net';
 
 /**
  * Proxies a multipart PDF upload to the blob storage service.
@@ -13,7 +14,8 @@ const BLOB_BASE_URL = process.env.NEXT_PUBLIC_BLOB_URL ?? 'https://blitz-blob.az
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
 
-  const upstream = await fetch(`${BLOB_BASE_URL}/api/files/v2/upload`, {
+  const blobBaseUrl = getServerEnv().BLOB_URL ?? DEFAULT_BLOB_URL;
+  const upstream = await fetch(`${blobBaseUrl}/api/files/v2/upload`, {
     method: 'POST',
     body: formData
   });

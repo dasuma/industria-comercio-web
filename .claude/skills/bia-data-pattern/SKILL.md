@@ -27,7 +27,7 @@ doFetch<TBody, TResponse>(args: {
   params?: TBody;
   value?: string;     // path param, ej. /sites/${id}
   token?: string;     // override del token
-  baseUrl?: boolean;  // default true (prepend NEXT_PUBLIC_BACKEND_URL)
+  baseUrl?: boolean;  // default true (prepend BACKEND_URL)
   cache?: RequestCache;
   next?: { revalidate?: number; tags?: string[] };
 }): Promise<TResponse>

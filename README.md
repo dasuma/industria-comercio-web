@@ -254,7 +254,7 @@ El proxy **solo verifica presencia**, no firma. La validación de la firma es re
 
 ### Variables de entorno
 
-`.env.local` necesita las 6 vars `NEXT_PUBLIC_FIREBASE_*` (validadas con Zod en [`src/config/env.ts`](./src/config/env.ts)) y `NEXT_PUBLIC_BACKEND_URL` para que el proxy sepa a dónde reenviar. **No** se necesita service account ni Admin SDK: el modelo actual valida tokens en el backend BIA, no en el server de Next.
+`.env.local` necesita las 6 vars `FIREBASE_*` (validadas con Zod en [`src/config/env.ts`](./src/config/env.ts)), `BACKEND_URL` para que el proxy sepa a dónde reenviar, `APP_NAME` y `CITY_NAME`. Se leen en runtime, sin prefijo `NEXT_PUBLIC_`: en Azure van como app settings del App Service, así una sola imagen sirve para todas las ciudades. **No** se necesita service account ni Admin SDK: el modelo actual valida tokens en el backend BIA, no en el server de Next.
 
 ## Documentación adicional
 

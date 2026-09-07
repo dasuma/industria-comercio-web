@@ -5,6 +5,8 @@ import { Inter } from 'next/font/google';
 import { Toaster } from '@dasuma/pradma-ui';
 import { defaultLocale, isLocale, type Locale } from '@/i18n/config';
 import { DataAccessProvider } from '@/data/core';
+import { getServerEnv } from '@/config/env';
+import { serializePublicConfig, toPublicConfig } from '@/config/publicConfig';
 import { SessionProvider } from '@/auth/SessionProvider';
 import { ThemeProvider } from '@/core/theme/ThemeProvider';
 import '@/styles/globals.css';
@@ -36,8 +38,15 @@ const resolveLocale = async (): Promise<Locale> => {
 
 const RootLayout = async ({ children }: { children: ReactNode }) => {
   const locale = await resolveLocale();
+  // Config leída de process.env en runtime (app settings del App Service) y
+  // entregada al browser en cada request: misma imagen Docker para toda ciudad.
+  // Script inline síncrono en <head>: corre antes que cualquier bundle del cliente.
+  const publicConfigScript = serializePublicConfig(toPublicConfig(getServerEnv()));
   return (
     <html lang={locale} className={inter.variable} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: publicConfigScript }} />
+      </head>
       <body className={`${inter.className} antialiased`}>
         <ThemeProvider>
           <DataAccessProvider>

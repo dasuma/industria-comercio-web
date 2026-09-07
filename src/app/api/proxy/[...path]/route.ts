@@ -1,14 +1,14 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { env } from '@/config/env';
+import { getServerEnv } from '@/config/env';
 import { SESSION_TOKEN_COOKIE } from '@/auth/sessionCookies';
 
 const FORWARDED_RESPONSE_HEADERS = ['content-type', 'content-disposition', 'content-length'];
 
 const proxy = async (request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) => {
   const { path } = await params;
-  const target = `${env.NEXT_PUBLIC_BACKEND_URL}/${path.join('/')}${request.nextUrl.search}`;
+  const target = `${getServerEnv().BACKEND_URL}/${path.join('/')}${request.nextUrl.search}`;
 
   const forwardHeaders = new Headers(request.headers);
   forwardHeaders.delete('host');

@@ -71,7 +71,7 @@ src/
 
 1. Componente cliente llama `useGetSites()` (hook React Query).
 2. El hook ejecuta `getSites()` que llama `doFetch<void, Site[]>({ endpoint: endpointsSites.list })`.
-3. `doFetch` arma URL (`NEXT_PUBLIC_BACKEND_URL` + `endpoint.url`), headers (`Authorization` desde cookie `bia_session`, `Accept-Language` desde `NEXT_LOCALE`), body si aplica.
+3. `doFetch` arma URL (`BACKEND_URL` + `endpoint.url`), headers (`Authorization` desde cookie `bia_session`, `Accept-Language` desde `NEXT_LOCALE`), body si aplica.
 4. `fetch` con `AbortController` (timeout 60s).
 5. Si 401/403 → intento de refresh (una vez). Si falla → limpia cookies + redirige a `/`.
 6. Si 2xx → parsea JSON y retorna `Site[]`.
