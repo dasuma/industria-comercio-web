@@ -37,12 +37,7 @@ import {
   useGetClient
 } from '../../data';
 import { useSettleYears } from '../../hooks/useSettleYears';
-import {
-  coveredMonths,
-  diffMonths,
-  resolveEndDate,
-  resolveStartDate
-} from '../../utils/settlePeriod';
+import { SETTLE_PERIOD_MONTHS, settlePeriod } from '../../utils/settlePeriod';
 import type { Establishment } from '../../models/establishment.interface';
 import type { EstablishmentActivity } from '../../models/establishment-activity.interface';
 import type { PradmaDictionary } from '../../dictionaries';
@@ -144,17 +139,8 @@ export const EstablishmentSettle = ({
   const [yearOverride, setYearOverride] = useState<number | null>(null);
   const year = yearOverride ?? availableYears[0] ?? CURRENT_YEAR - 1;
 
-  const startDate = resolveStartDate(establishment, year);
-  const endDate = resolveEndDate(establishment, year);
-  const months = diffMonths(startDate, endDate);
-  const covered = useMemo(
-    () => coveredMonths(startDate, endDate, year),
-    [startDate, endDate, year]
-  );
-  const monthInitials = useMemo(() => {
-    const fmt = new Intl.DateTimeFormat(intlLocale, { month: 'narrow' });
-    return Array.from({ length: 12 }, (_, m) => fmt.format(new Date(2000, m, 1)));
-  }, [intlLocale]);
+  // El período siempre es el año calendario completo del año elegido.
+  const { startDate, endDate } = settlePeriod(year);
 
   /* ── Activities for the selected year ── */
   const { data: activitiesData } = useGetEstablishmentActivitiesByYear(establishment.id, year);
@@ -344,7 +330,7 @@ export const EstablishmentSettle = ({
   }
 
   /* ── Derived labels ── */
-  const monthsLabel = `${months} ${months === 1 ? d.month : d.monthsPlural}`;
+  const monthsLabel = `${SETTLE_PERIOD_MONTHS} ${d.monthsPlural}`;
   const datesAreToday = presentationDate === TODAY && settlementDate === TODAY;
   const datesSummary = datesAreToday
     ? interpolate(d.dates.today, { date: formatLongDate(TODAY, intlLocale) })
@@ -394,33 +380,15 @@ export const EstablishmentSettle = ({
       </header>
 
       <div className="flex flex-col gap-6 p-5">
-        {/* ── Período: derivado del año + fechas del establecimiento ── */}
-        <div className="bg-bg-weak-25 flex flex-wrap items-center justify-between gap-4 rounded-xl px-4 py-3.5">
-          <div className="flex flex-col gap-1">
-            <p className="text-subheading-2xs text-text-soft-400 uppercase">{d.period.title}</p>
-            <p className="text-label-sm text-text-strong-950 tabular-nums">
-              {formatLongDate(startDate, intlLocale)} → {formatLongDate(endDate, intlLocale)}
-            </p>
-            <p className="text-paragraph-xs text-text-sub-600">
-              {monthsLabel} · {d.period.derived}
-            </p>
-          </div>
-          <ol className="flex gap-1" aria-label={d.months}>
-            {covered.map((on, m) => (
-              <li
-                key={m}
-                aria-current={on ? 'date' : undefined}
-                className={cn(
-                  'text-label-2xs flex size-7 items-center justify-center rounded-md uppercase',
-                  on
-                    ? 'bg-primary-alpha-16 text-primary-base ring-primary-alpha-24 ring-1'
-                    : 'bg-bg-weak-50 text-text-disabled-300'
-                )}
-              >
-                {monthInitials[m]}
-              </li>
-            ))}
-          </ol>
+        {/* ── Período: año calendario completo del año elegido ── */}
+        <div className="bg-bg-weak-25 flex flex-col gap-1 rounded-xl px-4 py-3.5">
+          <p className="text-subheading-2xs text-text-soft-400 uppercase">{d.period.title}</p>
+          <p className="text-label-sm text-text-strong-950 tabular-nums">
+            {formatLongDate(startDate, intlLocale)} → {formatLongDate(endDate, intlLocale)}
+          </p>
+          <p className="text-paragraph-xs text-text-sub-600">
+            {monthsLabel} · {d.period.derived}
+          </p>
         </div>
 
         {/* ── Actividades e ingresos ── */}

@@ -218,13 +218,11 @@ export const pradmaDictEn: PradmaDictionary = {
   settle: {
     year: 'Settlement year',
     noYearAvailable: 'This establishment is up to date with its settlements.',
-    months: 'Settlement months',
     startDate: 'Start date',
     endDate: 'End date',
     presentationDate: 'Presentation date',
     settlementDate: 'Settlement date',
     calculate: 'Calculate',
-    month: 'month',
     monthsPlural: 'months',
     title: 'New settlement',
     subtitle: 'Pick the year, confirm the sales for each activity and calculate.',
@@ -238,7 +236,7 @@ export const pradmaDictEn: PradmaDictionary = {
     },
     period: {
       title: 'Period',
-      derived: 'based on the establishment start and end dates'
+      derived: 'full calendar year'
     },
     activitiesSection: {
       title: 'Activities and income',

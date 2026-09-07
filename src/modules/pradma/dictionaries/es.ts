@@ -216,13 +216,11 @@ export const pradmaDictEs = {
   settle: {
     year: 'Año a liquidar',
     noYearAvailable: 'Este establecimiento está al día con sus liquidaciones.',
-    months: 'Meses de liquidación',
     startDate: 'Fecha inicial',
     endDate: 'Fecha final',
     presentationDate: 'Fecha de presentación',
     settlementDate: 'Fecha de liquidación',
     calculate: 'Calcular',
-    month: 'mes',
     monthsPlural: 'meses',
     title: 'Nueva liquidación',
     subtitle: 'Elegí el año, confirmá las ventas de cada actividad y calculá.',
@@ -236,7 +234,7 @@ export const pradmaDictEs = {
     },
     period: {
       title: 'Período',
-      derived: 'según fecha de inicio y fin del establecimiento'
+      derived: 'año calendario completo'
     },
     activitiesSection: {
       title: 'Actividades e ingresos',

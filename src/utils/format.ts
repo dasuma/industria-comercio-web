@@ -24,6 +24,16 @@ const NUMERIC_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
   day: '2-digit'
 };
 
+const DATE_ONLY_ISO = /^\d{4}-\d{2}-\d{2}$/;
+
+// Un "YYYY-MM-DD" sin hora lo parsea `new Date` como medianoche UTC, que en
+// zonas negativas (Colombia, UTC-5) cae en el día anterior. Lo anclamos al
+// mediodía local para que se muestre el día que dice el string.
+const parseDate = (value: Date | string): Date => {
+  if (value instanceof Date) return value;
+  return DATE_ONLY_ISO.test(value) ? new Date(`${value}T12:00:00`) : new Date(value);
+};
+
 export const formatDate = (
   value: Date | string | null | undefined,
   locale = 'es-CO',
@@ -31,7 +41,7 @@ export const formatDate = (
   fallback = '-'
 ): string => {
   if (value === null || value === undefined || value === '') return fallback;
-  const date = value instanceof Date ? value : new Date(value);
+  const date = parseDate(value);
   if (Number.isNaN(date.getTime())) return fallback;
   return new Intl.DateTimeFormat(locale, options).format(date);
 };
