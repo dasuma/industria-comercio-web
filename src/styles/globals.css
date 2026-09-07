@@ -129,6 +129,45 @@
   --color-information-base: #3b82f6; /* blue-500 */
   --color-information-light: #2563eb29; /* blue-600/16 */
   --color-information-lighter: #1d4ed81a; /* blue-800/10 */
+
+  /* FancyButton primary. En dark el DS asume un primary claro y le pone
+     `--color-fancy-ring-primary: neutral-300` (casi blanco) con drop
+     transparente: con el primary azul de PRADMA ese ring se lee como un halo
+     blanco alrededor del botón. Lo alineamos al azul del fill. En light no
+     hace falta — ahí el DS deriva el ring de `--color-primary-base`, que ya
+     remapeamos. */
+  --color-fancy-ring-primary: #3b82f6; /* = primary-base dark */
+  --color-fancy-drop-primary: #3b82f63d;
+}
+
+/* ── FancyButton primary en dark ──────────────────────────────────────────
+   El DS diseñó el primary de dark para un fill CLARO: texto `text-white-0`
+   (flippea a casi negro), filete `neutral-200` opaco en el ::before y shine
+   negro en el ::after. PRADMA tiñe el primary de azul, así que sobre el fill
+   azul esa receta deja un CTA con halo blanco, texto negro y un velo oscuro
+   encima. Lo alineamos a la receta de light — mismo azul, texto blanco, luz
+   desde arriba — para que el CTA de marca se vea igual en los dos temas.
+
+   El selector va por las dos clases que el variant `primary` del DS aplica
+   (`bg-primary-base` + `ring-fancy-ring-primary`): son parte del paquete, y
+   juntas no matchean ningún otro componente. `:not(:disabled)` es necesario:
+   sin él estas reglas le ganan por especificidad al `disabled:bg-bg-weak-50`
+   del DS y el botón deshabilitado seguiría azul. */
+.dark .bg-primary-base.ring-fancy-ring-primary:not(:disabled) {
+  /* blue-600, el mismo de light: con texto blanco da 5.9:1 (AA). El blue-500
+     del token en dark sólo llega a 3.9:1, por debajo del mínimo. */
+  background-color: #2563eb;
+  color: #fff;
+}
+
+/* Filete de 1px translúcido en vez de neutral-200 opaco. */
+.dark .bg-primary-base.ring-fancy-ring-primary:not(:disabled)::before {
+  background-image: linear-gradient(to bottom, rgb(255 255 255 / 0.2), transparent);
+}
+
+/* Shine: luz blanca desde arriba (el ::after ya trae opacity .16). */
+.dark .bg-primary-base.ring-fancy-ring-primary:not(:disabled)::after {
+  background-image: linear-gradient(to bottom, #fff, transparent);
 }
 
 /* Radix portals (Select, Dropdown, Tooltip…) must always render above page content.
