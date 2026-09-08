@@ -374,7 +374,7 @@ export const EstablishmentSettle = ({
           >
             <Select.Trigger
               id="settle-year"
-              className="text-label-sm text-text-strong-950 w-28 font-semibold tabular-nums"
+              className="text-label-sm text-text-strong-950 w-28 tabular-nums"
             >
               <Select.Value />
             </Select.Trigger>
@@ -392,7 +392,8 @@ export const EstablishmentSettle = ({
       <div className="flex flex-col gap-6 p-5">
         {/* ── Período: año calendario completo del año elegido ── */}
         <div className="bg-bg-weak-25 flex flex-col gap-1 rounded-xl px-4 py-3.5">
-          <p className="text-subheading-2xs text-text-soft-400 uppercase">{d.period.title}</p>
+          {/* [WCAG AA] text-sub-600 sobre bg-weak-25: text-soft-400 queda en 4.43:1 */}
+          <p className="text-subheading-2xs text-text-sub-600 uppercase">{d.period.title}</p>
           <p className="text-label-sm text-text-strong-950 tabular-nums">
             {formatLongDate(startDate, intlLocale)} → {formatLongDate(endDate, intlLocale)}
           </p>
@@ -411,7 +412,7 @@ export const EstablishmentSettle = ({
             <div
               className={cn(
                 ROW_GRID,
-                'bg-bg-weak-25 text-subheading-2xs text-text-soft-400 px-4 py-2 uppercase'
+                'bg-bg-weak-25 text-subheading-2xs text-text-sub-600 px-4 py-2 uppercase'
               )}
             >
               <span />
@@ -560,7 +561,7 @@ export const EstablishmentSettle = ({
       </div>
 
       {/* ── Footer: resumen + una sola acción ── */}
-      <footer className="border-stroke-soft-200 bg-bg-weak-25 flex flex-wrap items-center justify-between gap-3 border-t px-5 py-3">
+      <footer className="border-stroke-soft-200 flex flex-wrap items-center justify-between gap-3 border-t px-5 py-3">
         <p className="text-paragraph-xs text-text-sub-600 tabular-nums">{summary}</p>
         <div className="flex items-center gap-2.5">
           <Button.Root variant="basic" onClick={onBack} disabled={isPending}>

@@ -186,7 +186,7 @@ export const SettlementSheet = (props: SettlementSheetProps) => {
                           {activities.map(a => (
                             <Table.Row key={a.activity_code}>
                               <Table.Cell>
-                                <span className="text-text-strong-950 font-medium">
+                                <span className="text-label-sm text-text-strong-950">
                                   {a.activity_code}
                                 </span>
                                 <span className="text-text-soft-400 ml-1.5">{a.activity_name}</span>
@@ -194,7 +194,7 @@ export const SettlementSheet = (props: SettlementSheetProps) => {
                               <Table.Cell className="text-text-sub-600 text-right tabular-nums">
                                 {a.tariff_rate}
                               </Table.Cell>
-                              <Table.Cell className="text-text-strong-950 text-right font-medium tabular-nums">
+                              <Table.Cell className="text-label-sm text-text-strong-950 text-right tabular-nums">
                                 {formatCurrency(a.tax)}
                               </Table.Cell>
                             </Table.Row>
@@ -229,7 +229,8 @@ export const SettlementSheet = (props: SettlementSheetProps) => {
                               <span
                                 className={cn(
                                   'text-label-xs w-5 shrink-0 text-center tabular-nums',
-                                  isTotal ? 'text-success-dark' : 'text-text-soft-400'
+                                  // [WCAG AA] sub-600: soft-400 sobre bg-weak-50 da 4.43:1
+                                  isTotal ? 'text-success-dark' : 'text-text-sub-600'
                                 )}
                               >
                                 {row.number}
@@ -246,10 +247,15 @@ export const SettlementSheet = (props: SettlementSheetProps) => {
                               </span>
                               {row.description && row.description !== row.name ? (
                                 <Tooltip.Root>
+                                  {/* [R1] trigger enfocable: el tooltip debe alcanzarse con teclado */}
                                   <Tooltip.Trigger asChild>
-                                    <span className="text-text-soft-400 hover:text-text-sub-600 shrink-0 cursor-default">
+                                    <button
+                                      type="button"
+                                      aria-label={row.description}
+                                      className="text-text-soft-400 hover:text-text-sub-600 focus-visible:ring-stroke-strong-950 shrink-0 cursor-default rounded-sm outline-none focus-visible:ring-2"
+                                    >
                                       <RiInformationLine className="size-3.5" />
-                                    </span>
+                                    </button>
                                   </Tooltip.Trigger>
                                   <Tooltip.Content size="small" className="max-w-56">
                                     {row.description}
@@ -263,7 +269,7 @@ export const SettlementSheet = (props: SettlementSheetProps) => {
                                 isTotal
                                   ? 'text-label-sm text-success-dark'
                                   : 'text-label-xs text-text-strong-950',
-                                row.value === 0 && !isTotal && 'text-text-soft-400 font-normal'
+                                row.value === 0 && !isTotal && 'text-text-sub-600 font-normal'
                               )}
                             >
                               {row.value === 0
