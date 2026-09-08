@@ -13,6 +13,7 @@ import {
   FancyButton,
   Input,
   Label,
+  Select,
   Switch,
   toast
 } from '@dasuma/pradma-ui';
@@ -360,22 +361,31 @@ export const EstablishmentSettle = ({
           <h3 className="text-label-md text-text-strong-950">{d.title}</h3>
           <p className="text-paragraph-xs text-text-sub-600">{d.subtitle}</p>
         </div>
-        <div className="flex items-center gap-2" role="group" aria-label={d.year}>
-          <span className="text-paragraph-xs text-text-soft-400">{d.year}</span>
-          {/* [P8] 1-de-N sobre un set chico: pills con la receta de filtros del DS */}
-          {availableYears.map(y => (
-            <Button.Root
-              key={y}
-              variant="basic"
-              size="small"
-              data-state={y === year ? 'on' : 'off'}
-              aria-pressed={y === year}
-              onClick={() => setYearOverride(y)}
-              className="tabular-nums"
+        {/* 1-de-N sobre 5+ años: Select del DS en vez de pills; el año elegido queda siempre visible en el trigger */}
+        <div className="flex items-center gap-2">
+          <Label.Root htmlFor="settle-year" className="text-paragraph-xs text-text-soft-400">
+            {d.year}
+          </Label.Root>
+          <Select.Root
+            value={String(year)}
+            onValueChange={v => setYearOverride(Number(v))}
+            variant="compact"
+            size="small"
+          >
+            <Select.Trigger
+              id="settle-year"
+              className="text-label-sm text-text-strong-950 w-28 font-semibold tabular-nums"
             >
-              {y}
-            </Button.Root>
-          ))}
+              <Select.Value />
+            </Select.Trigger>
+            <Select.Content>
+              {availableYears.map(y => (
+                <Select.Item key={y} value={String(y)} className="tabular-nums">
+                  {y}
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select.Root>
         </div>
       </header>
 
